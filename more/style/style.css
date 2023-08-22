@@ -1,0 +1,132 @@
+body{
+	padding:0;
+  margin:0;
+  position:absolute;
+  width:100%;
+  height:100%;
+  display: flex;
+  justify-content: center;
+  font-family: Roboto,Helvetica,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+	background:#f0f1f2;
+}
+main{
+	
+}
+input,textarea{
+	display: inline-block;
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 0;
+	padding: 7px 14px;
+	height: 40px;
+	outline: none;
+	font-size: 14px;
+	font-weight: 300;
+	margin: 0;
+	width: 100%;
+	max-width: 100%;
+	-webkit-transition: all .2s ease;
+	transition: .25s ease;
+	box-shadow: none;
+}
+.button{
+	border: none;
+	border-radius: 0;
+	background: black;
+	color: #fff;
+	padding: 0 20px;
+	line-height: 40px;
+	height: 40px;
+	display: inline-block;
+	cursor: pointer;
+	text-transform: uppercase;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	outline: 0;
+	-webkit-appearance: none;
+	-webkit-transition: .3s ease;
+	transition: .3s ease;
+}
+.innerBox{
+	width:50%;
+}
+#ourmenu div{
+	cursor: pointer;
+	text-align: center;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width:100%;
+	font-weight:bold;
+}
+#ourmenu div:hover{
+	background:whitesmoke;
+}
+
+.fitborder{
+	border:border:1px solid rgb(232, 232, 232);
+}
+
+.lines{
+	width:95%;
+	display:flex;
+	gap:10px;
+	margin:2.5%;
+	align-items:flex-start;
+}
+.lines .item{
+	width:100%;
+	border:2px solid rgb(232, 232, 232);
+	cursor:pointer;
+	background:whitesmoke;
+}
+
+.item .thumbnail{
+	width:96%;
+	height:200px;
+	margin:2%;
+	background:black;
+}
+.item .thumbnail img{
+	width:100%;
+	height:100%;
+	object-fit:cover;
+}
+.item .moreinfo{
+	height:26%;
+	margin:2%;
+	width:96%;
+}
+.moreinfo .title{
+	display:flex;
+	align-items:center;
+	font-weight:bold;
+}
+.moreinfo .addressinfo{
+	display:flex;
+	gap:10px;
+	align-items:center;
+	height:50%;
+}
+.addressinfo .date{
+	font-size:12px;
+	font-weight:bold;
+}
+
+@media screen and (max-width:900px){
+	.innerBox{
+		width:100%;
+	}
+	.fitborder{
+		
+		border-left:none;
+		border-right:none;
+	}
+	.moreinfo .addressinfo{
+		font-size:smaller;
+	}
+}
