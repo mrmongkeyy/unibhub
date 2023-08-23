@@ -51,7 +51,7 @@ input,textarea{
 	transition: .3s ease;
 }
 .innerBox{
-	width:50%;
+	width:480px;
 }
 #ourmenu div{
 	cursor: pointer;
@@ -72,17 +72,19 @@ input,textarea{
 }
 
 .lines{
-	width:95%;
+	width:100%;
 	display:flex;
 	gap:10px;
-	margin:2.5%;
 	align-items:flex-start;
 }
 .lines .item{
 	width:100%;
-	border:2px solid rgb(232, 232, 232);
 	cursor:pointer;
-	background:whitesmoke;
+	border-bottom:1px solid lightgray;
+}
+
+.lines .item:hover .title{
+	text-decoration:underline;
 }
 
 .item .thumbnail{
@@ -104,7 +106,7 @@ input,textarea{
 .moreinfo .title{
 	display:flex;
 	align-items:center;
-	font-weight:bold;
+	font-size:18px;
 }
 .moreinfo .addressinfo{
 	display:flex;

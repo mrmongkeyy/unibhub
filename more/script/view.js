@@ -22,10 +22,8 @@ const view = {
 		style:`
 			width:100%;
 			height:128px;
-			border-bottom:1px solid #e8e8e8;
 			display:flex;
 			justify-content:center;
-			background:white;
 		`,
 		innerHTML:`
 			<div style="
@@ -42,7 +40,7 @@ const view = {
 					display: flex;
 					align-items: center;
 					justify-content:center;
-					border-bottom:1px solid rgb(232, 232, 232);
+					background:#f0f1f2;
 				">
 					<div style="
 						cursor:pointer;
@@ -55,6 +53,7 @@ const view = {
 					height: 100%;
 					display: flex;
 					align-items: center;
+					background:white;
 				" id=ourmenu class=innerBox>
 					<div>
 						<span>Ping</span>
@@ -136,22 +135,8 @@ const view = {
 								#gamedevvlog Progress udah cukup significant!!!
 							</div>
 							<div class=addressinfo>
-								<div class=username>By someone at</div>
+								<div class=username>By someone</div>
 								<div class=date>17 Sep 2023 19:30</div>
-							</div>
-						</div>
-					</div>
-					<div class=item>
-						<div class=thumbnail>
-							<img src=./more/media/pic.png>
-						</div>
-						<div class=moreinfo>
-							<div class=title>
-								What if this is changed???
-							</div>
-							<div class=addressinfo>
-								<div class=username>By someone at</div>
-								<div class=date>17 Sep 2023 19:30.</div>
 							</div>
 						</div>
 					</div>
@@ -166,22 +151,8 @@ const view = {
 								#gamedevvlog Progress udah cukup significant!!!
 							</div>
 							<div class=addressinfo>
-								<div class=username>By someone at</div>
+								<div class=username>By someone</div>
 								<div class=date>17 Sep 2023 19:30</div>
-							</div>
-						</div>
-					</div>
-					<div class=item>
-						<div class=thumbnail>
-							<img src=./more/media/pic.png>
-						</div>
-						<div class=moreinfo>
-							<div class=title>
-								What if this is changed???
-							</div>
-							<div class=addressinfo>
-								<div class=username>By someone at</div>
-								<div class=date>17 Sep 2023 19:30.</div>
 							</div>
 						</div>
 					</div>
@@ -196,22 +167,8 @@ const view = {
 								#gamedevvlog Progress udah cukup significant!!!
 							</div>
 							<div class=addressinfo>
-								<div class=username>By someone at</div>
+								<div class=username>By someone</div>
 								<div class=date>17 Sep 2023 19:30</div>
-							</div>
-						</div>
-					</div>
-					<div class=item>
-						<div class=thumbnail>
-							<img src=./more/media/pic.png>
-						</div>
-						<div class=moreinfo>
-							<div class=title>
-								What if this is changed???
-							</div>
-							<div class=addressinfo>
-								<div class=username>By someone at</div>
-								<div class=date>17 Sep 2023 19:30.</div>
 							</div>
 						</div>
 					</div>
