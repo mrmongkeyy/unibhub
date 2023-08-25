@@ -237,6 +237,8 @@ const view = {
 				justify-content: space-between;
 				padding: 10px;
 				border-bottom: 1px solid rgb(232, 232, 232);
+				position:sticky;
+				top:0;
 			">
 				<div id=backcontroll
 				style="
