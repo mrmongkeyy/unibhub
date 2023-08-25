@@ -13,9 +13,9 @@ const userData = {
 		email:'gemalagifrominfinitydreams@gmail.com'
 	},
 	moreInfo:{
-		hobbies:['Coding','Playing Football'],
+		hobbies:['Coding','Reading a book','Build Something'],
 		job:['Founder & Ceo TOA','Software Engineer','College Student'],
-		age:[19],
+		age:['19 Years'],
 		email:['gemalagifrominfinitydreams@gmail.com'],
 		website:['https://infinitydreams.cyclic.app']
 	},
@@ -175,7 +175,7 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:poppinsbold;
-					">TOA<span style=font-size:12px;>KAN Pikiran Mu!</span></div>
+					">TOA<span style=font-size:12px;font-family:poppinslight>KAN Pikiran Mu!</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -186,25 +186,35 @@ const view = {
 					background:white;
 					border-radius:20px 20px 0 0;
 				" id=ourmenu class=innerBox>
-					<div>
+					<div id=newArticle>
 						<img src=./more/media/pen.png class=navimg>
 					</div>
-					<div>
+					<div id=displayList>
 						<img src=./more/media/home.png class=navimg>
 					</div>
-					<div>
+					<div id=openInbox>
 						<img src=./more/media/chat.png class=navimg>
 					</div>
-					<div>
+					<div id=opneNotif>
 						<img src=./more/media/bell.png class=navimg>
 					</div>
-					<div>
+					<div id=openProfile>
 						<img src=./more/media/user.png class=navimg>
 					</div>
 				</div>
 			</div>
 			
-		`
+		`,
+		navEvent(){
+			this.findall('#ourmenu div').forEach(button=>{
+				button.onclick = ()=>{
+					view.content[button.id]();
+				}
+			})
+		},
+		onadded(){
+			this.navEvent();
+		}
 	}),
 	content:makeElement('content',{
 		className:'innerBox fitborder',
@@ -251,7 +261,7 @@ const view = {
 					width:100%;
 				"
 				>
-					On Beranda
+					Beranda
 				</div>
 				<div style="
 					width: 100%;
@@ -315,20 +325,10 @@ const view = {
 						<div class="buttonstyled" style="
 							border-radius:20px;display:flex;
 							align-items:center;gap:5px;background:none;
-						" id=view>10 view</div>
+							font-size:12px;
+						" id=view>10 Dilihat</div>
 					</div>
-					<div>
-						<div class="button buttonstyled" style="
-							border-radius:20px;display:flex;
-							align-items:center;gap:5px;
-						">
-							<img src=./more/media/share.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Share</div>
-					</div>
+					
 				</div>
 				<div style="
 					width: 100%;
@@ -342,7 +342,7 @@ const view = {
 					<div>
 						<div class="button buttonstyled" style="
 							border-radius:20px;display:flex;
-							align-items:center;gap:5px;
+							align-items:center;gap:5px;font-size:10px;
 						" id=view>
 							<img src=./more/media/chat.png
 								style="
@@ -354,7 +354,7 @@ const view = {
 					<div>
 						<div class="button buttonstyled" style="
 							border-radius:20px;display:flex;
-							align-items:center;gap:5px;
+							align-items:center;gap:5px;font-size:10px;
 						">FOLLOW</div>
 					</div>
 				</div>
@@ -368,22 +368,37 @@ const view = {
 			id=linesparent
 			></div>
 		`,
+		clearLinesParent(){
+			this.linesParent.clear();
+		},
 		onadded(){
-			this.openArticle();
+			this.linesParent = this.find('#linesparent');
+			this.displayList(app.dataFiktif);
 		},
 		displayList(data){
+			if(!data)data=app.dataFiktif;
+			this.clearLinesParent();
 			data.forEach((item,i)=>{
 				this.find('#linesparent').addChild(view.line(item,i+1));
 			})
+			
+			this.find('#stateLabel').innerHTML = 'Beranda';
+			this.find('#newartilebuttons').hide();
+			this.find('#reactTo').hide();
+			this.find('#profileTop').hide();
+			this.find('#searchware').show('flex');
 		},
 		newArticle(){
+			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.articlenew());
 			this.find('#stateLabel').innerHTML = 'Artikel Baru';
 			this.find('#searchware').hide();
 			this.find('#reactTo').hide();
+			this.find('#profileTop').hide();
 			this.find('#newartilebuttons').show('flex');
 		},
 		openArticle(){
+			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.openArticle());
 			this.find('#stateLabel').innerHTML = 'Baca Artikel';
 			this.find('#searchware').hide();
@@ -392,6 +407,7 @@ const view = {
 			this.find('#reactTo').show('flex');
 		},
 		openProfile(userId){
+			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.profilePage(userId));
 			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
 			this.find('#searchware').hide();
@@ -460,7 +476,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Judul Disini..." style="height:100%;resize:none;"></textarea>
+						<textarea placeholder="Tulis Judul Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
 					</div>
 				</div>
 				<div style="
@@ -476,7 +492,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Konten Disini..." style="height:100%;resize:none;"></textarea>
+						<textarea placeholder="Tulis Konten Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
 					</div>
 				</div>
 			`,
@@ -486,17 +502,19 @@ const view = {
 	openArticle(articleId){
 		return makeElement('div',{
 			style:`
-				margin:3%;
+				padding:3%;
 				display:flex;
 				flex-direction:column;
 				height:94%;
 				overflow:auto;
+				padding-top:0;
 			`,
 			innerHTML:`
 				<div style="
 					display:flex;
 					align-items:center;
 					gap:8px;
+					margin-top:10px;
 				">
 					<div>
 						<img class=profileimg src=./more/media/gemaprofile.png>
@@ -508,35 +526,59 @@ const view = {
 					font-family:poppinsbold;
 					margin:10px 0;
 				">
-					Biografi Singkat Penemu Facebook, Gema.
+					Apa yang akan menjadi permasalahan selanjutnya? We gonna understand later! hahaha
 				</div>
 				<div style="
 					display:flex;
 					flex-direction:column;
 					padding-bottom:20px;
 					border-bottom:1px solid whitesmoke;
-					margin-bottom:8px;
 				">
-					Zuckerberg lahir tahun 1984 di White Plains, New York[8] dari pasangan Karen, seorang psikiater, dan Edward Zuckerberg, seorang dokter gigi. Ia bersama tiga saudara perempuannya, Randi, Donna, dan Arielle,[9] dibesarkan di Dobbs Ferry, New York.[9] Zuckerberg dibesarkan sebagai seorang Yahudi dan menjalani bar mitzvah ketika menginjak usia 13 tahun,[10][11] meski selama ini ia menetapkan dirinya sebagai seorang ateis.[11][12]
+					What is the different between sound and sounds like?
 
-Di Ardsley High School, Zuckerberg mendapat nilai tinggi pada mata pelajaran klasika sebelum pindah ke Phillips Exeter Academy pada tahun pertamanya, tempat ia mendapat banyak hadiah dalam bidang sains (matematika, astronomi, dan fisika) dan ilmu klasik (dalam formulir pendaftaran perguruan tingginya, Zuckerberg memasukkan bahasa Prancis, Ibrani, Latin, dan Yunani Kuno dalam kolom bahasa non-Inggris yang bisa ia baca dan tulis) swerta merupakan seorang bintang anggar dan kapten tim anggar.[13][14][15][16] Di perguruan tinggi, ia dikenal karena mengutip beberapa kalimat dari puisi-puisi epik seperti Iliad.[13]
+This is what the problem is become, we have so many trouble in our life. And this is must be repaired to be normal because this is so important and i dont have any idea about this at a first place, and i hope that i will get it later.
 
-Pada sebuah pesta yang diadakan persaudaraannya pada tahun kedua di universitas, Zuckerberg bertemu mft, seorang mahasiswa Cina-Amerika asal pinggiran kota Boston (Braintree, Massachusetts[17]), dan mereka terus berkencan, sempat putus sebentar, sejak 2003. Pada September 2010, Zuckerberg mengundang Chan yang sudah menjadi mahasiswi kedokteran di Universitas California, San Francisco,[18] untuk pindah ke rumah sewaannya di Palo Alto.[9][19] Zuckerberg mempelajari bahasa Tionghoa Mandarin setiap hari sebagai persiapan kunjungan keduanya ke Tiongkok pada bulan Desember 2010.[20][21] Hingga 2010, Facebook diblokir oleh tembok api Internet negara itu.[22]
+The next problem is something to understand isnt have any current solutions, this is a big trouble. And talking about it, it has so many mistake or error cause the mechanic isnt designed well enough to used in this system.
+
+So, how can i fix this problem? and what will happend if there's no solution founded since 2024? i dont think that i have that space or capable enough to understand and make decision for it right now.
+
+So many people say that i dont have big idea.
 
 
-Zuckerberg (kanan) bersama Robert Scoble tahun 2008.
-Di profil Facebook Zuckerberg, ia menyebutkan tertarik pada "keterbukaan, menciptakan sesuatu yang membantu orang-orang terhubung dan berbagi segala hal yang penting bagi mereka, revolusi, aliran informasi, minimalisme".[23] Zuckerberg lebih enak melihat warna biru karena kebutaan warna merah-hijau yang dialaminya; biru juga merupakan warna dominan di Facebook.[24]
-
-Pada Mei 2011, dilaporkan bahwa Zuckerberg telah membeli rumah berkamar lima di Palo Alto senilai $7 juta.[25][26]
-
-Pada tanggal 19 Mei 2012, Zuckerberg menikah dengan Priscilla Chan. Upacara dilangsungkan di halaman belakang Zuckerberg. Tamu-tamu khusus diundang dengan dalih merayakan lulusnya Chan sebagai dokter dari fakultas kedokteran di University of California, San Francisco.[27][28]
-
-Pada 1 Desember 2015, ia mengumumkan kelahiran anaknya yang pertama, seorang bayi perempuan yang lahir dengan berat 3,4 kg dan diberi nama Maxima Chan Zuckerberg.[29] Ia juga menulis surat terbuka bagi putrinya, Max. Dalam surat tersebut, ia mengumumkan dirinya bakal membuat yayasan bernama Chan Zuckerberg Initiative.[30]
+And i am ok with that.
+				</div>
+				<div style="
+					display:flex;
+					gap:10px;
+					margin-top:10px;
+					justify-content:center;
+					padding-bottom:8px;
+					border-bottom:1px solid whitesmoke;
+				">
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:20px;display:flex;
+							align-items:center;gap:5px;
+						">Sukai Artikel</div>
+					</div>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:20px;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/share.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Bagikan</div>
+					</div>
 				</div>
 				<div id=commentsection style="
 					position:sticky;
 					top:0;
 					background:white;
+					padding-top:8px;
 				">
 					<div style="margin-bottom:8px;
 						display:flex;
@@ -582,7 +624,6 @@ Pada 1 Desember 2015, ia mengumumkan kelahiran anaknya yang pertama, seorang bay
 		return makeElement('div',{
 			style:`
 				border:1px solid whitesmoke;
-				margin:2%;
 				border-radius:0 0 20px 20px;
 				position:relative;
 			`,
@@ -681,7 +722,9 @@ Pada 1 Desember 2015, ia mengumumkan kelahiran anaknya yang pertama, seorang bay
 					gap:1px;
 					position:sticky;
 					top:0;
-					background:white;
+					background: gray;
+					color: white;
+					font-family: 'poppinsbold';
 				">
 					<div
 					style="
@@ -692,7 +735,7 @@ Pada 1 Desember 2015, ia mengumumkan kelahiran anaknya yang pertama, seorang bay
 						margin:0 6%;
 					"
 					>
-						<div>${userData.content.length} Artikel</div>
+						<div>${userData.content.length} Artikel Di Publish</div>
 					</div>
 				</div>
 			`,
