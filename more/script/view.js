@@ -905,8 +905,7 @@ And i am ok with that.
 			innerHTML:`
 			<div style="
 				background:white;
-				margin:0 2%;
-				width:92%;
+				width:96%;
 				padding: 2%;
 				border-radius:20px 20px 0 0;
 				display:flex;
