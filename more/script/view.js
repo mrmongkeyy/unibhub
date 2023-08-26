@@ -380,6 +380,14 @@ const view = {
 						<img src=./more/media/worker.png class=navimg>
 						Loker
 					</div>
+					<div style="
+						display:flex;
+						gap:8px;
+						cursor:pointer;
+					">
+						<img src=./more/media/construction-worker.png class=navimg>
+						Jasa
+					</div>
 				</div>
 				<div style=width:100%;>
 					<input placeholder="Cari Disini...">
