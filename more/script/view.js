@@ -241,6 +241,7 @@ const view = {
 				top:0;
 				overflow:auto;
 				height:48px;
+				padding-bottom:0;
 			">
 				<div id=backcontroll
 				style="
@@ -460,8 +461,7 @@ const view = {
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: center;
-					margin-right: 10px;
+					justify-content: flex-end;
 					display:flex;
 				"
 				id=newartilebuttons
@@ -541,8 +541,7 @@ const view = {
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: center;
-					margin-right: 10px;
+					justify-content: flex-end;
 					display:flex;
 				"
 				id=newartilebuttons
@@ -636,8 +635,7 @@ const view = {
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: center;
-					margin-right: 10px;
+					justify-content: flex-end;
 					display:flex;
 				"
 				id=newartilebuttons
