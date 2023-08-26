@@ -1299,6 +1299,7 @@ And i am ok with that.
 						justify-content:space-between;
 						padding:3%;
 						align-items:center;
+						background:whitesmoke;
 					">
 						<div style="
 							font-family:poppinsbold;
@@ -1307,7 +1308,7 @@ And i am ok with that.
 							Login TheSimpsons
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg>
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 						</div>
 					</div>
 					<div style="
@@ -1392,6 +1393,7 @@ And i am ok with that.
 						justify-content:space-between;
 						padding:3%;
 						align-items:center;
+						background:whitesmoke;
 					">
 						<div style="
 							font-family:poppinsbold;
@@ -1400,7 +1402,7 @@ And i am ok with that.
 							Akun Baru TheSimpsons
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg>
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 						</div>
 					</div>
 					<div style="
@@ -1443,7 +1445,7 @@ And i am ok with that.
 						<div style="
 							
 						" class=button id=goSignin>
-							Daftar
+							Buat Akun
 						</div>
 						<div style="
 							background:lightgray;
