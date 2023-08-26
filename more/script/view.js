@@ -268,6 +268,14 @@ const view = {
 					Beranda
 				</div>
 				<div style="
+					cursor:pointer;
+					display:none;
+				"
+				id=searchWare
+				>
+					<img src=./more/media/search.png class=navimg>
+				</div>
+				<div style="
 					width: 100%;
 					display: none;
 					justify-content: flex-end;
@@ -313,27 +321,45 @@ const view = {
 			})
 			this.find('#stateLabel').innerHTML = 'Beranda';
 			this.find('#reactTo').hide();
+			this.find('#searchWare').show('flex');
 		},
 		newArticle(){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.articlenew());
 			this.find('#stateLabel').innerHTML = 'Artikel Baru';
 			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
 		},
 		openArticle(){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.openArticle());
 			this.find('#stateLabel').innerHTML = 'Baca Artikel';
 			this.find('#reactTo').show('flex');
+			this.find('#searchWare').hide();
 		},
 		openProfile(userId){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.profilePage(userId));
 			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
 			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
 		},
 		newPost(){
 			this.addChild(view.newPost());
+		},
+		newJasa(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.jasanew());
+			this.find('#stateLabel').innerHTML = 'Post Jasa';
+			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
+		},
+		newLoker(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.lokernew());
+			this.find('#stateLabel').innerHTML = 'Post Loker';
+			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
 		}
 	}),
 	footer:makeElement('footer',{
@@ -356,7 +382,7 @@ const view = {
 					width: 96%;
 					display: flex;
 					gap:12px;
-					margin-right: 10px;
+					justify-content:space-around;
 					padding: 2%;
 					background: white;
 				">
@@ -384,16 +410,6 @@ const view = {
 						<img src=./more/media/construction-worker.png class=navimg>
 						Jasa
 					</div>
-				</div>
-				<div style=width:100%;>
-					<input placeholder="Cari Disini...">
-				</div>
-				<div style="
-					padding: 8px;
-					cursor: pointer;
-					margin-left:8px;
-				">
-					<img src=./more/media/search.png class=navimg>
 				</div>
 			`
 		})
@@ -484,7 +500,7 @@ const view = {
 					<div style="
 						font-family:poppinsbold;
 					">
-						Judul
+						Judul Artikel
 					</div>
 					<div style="
 						height:100%;
@@ -500,12 +516,204 @@ const view = {
 					<div style="
 						font-family:poppinsbold;
 					">
-						Konten
+						Konten Artikel
 					</div>
 					<div style="
 						height:100%;
 					">
 						<textarea placeholder="Tulis Konten Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+					</div>
+				</div>
+			`,
+			
+		})
+	},
+	jasanew(){
+		return makeElement('div',{
+			style:`
+				margin:3%;
+				display:flex;
+				flex-direction:column;
+				height:94%;
+				overflow:auto;
+				overflow-x:hidden;
+			`,
+			innerHTML:`
+				<div style="
+					width: 100%;
+					justify-content: center;
+					margin-right: 10px;
+					display:flex;
+				"
+				id=newartilebuttons
+				>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:20px 0 0 20px;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Simpan</div>
+					</div>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:0 20px 20px 0;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/save.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>TERBITKAN</div>
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Fee
+					</div>
+					<div style="
+						height:100%;
+					">
+						<input placeholder="Misal 200.000.00" type=number style="height:100%;resize:none;border-radius:0;">
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Nama Jasa
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Misal Jasa Buat Web Portofolio" style="height:100%;resize:none;border-radius:0;"></textarea>
+					</div>
+				</div>
+				<div style="
+					height:80%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Keterangan Jasa
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+					</div>
+				</div>
+			`,
+			
+		})
+	},
+	lokernew(){
+		return makeElement('div',{
+			style:`
+				margin:3%;
+				display:flex;
+				flex-direction:column;
+				height:94%;
+			`,
+			innerHTML:`
+				<div style="
+					width: 100%;
+					justify-content: center;
+					margin-right: 10px;
+					display:flex;
+				"
+				id=newartilebuttons
+				>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:20px 0 0 20px;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Simpan</div>
+					</div>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:0 20px 20px 0;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/save.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>TERBITKAN</div>
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Fee
+					</div>
+					<div style="
+						height:100%;
+					">
+						<input placeholder="Misal 200.000.00" type=number style="height:100%;resize:none;border-radius:0;">
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Nama Pekerjaan
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Nama Pekerjaan Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+					</div>
+				</div>
+				<div style="
+					height:80%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Deskripsi Dan Persyaratan
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
 					</div>
 				</div>
 			`,
@@ -903,14 +1111,13 @@ And i am ok with that.
 				width:100%;
 				height:100%;
 				display:flex;
-				align-items:flex-end;
+				align-items:flex-start;
 			`,
 			innerHTML:`
 			<div style="
-				background:whitesmoke;
+				background:white;
 				width:92%;
 				padding: 4%;
-				border-radius:20px 20px 0 0;
 				display:flex;
 				flex-direction:column;
 			">
@@ -944,10 +1151,28 @@ And i am ok with that.
 				</div>
 			</div>
 			`,
+			buttonEvent(){
+				this.findall('.newpostmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+						this.find('#closethis').click();
+					}
+				})
+			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{
 					this.remove();
 				}
+				this.buttonEvent();
+			},
+			newArticle(){
+				view.content.newArticle();
+			},
+			newJasa(){
+				view.content.newJasa();
+			},
+			newLoker(){
+				view.content.newLoker();
 			}
 		})
 	}
