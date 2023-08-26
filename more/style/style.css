@@ -83,8 +83,10 @@ input,textarea{
 	justify-content: center;
 	width:100%;
 	font-weight:bold;
+	flex-direction:column;
+	font-size:11px;
 }
-#ourmenu div img:hover{
+#ourmenu div:hover img{
 	width:26px;
 	height:26px;
 }

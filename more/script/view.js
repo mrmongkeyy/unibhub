@@ -175,12 +175,12 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:poppinsbold;
-					">TOA<span style=font-size:12px;font-family:poppinslight>KAN Pikiran Mu!</span></div>
+					">TheSimpsons<span style=font-size:12px;font-family:poppinslight> Portal</span></div>
 				</div>
 				<div style="
 					display: flex;
 					justify-content: space-between;
-					height: 100%;
+					height: 200px;
 					display: flex;
 					align-items: center;
 					background:white;
@@ -188,18 +188,23 @@ const view = {
 				" id=ourmenu class=innerBox>
 					<div id=newArticle>
 						<img src=./more/media/pen.png class=navimg>
+						Post
 					</div>
 					<div id=displayList>
 						<img src=./more/media/home.png class=navimg>
+						Beranda
 					</div>
 					<div id=openInbox>
 						<img src=./more/media/chat.png class=navimg>
+						Pesan
 					</div>
 					<div id=opneNotif>
 						<img src=./more/media/bell.png class=navimg>
+						Notif
 					</div>
 					<div id=openProfile>
 						<img src=./more/media/user.png class=navimg>
+						Profil
 					</div>
 				</div>
 			</div>
@@ -221,13 +226,10 @@ const view = {
 		style:`
 			background:white;
 			height:100%;
-			margin:10px;
 			display:flex;
 			align-items: center;
 			overflow:hidden;
 			flex-direction:column;
-			margin-top:0;
-			border-radius:0 0 20px 20px;
 		`,
 		innerHTML:`
 			<div style="
@@ -239,6 +241,8 @@ const view = {
 				border-bottom: 1px solid rgb(232, 232, 232);
 				position:sticky;
 				top:0;
+				overflow:auto;
+				height:48px;
 			">
 				<div id=backcontroll
 				style="
@@ -267,58 +271,9 @@ const view = {
 				</div>
 				<div style="
 					width: 100%;
-					display: flex;
-					justify-content: flex-end;
-					margin-right: 10px;
-				"
-				id=searchware
-				>
-					<div>
-						<input placeholder="Cari Disini...">
-					</div>
-					<div>
-						<div class=button style="background:none;color:black;">Cari</div>
-					</div>
-				</div>
-				<div style="
-					width: 100%;
 					display: none;
 					justify-content: flex-end;
-					margin-right: 10px;
-				"
-				id=newartilebuttons
-				>
-					<div>
-						<div class="button buttonstyled" style="
-							border-radius:20px 0 0 20px;display:flex;
-							align-items:center;gap:5px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Simpan</div>
-					</div>
-					<div>
-						<div class="button buttonstyled" style="
-							border-radius:0 20px 20px 0;display:flex;
-							align-items:center;gap:5px;
-						">
-							<img src=./more/media/save.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Publish</div>
-					</div>
-				</div>
-				<div style="
-					width: 100%;
-					display: none;
-					justify-content: flex-end;
-					margin-right: 10px;
+					margin-right: 3%;
 					gap:8px;
 				"
 				id=reactTo
@@ -332,40 +287,13 @@ const view = {
 					</div>
 					
 				</div>
-				<div style="
-					width: 100%;
-					display: none;
-					justify-content: flex-end;
-					margin-right: 10px;
-					gap:5px;
-				"
-				id=profileTop
-				>
-					<div>
-						<div class="button buttonstyled" style="
-							border-radius:20px;display:flex;
-							align-items:center;gap:5px;font-size:10px;
-						" id=view>
-							<img src=./more/media/chat.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>CHAT</div>
-					</div>
-					<div>
-						<div class="button buttonstyled" style="
-							border-radius:20px;display:flex;
-							align-items:center;gap:5px;font-size:10px;
-						">FOLLOW</div>
-					</div>
-				</div>
 			</div>
 			<div
 			style="
 				width:100%;
 				height:100%;
 				overflow:auto;
+				overflow-x:hidden;
 			"
 			id=linesparent
 			></div>
@@ -375,52 +303,87 @@ const view = {
 		},
 		onadded(){
 			this.linesParent = this.find('#linesparent');
-			this.displayList(app.dataFiktif);
+			this.openArticle(app.dataFiktif);
 		},
 		displayList(data){
 			if(!data)data=app.dataFiktif;
 			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.searchDiv());
 			data.forEach((item,i)=>{
-				this.find('#linesparent').addChild(view.line(item,i+1));
+				this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
 			})
-			
 			this.find('#stateLabel').innerHTML = 'Beranda';
-			this.find('#newartilebuttons').hide();
 			this.find('#reactTo').hide();
-			this.find('#profileTop').hide();
-			this.find('#searchware').show('flex');
 		},
 		newArticle(){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.articlenew());
 			this.find('#stateLabel').innerHTML = 'Artikel Baru';
-			this.find('#searchware').hide();
 			this.find('#reactTo').hide();
-			this.find('#profileTop').hide();
-			this.find('#newartilebuttons').show('flex');
 		},
 		openArticle(){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.openArticle());
 			this.find('#stateLabel').innerHTML = 'Baca Artikel';
-			this.find('#searchware').hide();
-			this.find('#newartilebuttons').hide();
-			this.find('#profileTop').hide();
 			this.find('#reactTo').show('flex');
 		},
 		openProfile(userId){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.profilePage(userId));
 			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
-			this.find('#searchware').hide();
-			this.find('#newartilebuttons').hide();
 			this.find('#reactTo').hide();
-			this.find('#profileTop').show('flex');
 		}
 	}),
 	footer:makeElement('footer',{
 		
 	}),
+	searchDiv(){		
+		return makeElement('div',{
+			style:`
+				width: 96%;
+				display: flex;
+				overflow:auto;
+				margin-right: 10px;
+				padding: 2%;
+				background: white;
+				border-bottom: 1px solid whitesmoke;
+			`,
+			innerHTML:`
+				<div style="
+					width: 96%;
+					display: flex;
+					justify-content: flex-end;
+					gap:12px;
+					margin-right: 10px;
+					padding: 2%;
+					background: white;
+				">
+					<div style="
+						display:flex;
+						gap:8px;
+						cursor:pointer;
+					">
+						<img src=./more/media/papers.png class=navimg>
+						Artikel
+					</div>
+					<div style="
+						display:flex;
+						gap:8px;
+						cursor:pointer;
+					">
+						<img src=./more/media/worker.png class=navimg>
+						Loker
+					</div>
+				</div>
+				<div style=width:100%;>
+					<input placeholder="Cari Disini...">
+				</div>
+				<div>
+					<div class=button style="background:none;color:black;">Cari</div>
+				</div>
+			`
+		})
+	},
 	line(data,i,bt=true){
 		const Dot = (data.title.length>100)?'...':'';
 		return makeElement('div',{
@@ -453,7 +416,7 @@ const view = {
 						</div>
 					</div>
 				</div>
-			`
+			`,
 		})
 	},
 	articlenew(){
@@ -465,6 +428,40 @@ const view = {
 				height:94%;
 			`,
 			innerHTML:`
+				<div style="
+					width: 100%;
+					justify-content: center;
+					margin-right: 10px;
+					display:flex;
+				"
+				id=newartilebuttons
+				>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:20px 0 0 20px;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Simpan</div>
+					</div>
+					<div>
+						<div class="button buttonstyled" style="
+							border-radius:0 20px 20px 0;display:flex;
+							align-items:center;gap:5px;
+						">
+							<img src=./more/media/save.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>TERBITKAN</div>
+					</div>
+				</div>
 				<div style="
 					height:20%;
 					display:flex;
@@ -714,6 +711,55 @@ And i am ok with that.
 							<div>
 								<div>${userData.peoples.following.length} following</div>
 							</div>
+						</div>
+					</div>
+				</div>
+				<div style="
+					border-bottom:1px solid whitesmoke;
+					display:flex;
+					color: white;
+					font-family: 'poppinsbold';
+					overflow:auto;
+				">
+					<div
+					style="
+						width:94%;
+						height:100%;
+						display:flex;
+						align-items:center;
+						margin:10px 6%;
+						gap:8px;
+					"
+					>
+						<div>
+							<div class="button buttonstyled" style="
+								border-radius:20px;display:flex;
+								align-items:center;gap:5px;font-size:10px;
+							" id=view>
+								<img src=./more/media/chat.png
+									style="
+										width:16px;
+										height:16px;
+									"
+								>Rekrut</div>
+						</div>
+						<div>
+							<div class="button buttonstyled" style="
+								border-radius:20px;display:flex;
+								align-items:center;gap:5px;font-size:10px;
+							" id=view>
+								<img src=./more/media/chat.png
+									style="
+										width:16px;
+										height:16px;
+									"
+								>CHAT</div>
+						</div>
+						<div>
+							<div class="button buttonstyled" style="
+								border-radius:20px;display:flex;
+								align-items:center;gap:5px;font-size:10px;
+							">FOLLOW</div>
 						</div>
 					</div>
 				</div>
