@@ -913,8 +913,8 @@ And i am ok with that.
 			innerHTML:`
 			<div style="
 				background:white;
-				width:96%;
-				padding: 2%;
+				width:92%;
+				padding: 4%;
 				border-radius:20px 20px 0 0;
 				display:flex;
 				flex-direction:column;
@@ -934,15 +934,15 @@ And i am ok with that.
 					" id=closethis>
 				</div>
 				<div class=newpostmenu>
-					<div>
+					<div id=newArticle>
 						<img src=./more/media/papers.png>
 						Artikel
 					</div>
-					<div>
+					<div id=newJasa>
 						<img src=./more/media/construction-worker.png>
 						Jasa
 					</div>
-					<div>
+					<div id=newLoker>
 						<img src=./more/media/worker.png>
 						Loker
 					</div>
