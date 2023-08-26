@@ -169,7 +169,6 @@ const view = {
 					display: flex;
 					align-items: center;
 					justify-content:center;
-					background:#f0f1f2;
 				">
 					<div style="
 						cursor:pointer;
@@ -183,8 +182,6 @@ const view = {
 					height: 200px;
 					display: flex;
 					align-items: center;
-					background:white;
-					border-radius:20px 20px 0 0;
 				" id=ourmenu class=innerBox>
 					<div id=newPost>
 						<img src=./more/media/pen.png class=navimg>
@@ -240,7 +237,6 @@ const view = {
 				align-items: center;
 				justify-content: space-between;
 				padding: 10px;
-				border-bottom: 1px solid rgb(232, 232, 232);
 				position:sticky;
 				top:0;
 				overflow:auto;
@@ -639,7 +635,6 @@ And i am ok with that.
 		
 		return makeElement('div',{
 			style:`
-				border:1px solid whitesmoke;
 				border-radius:0 0 20px 20px;
 				position:relative;
 			`,
@@ -912,7 +907,7 @@ And i am ok with that.
 			`,
 			innerHTML:`
 			<div style="
-				background:white;
+				background:whitesmoke;
 				width:92%;
 				padding: 4%;
 				border-radius:20px 20px 0 0;
