@@ -271,6 +271,7 @@ const view = {
 				<div style="
 					cursor:pointer;
 					display:none;
+					margin-right:20px;
 				"
 				id=searchWare
 				>
