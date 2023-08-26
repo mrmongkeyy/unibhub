@@ -505,12 +505,11 @@ const view = {
 	openArticle(articleId){
 		return makeElement('div',{
 			style:`
-				padding:3%;
+				padding:0 3%;
 				display:flex;
 				flex-direction:column;
-				height:94%;
+				height:100%;
 				overflow:auto;
-				padding-top:0;
 			`,
 			innerHTML:`
 				<div style="
@@ -848,13 +847,14 @@ And i am ok with that.
 				margin-top:10px;
 			`,
 			onadded(){
-				datacomment.forEach(comment=>{
+				datacomment.forEach((comment,i)=>{
 					this.addChild(makeElement('div',{
 						style:`
 							display:flex;
 							gap:10px;
 							align-item:center;
 							margin-top:8px;
+							margin-bottom:${i===datacomment.length-1?20:0}px;
 						`,
 						innerHTML:`
 							<div>
