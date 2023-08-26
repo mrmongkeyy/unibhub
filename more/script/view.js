@@ -186,7 +186,7 @@ const view = {
 					background:white;
 					border-radius:20px 20px 0 0;
 				" id=ourmenu class=innerBox>
-					<div id=newArticle>
+					<div id=newPost>
 						<img src=./more/media/pen.png class=navimg>
 						Post
 					</div>
@@ -213,6 +213,7 @@ const view = {
 		navEvent(){
 			this.findall('#ourmenu div').forEach(button=>{
 				button.onclick = ()=>{
+					view.content.saveRemove('#chooseType');
 					view.content[button.id]();
 				}
 			})
@@ -230,6 +231,7 @@ const view = {
 			align-items: center;
 			overflow:hidden;
 			flex-direction:column;
+			position:relative;
 		`,
 		innerHTML:`
 			<div style="
@@ -294,6 +296,7 @@ const view = {
 				height:100%;
 				overflow:auto;
 				overflow-x:hidden;
+				position:relative;
 			"
 			id=linesparent
 			></div>
@@ -332,6 +335,9 @@ const view = {
 			this.find('#linesparent').addChild(view.profilePage(userId));
 			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
 			this.find('#reactTo').hide();
+		},
+		newPost(){
+			this.addChild(view.newPost());
 		}
 	}),
 	footer:makeElement('footer',{
@@ -882,5 +888,72 @@ And i am ok with that.
 				})
 			}
 		})
+	},
+	newPost(){
+		return makeElement('div',{
+			id:'chooseType',
+			style:`
+				position:absolute;
+				top:0;
+				left:0;
+				background:#00000070;
+				width:100%;
+				height:100%;
+				display:flex;
+				align-items:flex-end;
+			`,
+			innerHTML:`
+			<div style="
+				background:white;
+				margin:0 2%;
+				width:92%;
+				padding: 2%;
+				border-radius:20px 20px 0 0;
+				display:flex;
+				flex-direction:column;
+			">
+				<div style="
+					font-family:poppinsbold;
+					display:flex;
+					align-items:center;
+					justify-content:space-between;
+					padding:0 5px;
+				">
+					Postingan Baru
+					<img src=./more/media/close.png class=navimg style="
+						width:16px;
+						height:16px;
+						cursor:pointer;
+					" id=closethis>
+				</div>
+				<div class=newpostmenu>
+					<div>
+						<img src=./more/media/papers.png>
+						Artikel
+					</div>
+					<div>
+						<img src=./more/media/construction-worker.png>
+						Jasa
+					</div>
+					<div>
+						<img src=./more/media/worker.png>
+						Loker
+					</div>
+				</div>
+			</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+			}
+		})
 	}
 }
+
+
+
+
+
+
+
