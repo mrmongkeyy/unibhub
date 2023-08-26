@@ -347,12 +347,12 @@ const view = {
 				padding: 2%;
 				background: white;
 				border-bottom: 1px solid whitesmoke;
+				align-items:center;
 			`,
 			innerHTML:`
 				<div style="
 					width: 96%;
 					display: flex;
-					justify-content: flex-end;
 					gap:12px;
 					margin-right: 10px;
 					padding: 2%;
@@ -378,8 +378,12 @@ const view = {
 				<div style=width:100%;>
 					<input placeholder="Cari Disini...">
 				</div>
-				<div>
-					<div class=button style="background:none;color:black;">Cari</div>
+				<div style="
+					padding: 8px;
+					cursor: pointer;
+					margin-left:8px;
+				">
+					<img src=./more/media/search.png class=navimg>
 				</div>
 			`
 		})
