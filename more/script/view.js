@@ -271,7 +271,7 @@ const view = {
 				<div style="
 					cursor:pointer;
 					display:none;
-					margin-right:20px;
+					margin-right:28px;
 				"
 				id=searchWare
 				>
@@ -339,7 +339,20 @@ const view = {
 			this.find('#reactTo').show('flex');
 			this.find('#searchWare').hide();
 		},
+		isInProfile(){
+			let result = false;
+			if(app.getInfoLogin()){
+				result = true;
+			}
+			return result;
+		},
+		getIn(){
+			view.main.addChild(view.loginBox());
+		},
 		openProfile(userId){
+			if(!this.isInProfile()){
+				return this.getIn();
+			}
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.profilePage(userId));
 			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
@@ -370,44 +383,55 @@ const view = {
 	searchDiv(){		
 		return makeElement('div',{
 			style:`
-				width: 96%;
+				width: 100%;
 				display: flex;
-				overflow:auto;
-				margin-right: 10px;
-				padding: 2%;
+				overflow: auto;
+				/* margin-right: 10px; */
+				margin: 2% 0;
 				background: white;
 				border-bottom: 1px solid whitesmoke;
-				align-items:center;
+				align-items: center;
+				/* margin-right: 0;
 			`,
 			innerHTML:`
 				<div style="
-					width: 96%;
-					display: flex;
-					gap:12px;
-					justify-content:space-around;
-					padding: 2%;
-					background: white;
-				">
+					  width: 100%;
+						display: flex;
+						justify-content: space-around;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
 					<div style="
-						display:flex;
-						gap:8px;
-						cursor:pointer;
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						border-bottom: 1px solid black;
+						padding: 10px;
+						justify-content: center;
 					">
 						<img src=./more/media/papers.png class=navimg>
 						Artikel
 					</div>
 					<div style="
-						display:flex;
-						gap:8px;
-						cursor:pointer;
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						width: 100%;
+						justify-content: center;
+						padding: 10px;
 					">
 						<img src=./more/media/worker.png class=navimg>
 						Loker
 					</div>
 					<div style="
-						display:flex;
-						gap:8px;
-						cursor:pointer;
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						width: 100%;
+						justify-content: center;
+						padding: 10px;
 					">
 						<img src=./more/media/construction-worker.png class=navimg>
 						Jasa
@@ -458,19 +482,22 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				height:94%;
+				gap:10px;
 			`,
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: flex-end;
-					display:flex;
+					justify-content: space-around;
+					display: flex;
+					background: whitesmoke;
+					border-radius: 20px;
 				"
 				id=newartilebuttons
 				>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:20px 0 0 20px;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/upload.png
 							style="
@@ -480,10 +507,10 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:0 20px 20px 0;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/save.png
 								style="
@@ -538,19 +565,35 @@ const view = {
 				height:94%;
 				overflow:auto;
 				overflow-x:hidden;
+				gap:10px;
 			`,
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: flex-end;
-					display:flex;
+					justify-content: space-around;
+					display: flex;
+					background: whitesmoke;
+					border-radius: 20px;
 				"
 				id=newartilebuttons
 				>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:20px 0 0 20px;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Files</div>
+					</div>
+					<div style=width:100%;>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/upload.png
 							style="
@@ -560,17 +603,17 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:0 20px 20px 0;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/save.png
 								style="
 									width:16px;
 									height:16px;
 								"
-							>TERBITKAN</div>
+							>Terbitkan</div>
 					</div>
 				</div>
 				<div style="
@@ -581,7 +624,7 @@ const view = {
 					<div style="
 						font-family:poppinsbold;
 					">
-						Fee
+						Min-Fee
 					</div>
 					<div style="
 						height:100%;
@@ -632,19 +675,35 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				height:94%;
+				gap:10px;
 			`,
 			innerHTML:`
 				<div style="
 					width: 100%;
-					justify-content: flex-end;
-					display:flex;
+					justify-content: space-around;
+					display: flex;
+					background: whitesmoke;
+					border-radius: 20px;
 				"
 				id=newartilebuttons
 				>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:20px 0 0 20px;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Files</div>
+					</div>
+					<div style=width:100%;>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/upload.png
 							style="
@@ -654,17 +713,17 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div>
+					<div style=width:100%;>
 						<div class="button buttonstyled" style="
-							border-radius:0 20px 20px 0;display:flex;
-							align-items:center;gap:5px;
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/save.png
 								style="
 									width:16px;
 									height:16px;
 								"
-							>TERBITKAN</div>
+							>Terbitkan</div>
 					</div>
 				</div>
 				<div style="
@@ -675,7 +734,7 @@ const view = {
 					<div style="
 						font-family:poppinsbold;
 					">
-						Fee
+						Max-Fee
 					</div>
 					<div style="
 						height:100%;
@@ -767,23 +826,24 @@ So many people say that i dont have big idea.
 And i am ok with that.
 				</div>
 				<div style="
-					display:flex;
-					gap:10px;
-					margin-top:10px;
-					justify-content:center;
-					padding-bottom:8px;
-					border-bottom:1px solid whitesmoke;
+					 display: flex;
+					gap: 10px;
+					/* margin-top: 10px; */
+					justify-content: space-around;
+					margin-bottom: 10px;
+					/* border-bottom: 1px solid whitesmoke; */
+					/* border-radius: 10px;
 				">
-					<div>
+					<div style="width:100%;">
 						<div class="button buttonstyled" style="
-							border-radius:20px;display:flex;
-							align-items:center;gap:5px;
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
 						">Sukai Artikel</div>
 					</div>
-					<div>
+					<div style="width:100%;">
 						<div class="button buttonstyled" style="
-							border-radius:20px;display:flex;
-							align-items:center;gap:5px;
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
 						">
 							<img src=./more/media/share.png
 								style="
@@ -814,7 +874,6 @@ And i am ok with that.
 						</div>
 					</div>
 					<div style="
-						border-bottom:1px solid whitesmoke;
 						padding-bottom:10px;
 					">
 						<textarea style="
@@ -930,6 +989,9 @@ And i am ok with that.
 							<div>
 								<div>${userData.peoples.following.length} following</div>
 							</div>
+							<div>
+								<div>${userData.peoples.following.length} Projects</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -948,6 +1010,7 @@ And i am ok with that.
 						align-items:center;
 						margin:10px 6%;
 						gap:8px;
+						justify-content:space-around;
 					"
 					>
 						<div>
@@ -983,26 +1046,65 @@ And i am ok with that.
 					</div>
 				</div>
 				<div style="
-					height:48px;
-					border-bottom:1px solid whitesmoke;
-					display:flex;
-					gap:1px;
-					position:sticky;
-					top:0;
-					background: gray;
-					color: white;
-					font-family: 'poppinsbold';
+					height: 48px;
+					border-bottom: 1px solid whitesmoke;
+					display: flex;
+					gap: 1px;
+					position: sticky;
+					top: 0;
+					background: white;
+					/* color: white; */
+					/* font-family: 'poppinsbold';
 				">
 					<div
 					style="
-						width:94%;
+						width:100%;
 						height:100%;
 						display:flex;
 						align-items:center;
-						margin:0 6%;
 					"
 					>
-						<div>${userData.content.length} Artikel Di Publish</div>
+						<div style="
+								width: 100%;
+								display: flex;
+								justify-content: space-around;
+						" id=berandadivmenu>
+							<div style="
+								display: flex;
+								gap: 8px;
+								cursor: pointer;
+								height: 100%;
+								width: 100%;
+								border-bottom: 1px solid black;
+								padding: 10px;
+								justify-content: center;
+							">
+								<img src=./more/media/papers.png class=navimg>
+								Artikel
+							</div>
+							<div style="
+								display: flex;
+								gap: 8px;
+								cursor: pointer;
+								width: 100%;
+								justify-content: center;
+								padding: 10px;
+							">
+								<img src=./more/media/worker.png class=navimg>
+								Project
+							</div>
+							<div style="
+								display: flex;
+								gap: 8px;
+								cursor: pointer;
+								width: 100%;
+								justify-content: center;
+								padding: 10px;
+							">
+								<img src=./more/media/construction-worker.png class=navimg>
+								Jasa
+							</div>
+						</div>
 					</div>
 				</div>
 			`,
@@ -1106,7 +1208,7 @@ And i am ok with that.
 				position:absolute;
 				top:0;
 				left:0;
-				background:#00000070;
+				background:rgba(0, 0, 0, 0.25);
 				width:100%;
 				height:100%;
 				display:flex;
@@ -1172,6 +1274,204 @@ And i am ok with that.
 			},
 			newLoker(){
 				view.content.newLoker();
+			}
+		})
+	},
+	loginBox(){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Login TheSimpsons
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						flex-direction:column;
+						gap:10px;
+					">
+						<div>
+							<div>Username</div>
+							<div>
+								<input placeholder="Masukan Username" style=border-radius:0;>
+							</div>
+						</div>
+						<div>
+							<div>Password</div>
+							<div>
+								<input placeholder="Masukan Password" style=border-radius:0;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=buttons>
+						<div style="
+							
+						" class=button id=goIn>
+							Masuk
+						</div>
+						<div style="
+							background:lightgray;
+							color:black;
+						" class=button id=goSignin>
+							Daftar
+						</div>
+					</div>
+				</div>
+			`,
+			buttonEvent(){
+				this.findall('#buttons div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			goIn(){
+				
+			},
+			goSignin(){
+				view.main.addChild(view.siginBox());
+				this.remove();
+			},
+			onadded(){
+				//close Event.
+				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.buttonEvent();
+			}
+		})
+	},
+	siginBox(){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Akun Baru TheSimpsons
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						flex-direction:column;
+						gap:10px;
+					">
+						<div>
+							<div>Username</div>
+							<div>
+								<input placeholder="Masukan Username" style=border-radius:0;>
+							</div>
+						</div>
+						<div>
+							<div>Email</div>
+							<div>
+								<input placeholder="Masukan Email" style=border-radius:0;>
+							</div>
+						</div>
+						<div>
+							<div>Password</div>
+							<div>
+								<input placeholder="Masukan Password" style=border-radius:0;>
+							</div>
+						</div>
+						<div>
+							<div>Ulagi Password</div>
+							<div>
+								<input placeholder="Masukan Password" style=border-radius:0;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=buttons>
+						<div style="
+							
+						" class=button id=goSignin>
+							Daftar
+						</div>
+						<div style="
+							background:lightgray;
+							color:black;
+						" class=button id=goIn>
+							Masuk
+						</div>
+					</div>
+				</div>
+			`,
+			buttonEvent(){
+				this.findall('#buttons div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			goIn(){
+				view.main.addChild(view.loginBox());
+				this.remove();
+			},
+			goSignin(){
+				
+			},
+			onadded(){
+				//close Event.
+				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.buttonEvent();
 			}
 		})
 	}

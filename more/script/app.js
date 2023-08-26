@@ -74,10 +74,12 @@ const app = {
 		}
 	],
 	init(){
-		
 		//view init.
 		view.init();
-	}
+	},
+	getInfoLogin(){
+		return false;
+	},
 }
 
 app.init();
