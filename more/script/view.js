@@ -179,7 +179,7 @@ const view = {
 				<div style="
 					display: flex;
 					justify-content: space-between;
-					height: 200px;
+					height: 100%;
 					display: flex;
 					align-items: center;
 				" id=ourmenu class=innerBox>
@@ -332,6 +332,13 @@ const view = {
 			this.find('#reactTo').hide();
 			this.find('#searchWare').hide();
 		},
+		newCerpen(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.cerpennew());
+			this.find('#stateLabel').innerHTML = 'Cerpen Baru';
+			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
+		},
 		openArticle(){
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.openArticle());
@@ -391,7 +398,8 @@ const view = {
 				background: white;
 				border-bottom: 1px solid whitesmoke;
 				align-items: center;
-				/* margin-right: 0;
+				position:sticky;
+				top:0;
 			`,
 			innerHTML:`
 				<div style="
@@ -401,6 +409,18 @@ const view = {
 						/* margin: 2%; */
 						background: white;
 				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					">
+						<img src=./more/media/deer-shape.png class=navimg>
+						Cerpen
+					</div>
 					<div style="
 						display: flex;
 						gap: 8px;
@@ -1216,11 +1236,13 @@ And i am ok with that.
 			`,
 			innerHTML:`
 			<div style="
-				background:white;
-				width:92%;
+				background: white;
+				width: 92%;
 				padding: 4%;
-				display:flex;
-				flex-direction:column;
+				display: flex;
+				flex-direction: column;
+				overflow: auto;
+				height: 100%;
 			">
 				<div style="
 					font-family:poppinsbold;
@@ -1237,17 +1259,33 @@ And i am ok with that.
 					" id=closethis>
 				</div>
 				<div class=newpostmenu>
-					<div id=newArticle>
+					<div id=newCerpen class=child>
+						<img src=./more/media/deer-shape.png>
+						<div>
+							<div>Cerpen</div>
+							<div style="font-family:poppinslight">Posting Cerita Pendek, Dan Bagikan Imaginasimu!</div>
+						</div>
+					</div>
+					<div id=newArticle class=child>
 						<img src=./more/media/papers.png>
-						Artikel
+						<div>
+							<div>Artikel</div>
+							<div style="font-family:poppinslight">Posting Artikel, Dan Bagikan Pemikiranmu!</div>
+						</div>
 					</div>
-					<div id=newJasa>
+					<div id=newJasa class=child>
 						<img src=./more/media/construction-worker.png>
-						Jasa
+						<div>
+							<div>Jasa</div>
+							<div style="font-family:poppinslight">Posting Jasa, Dan Temukan Klienmu!</div>
+						</div>
 					</div>
-					<div id=newLoker>
+					<div id=newLoker class=child>
 						<img src=./more/media/worker.png>
-						Loker
+						<div>
+							<div>Loker</div>
+							<div style="font-family:poppinslight">Posting Tugasmu, Dan Biarkan Mereka Yang Nyelesain!</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -1268,6 +1306,9 @@ And i am ok with that.
 			},
 			newArticle(){
 				view.content.newArticle();
+			},
+			newCerpen(){
+				view.content.newCerpen();
 			},
 			newJasa(){
 				view.content.newJasa();
@@ -1475,6 +1516,87 @@ And i am ok with that.
 				this.find('#closethis').onclick = ()=>{this.remove()}
 				this.buttonEvent();
 			}
+		})
+	},
+	cerpennew(){
+		return makeElement('div',{
+			style:`
+				margin:3%;
+				display:flex;
+				flex-direction:column;
+				height:94%;
+				gap:10px;
+			`,
+			innerHTML:`
+				<div style="
+					width: 100%;
+					justify-content: space-around;
+					display: flex;
+					background: whitesmoke;
+					border-radius: 20px;
+				"
+				id=newartilebuttons
+				>
+					<div style=width:100%;>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/upload.png
+							style="
+								width:14px;
+								height:14px;
+							"
+							>
+						Simpan</div>
+					</div>
+					<div style=width:100%;>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/save.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Terbitkan</div>
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Judul Cerpen
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Judul Cerpen Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+					</div>
+				</div>
+				<div style="
+					height:80%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:poppinsbold;
+					">
+						Isi Cerpen
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Isi Cerpen Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+					</div>
+				</div>
+			`,
+			
 		})
 	}
 }
