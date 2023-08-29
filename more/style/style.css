@@ -127,6 +127,10 @@ input,textarea{
 	border:border:1px solid rgb(232, 232, 232);
 }
 
+.bold{
+	font-family:PoppinsBold;
+}
+
 .lines{
 	width: 100%;
 	display: flex;

@@ -195,7 +195,7 @@ const view = {
 						<img src=./more/media/chat.png class=navimg>
 						Pesan
 					</div>
-					<div id=opneNotif>
+					<div id=openNotif>
 						<img src=./more/media/bell.png class=navimg>
 						Notif
 					</div>
@@ -380,6 +380,13 @@ const view = {
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.lokernew());
 			this.find('#stateLabel').innerHTML = 'Post Loker';
+			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
+		},
+		openNotif(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.notif());
+			this.find('#stateLabel').innerHTML = 'Notifmu';
 			this.find('#reactTo').hide();
 			this.find('#searchWare').hide();
 		}
@@ -1597,6 +1604,51 @@ And i am ok with that.
 				</div>
 			`,
 			
+		})
+	},
+	notif(){
+		return makeElement('div',{
+			style:`
+				width:96%;
+				height:96%;
+				gap:12px;
+				display:flex;
+				flex-direction:column;
+				padding:2%;
+				overflow:auto;
+				cursor:pointer;
+			`,
+			className:'NotifParent',
+			generateNotifList(NotifList){
+				NotifList.forEach((item,i)=>{
+					this.addChild(makeElement('div',{
+						style:`
+							width:96%;
+							display:flex;
+							gap:12px;
+							padding:2%;
+							align-items:center;
+							border-bottom:${i===NotifList.length-1?'':'1px solid whitesmoke'};
+						`,
+						innerHTML:`
+							<img src=./more/media/deer-shape.png style="
+								width:32px;
+								height:32px;
+							">
+							<div>
+								<div>${item.who}, ${item.when}</div>
+								<div class=bold>${item.what}</div>
+							</div>
+						`
+					}))
+				})
+			},
+			onadded(){
+				this.generateNotifList([
+					{who:'gemasajaa',when:'12 sep 2023',what:'Liking Your Boobs'},
+					{who:'someguy',when:'15 sep 2023',what:'Liking Your Photos'}
+				]);
+			}
 		})
 	}
 }
