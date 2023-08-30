@@ -837,7 +837,6 @@ const view = {
 					display:flex;
 					flex-direction:column;
 					padding-bottom:20px;
-					border-bottom:1px solid whitesmoke;
 				">
 					What is the different between sound and sounds like?
 
@@ -1366,15 +1365,15 @@ And i am ok with that.
 						gap:10px;
 					">
 						<div>
-							<div>Username</div>
+							<div>Email</div>
 							<div>
-								<input placeholder="Masukan Username" style=border-radius:0;>
+								<input placeholder="Masukan Email" style=border-radius:0; type=email>
 							</div>
 						</div>
 						<div>
 							<div>Password</div>
 							<div>
-								<input placeholder="Masukan Password" style=border-radius:0;>
+								<input placeholder="Masukan Password" style=border-radius:0; type=password>
 							</div>
 						</div>
 					</div>
@@ -1385,13 +1384,16 @@ And i am ok with that.
 						gap:10px;
 					" id=buttons>
 						<div style="
-							
+							width: 100%;
+							text-align: center;
 						" class=button id=goIn>
 							Masuk
 						</div>
 						<div style="
-							background:lightgray;
-							color:black;
+							background: lightgray;
+							color: black;
+							width: 100%;
+							text-align: center;
 						" class=button id=goSignin>
 							Daftar
 						</div>
@@ -1458,31 +1460,47 @@ And i am ok with that.
 						display:flex;
 						flex-direction:column;
 						gap:10px;
+					" id=form>
+						<div id=username>
+							<div>Username<span class=star>*</span></div>
+							<div>
+								<input type=text placeholder="Masukan Username" style=border-radius:0;>
+							</div>
+						</div>
+						<div id=emailuser>
+							<div>Email<span class=star>*</span></div>
+							<div>
+								<input type=email placeholder="Masukan Email" style=border-radius:0;>
+							</div>
+						</div>
+						<div id=userpassone>
+							<div>Password<span class=star>* <span class=sosmall>min 6 digits</span></span></div>
+							<div>
+								<input type=password placeholder="Masukan Password" style=border-radius:0; required>
+							</div>
+						</div>
+						<div id=userpasstwo>
+							<div>Ulagi Password<span class=star>* <span class=sosmall>min 6 digits</span></span></div>
+							<div>
+								<input type=password placeholder="Masukan Password" style=border-radius:0;>
+							</div>
+						</div>
+					</div>
+					<div id=loading style="
+						padding:20px;
+						display:none;
+						align-items:center;
+						justify-content:center;
 					">
-						<div>
-							<div>Username</div>
-							<div>
-								<input placeholder="Masukan Username" style=border-radius:0;>
-							</div>
-						</div>
-						<div>
-							<div>Email</div>
-							<div>
-								<input placeholder="Masukan Email" style=border-radius:0;>
-							</div>
-						</div>
-						<div>
-							<div>Password</div>
-							<div>
-								<input placeholder="Masukan Password" style=border-radius:0;>
-							</div>
-						</div>
-						<div>
-							<div>Ulagi Password</div>
-							<div>
-								<input placeholder="Masukan Password" style=border-radius:0;>
-							</div>
-						</div>
+						Menyimpan data anda, tunggu sebentar!
+					</div>
+					<div id=anounce style="
+						padding:20px;
+						display:none;
+						align-items:center;
+						justify-content:center;
+					">
+						Maaf, ada masalah saat proses penyimpanan data anda!
 					</div>
 					<div style="
 						padding:20px;
@@ -1490,14 +1508,17 @@ And i am ok with that.
 						justify-content:center;
 						gap:10px;
 					" id=buttons>
-						<div style="
-							
-						" class=button id=goSignin>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+						">
 							Buat Akun
 						</div>
 						<div style="
 							background:lightgray;
 							color:black;
+							width: 100%;
+							text-align: center;
 						" class=button id=goIn>
 							Masuk
 						</div>
@@ -1515,8 +1536,126 @@ And i am ok with that.
 				view.main.addChild(view.loginBox());
 				this.remove();
 			},
+			collectData(){
+				const datauser = {len:0};
+				this.findall('input').forEach(input=>{
+					if(input.value.length>0){
+						datauser[input.parentElement.parentElement.id] = {input,value:input.value};
+						datauser.len += 1;
+					}else{
+						input.showUp((el)=>{
+							el.style.borderColor = 'red';
+						},(el)=>{
+							el.style.borderColor = '#e0e0e0';
+						});
+					}
+				})
+				return datauser;
+			},
+			getComplete(validLen){
+				const data = this.collectData();
+				if(data.len===validLen)return data;
+				return false;
+			},
+			validate(data,rules){
+				let index = 0;
+				let result = [];
+				let back;
+				for(let i in data){
+					if(i==='len')continue;
+					result.push(rules[index](data[i],back));
+					back = data[i];
+					index += 1;
+				}
+				return result;
+			},
+			rulesSignIn(){
+				return [
+					(value,back)=>{
+						return true;
+					},
+					//email rules
+					(value,back)=>{
+						if(value.value.indexOf('@')===-1){
+							value.input.showUp((el)=>{
+								el.style.borderColor = 'red';
+							},(el)=>{
+								el.style.borderColor = '#e0e0e0';
+							});
+							forceRecheck(view.main,'Email Tidak Valid!');
+							return false;
+						}return true;
+					},
+					//password
+					(value,back)=>{
+						return true;
+					},
+					//password
+					(value,back)=>{
+						if(value.value !== back.value){
+							value.input.showUp((el)=>{
+								el.style.borderColor = 'red';
+							},(el)=>{
+								el.style.borderColor = '#e0e0e0';
+							});
+							back.input.showUp((el)=>{
+								el.style.borderColor = 'red';
+							},(el)=>{
+								el.style.borderColor = '#e0e0e0';
+							});
+							forceRecheck(view.main,'Password Tidak Sama!');
+							return false;
+						}else if(value.value.length < 6){
+							value.input.showUp((el)=>{
+								el.style.borderColor = 'red';
+							},(el)=>{
+								el.style.borderColor = '#e0e0e0';
+							});
+							back.input.showUp((el)=>{
+								el.style.borderColor = 'red';
+							},(el)=>{
+								el.style.borderColor = '#e0e0e0';
+							});
+							forceRecheck(view.main,'Password Minimum 6 Digit!');
+							return false;
+						}
+						return true;
+					}
+				]
+			},
 			goSignin(){
-				
+				const data = this.getComplete(4);
+				if(!data)return forceRecheck(view.main,'Lengkapi Data Terlebih Dahulu!');
+				//now validating the data.
+				const rst = this.validate(data,this.rulesSignIn());
+				if(!rst.includes(false))this.completeIt(data);
+			},
+			hideFormAndButtons(){
+				this.find('#form').hide();
+				this.find('#buttons').hide();
+			},
+			showTheAnounce(msg){
+				this.find('#loading').hide();
+				const anounce = this.find('#anounce');
+				anounce.innerText = msg;
+				anounce.show('flex');
+			},
+			completeIt(data){
+				this.submitData({
+					username:data.username.value,
+					password:data.userpassone.value,
+					email:data.emailuser.value,
+					uniqueId:getUniqueID(),
+					date:getFullDate(),
+					cleanEmail:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@'))
+				});
+			},
+			submitData(data){
+				this.hideFormAndButtons();
+				this.find('#loading').show('flex');
+				app.doglas.doglas.database().ref(`intree/${data.cleanEmail}`).update(data).then(()=>{
+					this.showTheAnounce('Data anda berhasil disimpan, mohon cek email anda dan lakukan verifikasi.');
+				});
 			},
 			onadded(){
 				//close Event.

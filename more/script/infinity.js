@@ -175,6 +175,12 @@ const toInject = {
 		},
 		setHTML(string){
 			this.innerHTML = string;
+		},
+		showUp(before,after,timeout=2000){
+			before(this);
+			setTimeout(()=>{
+				after(this);
+			},timeout)
 		}
 	}
 
@@ -393,8 +399,8 @@ const compareSet = function(src,c1,c2){
 		src = c1;
 	}
 }
-const forceRecheck = function(el,msg){
-	el.saveRemove('#frcel');
+const forceRecheck = function(el,msg,inf=false){
+	const allfrc = findall('#frcel');
 	el.addChild(makeElement('div',{
 		id:'frcel',
 		style:`
@@ -406,12 +412,15 @@ const forceRecheck = function(el,msg){
 			right:0;
 			margin:10px;
 			font-size:16px;
+			margin-top: ${50*allfrc.length+1}px;
 		`,
 		innerHTML:msg,
 		onadded(){
-			setTimeout(()=>{
-				this.remove()
-			},2000);
+			if(!inf){
+				setTimeout(()=>{
+					this.remove()
+				},2000);
+			}
 		}
 	}))
 }
@@ -429,4 +438,7 @@ const nonull = function(obj){
 		valid:nullkeys.length===0?true:false,
 		nullkeys
 	}
+}
+const getFullDate = function(){
+	return new Date().toLocaleDateString();
 }
