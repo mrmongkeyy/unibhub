@@ -24,6 +24,16 @@ const filterString = function(string,char,newchar){
 	}
 	return string;
 }
+const emptycheck = function(jsondata){
+	let valid = true;
+	for(let i in jsondata){
+		if(!jsondata[i] || jsondata[i].length===0){
+			valid = false;
+			break;
+		}
+	}
+	return valid;
+}
 const recheckvalue = function(el,time=1000){
 	const borderColorBefore = el.style.borderColor;
 	el.style.borderColor = 'red';

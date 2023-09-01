@@ -1,4 +1,5 @@
 const app = {
+	noProfilePng:'./more/media/user.png',
 	dataFiktif:[
 		{
 			title:'How to code a game using PYTHON!!!',
@@ -75,12 +76,14 @@ const app = {
 	],
 	init(){
 		this.doglas.init();
+		this.ls.init();
 		//view init.
 		view.init();
 		//flextoshowsa init.
 		if(!this.flextoshowsa.init())return this.err();
 	},
 	getInfoLogin(){
+		if(this.userData)return true;
 		return false;
 	},
 	flextoshowsa:{
@@ -103,11 +106,52 @@ const app = {
 		init(){
 			this.doglas.initializeApp(this.data);
 		},
-		doglas:firebase
+		doglas:firebase,
+		do(args){ //[db/orsomething,parentchild,child,get/orupdate,datapass].
+			return this.doglas[args[0]]().ref(`${args[1]}/${args[2]}`)[args[3]](args[4]);
+		}
 	},
 	err(){
 		view.main.clear();
 		forceRecheck(view.main,'Error, Youre OFF! Please Check Back Your Internet Connection!',true);
+	},
+	checkLogin(datauser,toRemove){
+		this.doglas.do(['database','users',`${datauser.cleanEmail}`,'get']).then((callbackData)=>{
+			const data = callbackData.val();
+			if(!data){
+				forceRecheck(view.main,'User Tidak Ditemukan! Periksa Kembali Email Anda!');	
+				return false;
+			}
+			const passed = this.checkPass(datauser,data);
+			if(!passed){
+				forceRecheck(view.main,'Kata Sandi Salah! Periksa Kembali.');
+				return false;
+			}
+			this.saveDataLogin(data);
+			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			toRemove.remove();
+		})
+	},
+	checkPass(datauser,data){
+		console.log(datauser,data);
+		if(datauser.userPass === data.password)return true;
+		return false;
+	},
+	saveDataLogin(datatosave){
+		this.ls.put(datatosave);
+		delete datatosave.password;
+		this.userData = datatosave;
+	},
+	ls:{
+		init(){
+			this.id = getUniqueID();
+		},
+		put(data){
+			localStorage.setItem(this.id,JSON.stringify(data));
+		},
+		get(){
+			return JSON.parse(localStorage.getItem(this.id));
+		}
 	}
 }
 

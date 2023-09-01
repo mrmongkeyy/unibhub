@@ -211,7 +211,7 @@ const view = {
 			this.findall('#ourmenu div').forEach(button=>{
 				button.onclick = ()=>{
 					view.content.saveRemove('#chooseType');
-					view.content[button.id]();
+					view.content[button.id]([],'loadartikel',true);
 				}
 			})
 		},
@@ -243,22 +243,6 @@ const view = {
 				height:48px;
 				padding-bottom:0;
 			">
-				<div id=backcontroll
-				style="
-					margin-left:28px;
-					font-weight:bold;
-					border-radius:50%;
-					padding:2px;
-					cursor:pointer;
-				"
-				>
-					<img src=./more/media/back.png
-					style="
-						width:16px;
-						height:16px;
-					"
-					>
-				</div>
 				<div id=stateLabel
 				style="
 					margin-left:28px;
@@ -312,15 +296,19 @@ const view = {
 		},
 		onadded(){
 			this.linesParent = this.find('#linesparent');
-			this.openArticle(app.dataFiktif);
+			//this.openArticle(app.dataFiktif);
+			this.displayList([],'loadartikel',true);
 		},
-		displayList(data){
-			if(!data)data=app.dataFiktif;
+		displayList(data,nav,boot){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.searchDiv());
+			this.find('#linesparent').addChild(view.searchDiv(nav,boot));
 			data.forEach((item,i)=>{
 				this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
 			})
+			//zerodata handler.
+			if(data.length===0){
+				this.find('#linesparent').addChild(view.nodata());
+			}
 			this.find('#stateLabel').innerHTML = 'Beranda';
 			this.find('#reactTo').hide();
 			this.find('#searchWare').show('flex');
@@ -339,14 +327,35 @@ const view = {
 			this.find('#reactTo').hide();
 			this.find('#searchWare').hide();
 		},
-		openArticle(){
+		openArticles(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.openArticle());
+			this.find('#linesparent').addChild(view.openArticles());
 			this.find('#stateLabel').innerHTML = 'Baca Artikel';
 			this.find('#reactTo').show('flex');
 			this.find('#searchWare').hide();
 		},
-		isInProfile(){
+		openShortStories(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.openShortStories());
+			this.find('#stateLabel').innerHTML = 'Baca Cerpen';
+			this.find('#reactTo').show('flex');
+			this.find('#searchWare').hide();
+		},
+		openJobs(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.openJobs());
+			this.find('#stateLabel').innerHTML = 'Info Loker';
+			this.find('#reactTo').show('flex');
+			this.find('#searchWare').hide();
+		},
+		openServices(){
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.openServices());
+			this.find('#stateLabel').innerHTML = 'Info Jasa';
+			this.find('#reactTo').show('flex');
+			this.find('#searchWare').hide();
+		},
+		InProfile(){
 			let result = false;
 			if(app.getInfoLogin()){
 				result = true;
@@ -367,6 +376,9 @@ const view = {
 			this.find('#searchWare').hide();
 		},
 		newPost(){
+			if(!app.userData){
+				return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+			}
 			this.addChild(view.newPost());
 		},
 		newJasa(){
@@ -394,8 +406,9 @@ const view = {
 	footer:makeElement('footer',{
 		
 	}),
-	searchDiv(){		
+	searchDiv(nav='loadartikel',boot=false){
 		return makeElement('div',{
+			nav,
 			style:`
 				width: 100%;
 				display: flex;
@@ -424,7 +437,9 @@ const view = {
 						width: 100%;
 						padding: 10px;
 						justify-content: center;
-					">
+					"
+					id=loadcerpen
+					>
 						<img src=./more/media/deer-shape.png class=navimg>
 						Cerpen
 					</div>
@@ -434,10 +449,11 @@ const view = {
 						cursor: pointer;
 						height: 100%;
 						width: 100%;
-						border-bottom: 1px solid black;
 						padding: 10px;
 						justify-content: center;
-					">
+					"
+					id=loadartikel
+					>
 						<img src=./more/media/papers.png class=navimg>
 						Artikel
 					</div>
@@ -448,7 +464,9 @@ const view = {
 						width: 100%;
 						justify-content: center;
 						padding: 10px;
-					">
+					"
+					id=loadloker
+					>
 						<img src=./more/media/worker.png class=navimg>
 						Loker
 					</div>
@@ -459,16 +477,63 @@ const view = {
 						width: 100%;
 						justify-content: center;
 						padding: 10px;
-					">
+					"
+					id=loadjasa
+					>
 						<img src=./more/media/construction-worker.png class=navimg>
 						Jasa
 					</div>
 				</div>
-			`
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.buttonSetup();
+				if(boot)this.loadartikel();
+			},
+			loadjasa(){
+				app.doglas.do(['database','post','Services','get','']).then(data=>{
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadjasa');
+				})
+			},
+			loadcerpen(){
+				app.doglas.do(['database','post','ShortStories','get','']).then(data=>{
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadcerpen');
+				})
+			},
+			loadartikel(){
+				app.doglas.do(['database','post','Articles','get','']).then(data=>{
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadartikel');
+				})
+			},
+			loadloker(){
+				app.doglas.do(['database','post','Jobs','get','']).then(data=>{
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadloker');
+				})
+			}
 		})
 	},
 	line(data,i,bt=true){
 		const Dot = (data.title.length>100)?'...':'';
+		if(!data.more){
+			data.more = {
+				share:[],
+				like:[],
+				comment:[],
+				view:[]
+			}
+		}
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
@@ -485,7 +550,7 @@ const view = {
 								<img class=profileimg src=${data.profilepicture}>
 							</div>
 							<div class=username>${data.username},</div>
-							<div class=date>${data.date}</div>
+							<div class=date>${data.time}</div>
 						</div>
 						<div class=vshareinfo>
 							<div>
@@ -500,6 +565,12 @@ const view = {
 					</div>
 				</div>
 			`,
+			onadded(){
+				this.find('.item').onclick = ()=>{
+					app.dataContent = data;
+					view.content[`open${data.type}`]();
+				}
+			},
 		})
 	},
 	articlenew(){
@@ -521,7 +592,7 @@ const view = {
 				"
 				id=newartilebuttons
 				>
-					<div style=width:100%;>
+					<div style=width:100%; id=saveToDraft class=thebutton>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -534,7 +605,7 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; id=publish class=thebutton>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -560,7 +631,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Judul Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+						<textarea id=title placeholder="Tulis Judul Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
 					</div>
 				</div>
 				<div style="
@@ -576,11 +647,52 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Konten Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+						<textarea id=description placeholder="Tulis Konten Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
 					</div>
 				</div>
 			`,
-			
+			collectData(){
+				const Data = {};
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"Articles",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
+					more:{
+						like:[],
+						share:[],
+						comments:[],
+						view:[]
+					}
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				console.log('called');
+				this.setupButton();
+			}
 		})
 	},
 	jasanew(){
@@ -604,7 +716,7 @@ const view = {
 				"
 				id=newartilebuttons
 				>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=addFiles>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -617,7 +729,7 @@ const view = {
 							>
 						Files</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=saveToDraft>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -630,7 +742,7 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=publish>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -672,7 +784,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Misal Jasa Buat Web Portofolio" style="height:100%;resize:none;border-radius:0;"></textarea>
+						<textarea placeholder="Misal Jasa Buat Web Portofolio" style="height:100%;resize:none;border-radius:0;" id=title></textarea>
 					</div>
 				</div>
 				<div style="
@@ -688,11 +800,52 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
 				</div>
 			`,
-			
+			collectData(){
+				const minFee = this.find('input').value;
+				const Data = {minFee};
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"Services",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
+					more:{
+						like:[],
+						share:[],
+						comments:[],
+						view:[]
+					}
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				this.setupButton();
+			}
 		})
 	},
 	lokernew(){
@@ -714,7 +867,7 @@ const view = {
 				"
 				id=newartilebuttons
 				>
-					<div style=width:100%;>
+					<div style=width:100%; class="thebutton" id=addFiles>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -727,7 +880,7 @@ const view = {
 							>
 						Files</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=saveToDraft>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -740,7 +893,7 @@ const view = {
 							>
 						Simpan</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=publish>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -782,7 +935,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Nama Pekerjaan Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+						<textarea placeholder="Tulis Nama Pekerjaan Disini..." style="height:100%;resize:none;border-radius:0;" id=title></textarea>
 					</div>
 				</div>
 				<div style="
@@ -798,19 +951,59 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
 				</div>
 			`,
-			
+			collectData(){
+				const maxFee = this.find('input').value;
+				const Data = {maxFee};
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"Jobs",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
+					more:{
+						like:[],
+						share:[],
+						comments:[],
+						view:[]
+					}
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				this.setupButton();
+			}
 		})
 	},
-	openArticle(articleId){
+	openArticles(){
+		const data = app.dataContent;
 		return makeElement('div',{
 			style:`
 				padding:0 3%;
-				display:flex;
-				flex-direction:column;
 				height:100%;
 				overflow:auto;
 			`,
@@ -824,32 +1017,27 @@ const view = {
 					<div>
 						<img class=profileimg src=./more/media/gemaprofile.png>
 					</div>
-					<div class=username>gemasajaa,</div>
-					<div class=date>17 Sep 2023</div>
+					<div class=username>${data.username},</div>
+					<div class=date>${data.time}</div>
 				</div>
 				<div style="
 					font-family:poppinsbold;
 					margin:10px 0;
-				">
-					Apa yang akan menjadi permasalahan selanjutnya? We gonna understand later! hahaha
-				</div>
+				">${data.title}</div>
 				<div style="
-					display:flex;
-					flex-direction:column;
+					height:50%;
 					padding-bottom:20px;
 				">
-					What is the different between sound and sounds like?
-
-This is what the problem is become, we have so many trouble in our life. And this is must be repaired to be normal because this is so important and i dont have any idea about this at a first place, and i hope that i will get it later.
-
-The next problem is something to understand isnt have any current solutions, this is a big trouble. And talking about it, it has so many mistake or error cause the mechanic isnt designed well enough to used in this system.
-
-So, how can i fix this problem? and what will happend if there's no solution founded since 2024? i dont think that i have that space or capable enough to understand and make decision for it right now.
-
-So many people say that i dont have big idea.
-
-
-And i am ok with that.
+					<textarea readonly
+					style="
+						height: 100%;
+				    border-radius: 0;
+				    padding: 0;
+				    border: 0;
+				    background: white;
+				    resize:none;
+					"
+					>${data.description}</textarea>
 				</div>
 				<div style="
 					 display: flex;
@@ -923,8 +1111,344 @@ And i am ok with that.
 			}
 		})
 	},
-	profilePage(userId){
-		
+	openServices(){
+		const data = app.dataContent;
+		return makeElement('div',{
+			style:`
+				padding:0 3%;
+				height:100%;
+				overflow:auto;
+			`,
+			innerHTML:`
+				<div style="
+					display:flex;
+					align-items:center;
+					gap:8px;
+					margin-top:10px;
+				">
+					<div>
+						<img class=profileimg src=./more/media/gemaprofile.png>
+					</div>
+					<div class=username>${data.username},</div>
+					<div class=date>${data.time}</div>
+				</div>
+				<div style="
+					font-family:poppinsbold;
+					margin:10px 0;
+				">${data.title}</div>
+				<div style="
+					height:50%;
+					padding-bottom:20px;
+				">
+					<textarea readonly
+					style="
+						height: 100%;
+				    border-radius: 0;
+				    padding: 0;
+				    border: 0;
+				    background: white;
+				    resize:none;
+					"
+					>${data.description}</textarea>
+				</div>
+				<div style="
+					 display: flex;
+					gap: 10px;
+					/* margin-top: 10px; */
+					justify-content: space-around;
+					margin-bottom: 10px;
+					/* border-bottom: 1px solid whitesmoke; */
+					/* border-radius: 10px;
+				">
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">Sukai Artikel</div>
+					</div>
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/share.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Bagikan</div>
+					</div>
+				</div>
+				<div id=commentsection style="
+					position:sticky;
+					top:0;
+					background:white;
+					padding-top:8px;
+				">
+					<div style="margin-bottom:8px;
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style="font-family:poppinsbold;">
+							Tinggalkan Komentar!
+						</div>
+						<div class=button style="
+							border-radius:20px;
+						">
+							Posting
+						</div>
+					</div>
+					<div style="
+						padding-bottom:10px;
+					">
+						<textarea style="
+							border-radius:0;
+							min-height:100px;
+							min-width:100%;
+							max-width:100%;
+						"></textarea>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.generateComment('randomid');
+			},
+			generateComment(articleId){
+				this.addChild(makeElement('div',{
+					onadded(){
+						this.addChild(view.comment(userData.content[articleId].more.comment));
+					}
+				}))
+			}
+		})
+	},
+	openJobs(){
+		const data = app.dataContent;
+		return makeElement('div',{
+			style:`
+				padding:0 3%;
+				height:100%;
+				overflow:auto;
+			`,
+			innerHTML:`
+				<div style="
+					display:flex;
+					align-items:center;
+					gap:8px;
+					margin-top:10px;
+				">
+					<div>
+						<img class=profileimg src=./more/media/gemaprofile.png>
+					</div>
+					<div class=username>${data.username},</div>
+					<div class=date>${data.time}</div>
+				</div>
+				<div style="
+					font-family:poppinsbold;
+					margin:10px 0;
+				">${data.title}</div>
+				<div style="
+					height:50%;
+					padding-bottom:20px;
+				">
+					<textarea readonly
+					style="
+						height: 100%;
+				    border-radius: 0;
+				    padding: 0;
+				    border: 0;
+				    background: white;
+				    resize:none;
+					"
+					>${data.description}</textarea>
+				</div>
+				<div style="
+					 display: flex;
+					gap: 10px;
+					/* margin-top: 10px; */
+					justify-content: space-around;
+					margin-bottom: 10px;
+					/* border-bottom: 1px solid whitesmoke; */
+					/* border-radius: 10px;
+				">
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">Sukai Artikel</div>
+					</div>
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/share.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Bagikan</div>
+					</div>
+				</div>
+				<div id=commentsection style="
+					position:sticky;
+					top:0;
+					background:white;
+					padding-top:8px;
+				">
+					<div style="margin-bottom:8px;
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style="font-family:poppinsbold;">
+							Tinggalkan Komentar!
+						</div>
+						<div class=button style="
+							border-radius:20px;
+						">
+							Posting
+						</div>
+					</div>
+					<div style="
+						padding-bottom:10px;
+					">
+						<textarea style="
+							border-radius:0;
+							min-height:100px;
+							min-width:100%;
+							max-width:100%;
+						"></textarea>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.generateComment('randomid');
+			},
+			generateComment(articleId){
+				this.addChild(makeElement('div',{
+					onadded(){
+						this.addChild(view.comment(userData.content[articleId].more.comment));
+					}
+				}))
+			}
+		})
+	},
+	openShortStories(){
+		const data = app.dataContent;
+		return makeElement('div',{
+			style:`
+				padding:0 3%;
+				height:100%;
+				overflow:auto;
+			`,
+			innerHTML:`
+				<div style="
+					display:flex;
+					align-items:center;
+					gap:8px;
+					margin-top:10px;
+				">
+					<div>
+						<img class=profileimg src=./more/media/gemaprofile.png>
+					</div>
+					<div class=username>${data.username},</div>
+					<div class=date>${data.time}</div>
+				</div>
+				<div style="
+					font-family:poppinsbold;
+					margin:10px 0;
+				">${data.title}</div>
+				<div style="
+					height:50%;
+					padding-bottom:20px;
+				">
+					<textarea readonly
+					style="
+						height: 100%;
+				    border-radius: 0;
+				    padding: 0;
+				    border: 0;
+				    background: white;
+				    resize:none;
+					"
+					>${data.description}</textarea>
+				</div>
+				<div style="
+					 display: flex;
+					gap: 10px;
+					/* margin-top: 10px; */
+					justify-content: space-around;
+					margin-bottom: 10px;
+					/* border-bottom: 1px solid whitesmoke; */
+					/* border-radius: 10px;
+				">
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">Sukai Artikel</div>
+					</div>
+					<div style="width:100%;">
+						<div class="button buttonstyled" style="
+							display:flex;justify-content:center;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/share.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Bagikan</div>
+					</div>
+				</div>
+				<div id=commentsection style="
+					position:sticky;
+					top:0;
+					background:white;
+					padding-top:8px;
+				">
+					<div style="margin-bottom:8px;
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style="font-family:poppinsbold;">
+							Tinggalkan Komentar!
+						</div>
+						<div class=button style="
+							border-radius:20px;
+						">
+							Posting
+						</div>
+					</div>
+					<div style="
+						padding-bottom:10px;
+					">
+						<textarea style="
+							border-radius:0;
+							min-height:100px;
+							min-width:100%;
+							max-width:100%;
+						"></textarea>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.generateComment('randomid');
+			},
+			generateComment(articleId){
+				this.addChild(makeElement('div',{
+					onadded(){
+						this.addChild(view.comment(userData.content[articleId].more.comment));
+					}
+				}))
+			}
+		})
+	},
+	profilePage(){
+		Object.assign(userData,app.userData);
 		return makeElement('div',{
 			style:`
 				border-radius:0 0 20px 20px;
@@ -1297,7 +1821,7 @@ And i am ok with that.
 			</div>
 			`,
 			buttonEvent(){
-				this.findall('.newpostmenu div').forEach(button=>{
+				this.findall('.newpostmenu .child').forEach(button=>{
 					button.onclick = ()=>{
 						this[button.id]();
 						this.find('#closethis').click();
@@ -1367,13 +1891,13 @@ And i am ok with that.
 						<div>
 							<div>Email</div>
 							<div>
-								<input placeholder="Masukan Email" style=border-radius:0; type=email>
+								<input placeholder="Masukan Email" style=border-radius:0; type=email id=userEmail>
 							</div>
 						</div>
 						<div>
 							<div>Password</div>
 							<div>
-								<input placeholder="Masukan Password" style=border-radius:0; type=password>
+								<input placeholder="Masukan Password" style=border-radius:0; type=password id=userPass>
 							</div>
 						</div>
 					</div>
@@ -1407,8 +1931,20 @@ And i am ok with that.
 					}
 				})
 			},
+			collectData(){
+				const data = {};
+				this.findall('input').forEach(input=>{
+					data[input.id] = input.value;
+				})
+				if(data.userEmail){
+					data.cleanEmail = data.userEmail.slice(0,data.userEmail.indexOf('@'));
+				}
+				return data;
+			},
 			goIn(){
-				
+				//time to check user login data.
+				const userPData = this.collectData();
+				app.checkLogin(userPData,this);
 			},
 			goSignin(){
 				view.main.addChild(view.siginBox());
@@ -1653,8 +2189,9 @@ And i am ok with that.
 			submitData(data){
 				this.hideFormAndButtons();
 				this.find('#loading').show('flex');
-				app.doglas.doglas.database().ref(`intree/${data.cleanEmail}`).update(data).then(()=>{
-					this.showTheAnounce('Data anda berhasil disimpan, mohon cek email anda dan lakukan verifikasi.');
+				app.doglas.do(['database','users',data.cleanEmail,'update',data]).then(()=>{
+					this.showTheAnounce('Pendaftaran Berhasil! Silahkan Lakukan Login.');
+					setTimeout(()=>{this.goIn()},1000);
 				});
 			},
 			onadded(){
@@ -1683,7 +2220,7 @@ And i am ok with that.
 				"
 				id=newartilebuttons
 				>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=publish>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -1696,7 +2233,7 @@ And i am ok with that.
 							>
 						Simpan</div>
 					</div>
-					<div style=width:100%;>
+					<div style=width:100%; class=thebutton id=publish>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
@@ -1722,7 +2259,7 @@ And i am ok with that.
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Judul Cerpen Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+						<textarea id=title placeholder="Tulis Judul Cerpen Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
 					</div>
 				</div>
 				<div style="
@@ -1738,11 +2275,46 @@ And i am ok with that.
 					<div style="
 						height:100%;
 					">
-						<textarea placeholder="Tulis Isi Cerpen Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+						<textarea id=description placeholder="Tulis Isi Cerpen Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
 					</div>
 				</div>
 			`,
-			
+			collectData(){
+				const Data = {};
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"ShortStories",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				console.log('called');
+				this.setupButton();
+			}
 		})
 	},
 	notif(){
@@ -1788,6 +2360,89 @@ And i am ok with that.
 					{who:'someguy',when:'15 sep 2023',what:'Liking Your Photos'}
 				]);
 			}
+		})
+	},
+	loadingPost(datatoupload){
+		return makeElement('div',{
+			datatoupload,
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Proses Uploading
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					">
+						<div id=text>
+							Mohon Tunggu Sebentar, Sedang Mengupload Data.
+						</div>
+					</div>
+				</div>
+			`,
+			handleResponse(x){
+				console.log(x);
+				if(!x){
+					this.text.innerHTML = 'Data Berhasil Diupload';
+					view.content.newPost();
+				}else{
+					this.text.innerHTML = 'Terjadi Masalah Saat Mengupload, coba lagi nanti.';
+					this.remove();
+				}
+			},
+			DoRequest(){
+				app.doglas.do(['database','post',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]).then((x)=>{
+					this.handleResponse(x);
+				})
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.text = this.find('#text');
+				this.DoRequest();
+			}
+		})
+	},
+	nodata(){
+		return makeElement('div',{
+			innerHTML:`
+				Belum Ada Data Terbaru.
+			`,
+			style:`
+				width:100%;
+				height:200px;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+			`
 		})
 	}
 }
