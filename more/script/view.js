@@ -3500,7 +3500,7 @@ const view = {
 									border-radius:20px;display:flex;
 									align-items:center;gap:5px;
 									justify-content:center;
-								" id=chat>
+								" id=reject>
 									<img src=./more/media/rejection.png
 										style="
 											width:16px;
@@ -3512,8 +3512,20 @@ const view = {
 					</div>
 				</div>
 			`,
+			buttonsEvent(){
+				this.findall('.button').forEach(button=>{
+					button.onclick = ()=>{this[button.id]()};
+				})
+			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.buttonsEvent();
+			},
+			hire(){
+				console.log('To Hire ',data);
+			},
+			reject(){
+				console.log('To reject ',data);
 			}
 		})
 	}
