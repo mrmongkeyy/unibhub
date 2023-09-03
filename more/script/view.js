@@ -1,4 +1,4 @@
-const userData = {
+const userDatas = {
 	username:'gemasajaa',
 	name:'Rahmat Agem Pratama',
 	bio:'Coding is more than writing a code, its the art of invention.',
@@ -245,7 +245,7 @@ const view = {
 			">
 				<div id=stateLabel
 				style="
-					margin-left:28px;
+					margin-left:3%;
 					font-weight:bold;
 					width:100%;
 				"
@@ -275,7 +275,7 @@ const view = {
 							border-radius:20px;display:flex;
 							align-items:center;gap:5px;background:none;
 							font-size:12px;
-						" id=view>10 Dilihat</div>
+						" id=view>10 Kali Dibaca</div>
 					</div>
 					
 				</div>
@@ -355,7 +355,7 @@ const view = {
 			this.find('#reactTo').show('flex');
 			this.find('#searchWare').hide();
 		},
-		InProfile(){
+		isInProfile(){
 			let result = false;
 			if(app.getInfoLogin()){
 				result = true;
@@ -401,6 +401,14 @@ const view = {
 			this.find('#stateLabel').innerHTML = 'Notifmu';
 			this.find('#reactTo').hide();
 			this.find('#searchWare').hide();
+		},
+		openInbox(){
+			//if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			this.clearLinesParent();
+			this.find('#linesparent').addChild(view.inbox());
+			this.find('#stateLabel').innerHTML = 'Inbox';
+			this.find('#reactTo').hide();
+			this.find('#searchWare').hide();
 		}
 	}),
 	footer:makeElement('footer',{
@@ -425,7 +433,7 @@ const view = {
 				<div style="
 					  width: 100%;
 						display: flex;
-						justify-content: space-around;
+						justify-content: flex-start;
 						/* margin: 2%; */
 						background: white;
 				" id=berandadivmenu>
@@ -468,7 +476,7 @@ const view = {
 					id=loadloker
 					>
 						<img src=./more/media/worker.png class=navimg>
-						Loker
+						Project
 					</div>
 					<div style="
 						display: flex;
@@ -495,6 +503,7 @@ const view = {
 			onadded(){
 				//set the nav.
 				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot)this.loadartikel();
 			},
@@ -542,6 +551,9 @@ const view = {
 						<div>#${i}</div>
 					</div>
 					<div class=moreinfo>
+						<div id=fee>
+							${data.type==='Jobs'?'Maks':'Min'} Bid Rp. ${getPrice(data.maxFee||data.minFee)}
+						</div>
 						<div class=title>
 							${data.title.slice(0,100) + Dot}
 						</div>
@@ -554,18 +566,16 @@ const view = {
 						</div>
 						<div class=vshareinfo>
 							<div>
-								<img class=profileimg src=./more/media/eye.png>
-								<span>${data.more.view.length}</span>
-							</div>
-							<div>
-								<img class=profileimg src=./more/media/share.png>
-								<span>${data.more.share.length}</span>
+								<span>${data.more.view.length} Kali Dibaca.</span>
 							</div>
 						</div>
 					</div>
 				</div>
 			`,
 			onadded(){
+				if(data.maxFee||data.minFee){
+					this.find('.vshareinfo').remove();
+				}else this.find('#fee').remove();
 				this.find('.item').onclick = ()=>{
 					app.dataContent = data;
 					view.content[`open${data.type}`]();
@@ -1006,6 +1016,10 @@ const view = {
 				padding:0 3%;
 				height:100%;
 				overflow:auto;
+				display:flex;
+				flex-direction:column;
+				position:relative;
+				overflow:hidden;
 			`,
 			innerHTML:`
 				<div style="
@@ -1021,13 +1035,12 @@ const view = {
 					<div class=date>${data.time}</div>
 				</div>
 				<div style="
-					font-family:poppinsbold;
-					margin:10px 0;
-				">${data.title}</div>
-				<div style="
-					height:50%;
-					padding-bottom:20px;
+					height:100%;
 				">
+					<div style="
+						font-family:poppinsbold;
+						margin:10px 0;
+					">${data.title}</div>
 					<textarea readonly
 					style="
 						height: 100%;
@@ -1036,71 +1049,40 @@ const view = {
 				    border: 0;
 				    background: white;
 				    resize:none;
+						font-size:20px;
+						padding-bottom:100px;
 					"
 					>${data.description}</textarea>
 				</div>
 				<div style="
-					 display: flex;
-					gap: 10px;
-					/* margin-top: 10px; */
-					justify-content: space-around;
-					margin-bottom: 10px;
-					/* border-bottom: 1px solid whitesmoke; */
-					/* border-radius: 10px;
-				">
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">Sukai Artikel</div>
-					</div>
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/share.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Bagikan</div>
-					</div>
-				</div>
-				<div id=commentsection style="
 					position:sticky;
-					top:0;
-					background:white;
-					padding-top:8px;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
 				">
-					<div style="margin-bottom:8px;
-						display:flex;
-						justify-content:space-between;
-						align-items:center;
-					">
-						<div style="font-family:poppinsbold;">
-							Tinggalkan Komentar!
-						</div>
-						<div class=button style="
-							border-radius:20px;
-						">
-							Posting
-						</div>
-					</div>
 					<div style="
+						padding:20px;
 						padding-bottom:10px;
+						background:black;
+						color:white;
+						border:1px solid black;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
 					">
-						<textarea style="
-							border-radius:0;
-							min-height:100px;
-							min-width:100%;
-							max-width:100%;
-						"></textarea>
+						Lihat Komentar
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.generateComment('randomid');
+				//this.generateComment('randomid');
 			},
 			generateComment(articleId){
 				this.addChild(makeElement('div',{
@@ -1117,14 +1099,14 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
+				overflow:hidden;
 			`,
 			innerHTML:`
 				<div style="
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin-top:10px;
+					margin:10px 0;
 				">
 					<div>
 						<img class=profileimg src=./more/media/gemaprofile.png>
@@ -1132,14 +1114,14 @@ const view = {
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
 				</div>
+				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
-					font-family:poppinsbold;
-					margin:10px 0;
-				">${data.title}</div>
-				<div style="
-					height:50%;
-					padding-bottom:20px;
+					height:100%;
 				">
+					<div style="
+						font-family:poppinsbold;
+						margin:10px 0;
+					">${data.title}</div>
 					<textarea readonly
 					style="
 						height: 100%;
@@ -1148,78 +1130,46 @@ const view = {
 				    border: 0;
 				    background: white;
 				    resize:none;
+						font-size:20px;
+						padding-bottom:100px;
 					"
 					>${data.description}</textarea>
 				</div>
 				<div style="
-					 display: flex;
-					gap: 10px;
-					/* margin-top: 10px; */
-					justify-content: space-around;
-					margin-bottom: 10px;
-					/* border-bottom: 1px solid whitesmoke; */
-					/* border-radius: 10px;
+					position:absolute;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
 				">
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">Sukai Artikel</div>
-					</div>
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/share.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Bagikan</div>
-					</div>
-				</div>
-				<div id=commentsection style="
-					position:sticky;
-					top:0;
-					background:white;
-					padding-top:8px;
-				">
-					<div style="margin-bottom:8px;
-						display:flex;
-						justify-content:space-between;
-						align-items:center;
-					">
-						<div style="font-family:poppinsbold;">
-							Tinggalkan Komentar!
-						</div>
-						<div class=button style="
-							border-radius:20px;
-						">
-							Posting
-						</div>
-					</div>
 					<div style="
+						padding:20px;
 						padding-bottom:10px;
-					">
-						<textarea style="
-							border-radius:0;
-							min-height:100px;
-							min-width:100%;
-							max-width:100%;
-						"></textarea>
+						background:black;
+						color:white;
+						border:1px solid black;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=dooffers>
+						Buat Penawaran
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.generateComment('randomid');
+				this.find('#dooffers').onclick = ()=>{
+					this.doOffers();
+				}
 			},
-			generateComment(articleId){
-				this.addChild(makeElement('div',{
-					onadded(){
-						this.addChild(view.comment(userData.content[articleId].more.comment));
-					}
-				}))
+			doOffers(){
+				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postid}));
 			}
 		})
 	},
@@ -1229,14 +1179,14 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
+				overflow:hidden;
 			`,
 			innerHTML:`
 				<div style="
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin-top:10px;
+					margin:10px 0;
 				">
 					<div>
 						<img class=profileimg src=./more/media/gemaprofile.png>
@@ -1244,14 +1194,14 @@ const view = {
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
 				</div>
+				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
-					font-family:poppinsbold;
-					margin:10px 0;
-				">${data.title}</div>
-				<div style="
-					height:50%;
-					padding-bottom:20px;
+					height:100%;
 				">
+					<div style="
+						font-family:poppinsbold;
+						margin:10px 0;
+					">${data.title}</div>
 					<textarea readonly
 					style="
 						height: 100%;
@@ -1260,78 +1210,46 @@ const view = {
 				    border: 0;
 				    background: white;
 				    resize:none;
+						font-size:20px;
+						padding-bottom:100px;
 					"
 					>${data.description}</textarea>
 				</div>
 				<div style="
-					 display: flex;
-					gap: 10px;
-					/* margin-top: 10px; */
-					justify-content: space-around;
-					margin-bottom: 10px;
-					/* border-bottom: 1px solid whitesmoke; */
-					/* border-radius: 10px;
+					position:absolute;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
 				">
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">Sukai Artikel</div>
-					</div>
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/share.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Bagikan</div>
-					</div>
-				</div>
-				<div id=commentsection style="
-					position:sticky;
-					top:0;
-					background:white;
-					padding-top:8px;
-				">
-					<div style="margin-bottom:8px;
-						display:flex;
-						justify-content:space-between;
-						align-items:center;
-					">
-						<div style="font-family:poppinsbold;">
-							Tinggalkan Komentar!
-						</div>
-						<div class=button style="
-							border-radius:20px;
-						">
-							Posting
-						</div>
-					</div>
 					<div style="
+						padding:20px;
 						padding-bottom:10px;
-					">
-						<textarea style="
-							border-radius:0;
-							min-height:100px;
-							min-width:100%;
-							max-width:100%;
-						"></textarea>
+						background:black;
+						color:white;
+						border:1px solid black;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=dooffers>
+						Buat Penawaran
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.generateComment('randomid');
+				this.find('#dooffers').onclick = ()=>{
+					this.doOffers();
+				}
 			},
-			generateComment(articleId){
-				this.addChild(makeElement('div',{
-					onadded(){
-						this.addChild(view.comment(userData.content[articleId].more.comment));
-					}
-				}))
+			doOffers(){
+				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
 			}
 		})
 	},
@@ -1341,7 +1259,7 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
+				overflow:hidden;
 			`,
 			innerHTML:`
 				<div style="
@@ -1357,13 +1275,12 @@ const view = {
 					<div class=date>${data.time}</div>
 				</div>
 				<div style="
-					font-family:poppinsbold;
-					margin:10px 0;
-				">${data.title}</div>
-				<div style="
-					height:50%;
-					padding-bottom:20px;
+					height:100%;
 				">
+					<div style="
+						font-family:poppinsbold;
+						margin:10px 0;
+					">${data.title}</div>
 					<textarea readonly
 					style="
 						height: 100%;
@@ -1372,71 +1289,40 @@ const view = {
 				    border: 0;
 				    background: white;
 				    resize:none;
+						font-size:20px;
+						padding-bottom:100px;
 					"
 					>${data.description}</textarea>
 				</div>
 				<div style="
-					 display: flex;
-					gap: 10px;
-					/* margin-top: 10px; */
-					justify-content: space-around;
-					margin-bottom: 10px;
-					/* border-bottom: 1px solid whitesmoke; */
-					/* border-radius: 10px;
+					position:absolute;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
 				">
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">Sukai Artikel</div>
-					</div>
-					<div style="width:100%;">
-						<div class="button buttonstyled" style="
-							display:flex;justify-content:center;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/share.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Bagikan</div>
-					</div>
-				</div>
-				<div id=commentsection style="
-					position:sticky;
-					top:0;
-					background:white;
-					padding-top:8px;
-				">
-					<div style="margin-bottom:8px;
-						display:flex;
-						justify-content:space-between;
-						align-items:center;
-					">
-						<div style="font-family:poppinsbold;">
-							Tinggalkan Komentar!
-						</div>
-						<div class=button style="
-							border-radius:20px;
-						">
-							Posting
-						</div>
-					</div>
 					<div style="
+						padding:20px;
 						padding-bottom:10px;
+						background:black;
+						color:white;
+						border:1px solid black;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
 					">
-						<textarea style="
-							border-radius:0;
-							min-height:100px;
-							min-width:100%;
-							max-width:100%;
-						"></textarea>
+						Lihat Komentar
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.generateComment('randomid');
+				//this.generateComment('randomid');
 			},
 			generateComment(articleId){
 				this.addChild(makeElement('div',{
@@ -1448,7 +1334,14 @@ const view = {
 		})
 	},
 	profilePage(){
-		Object.assign(userData,app.userData);
+		const userData = app.userData;
+		if(!userData.peoples){
+			userData.peoples = {
+				followers:[],
+				following:[],
+				projects:[]
+			}
+		}
 		return makeElement('div',{
 			style:`
 				border-radius:0 0 20px 20px;
@@ -1459,7 +1352,31 @@ const view = {
 					height:150px;
 					width:100%;
 					background:lightblue;
+					position:relative;
 				">
+					<img id=bannerimg style="
+						width:100%;
+						height:150px;
+						object-fit:cover;
+					" src="${userData.bannerpic}">
+					<div style="
+						position: absolute;
+						top: 0;
+						right: 0;
+						padding: 10px;
+						background: white;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						border-radius: 0 0 0 20px;
+						border: 2px solid whitesmoke;
+						cursor:pointer;
+					" id=editbanner>
+						<img src=./more/media/edit.png style="
+							width:24px;
+							height:24px;
+						">
+					</div>
 				</div>
 				<div id=topFront
 				style="
@@ -1480,15 +1397,32 @@ const view = {
 						border-radius:50%;
 						width:128px;
 						height:128px;
+						position:relative;
 					">
-						<img src=${userData.profile}
+						<img src=${userData.profilepicture||app.noProfilePng}
 						style="
 							width:128px;
 							height:128px;
 							object-fit:cover;
 							border-radius:50%;
 						"
+						id=profilepicture
 						>
+						<div style="
+							position: absolute;
+							bottom: 0;
+							right: 0;
+							padding: 10px;
+							background: white;
+							border: 2px solid whitesmoke;
+							border-radius: 50%;
+							cursor: pointer;
+						" id=editPicture>
+							<img src=./more/media/edit.png style="
+								width:24px;
+								height:24px;
+							">
+						</div>
 					</div>
 					<div style="
 						padding:8px;
@@ -1498,7 +1432,7 @@ const view = {
 						display:flex;
 						gap:5px;
 						cursor:pointer;
-					">
+					" id=editProfile>
 						<img src=./more/media/edit.png
 						style="
 							width:24px;
@@ -1525,22 +1459,22 @@ const view = {
 						"><span>@${userData.username}</span></div>
 						<div style="
 							color:gray;
-						"><span>${userData.name}</span></div>
+						"><span>${userData.name||'-'}</span></div>
 						<div style="
 							color:gray;
-						"><span>${userData.bio}</span></div>
+						"><span>${userData.bio||'-'}</span></div>
 						<div style="
 							display: flex;
 							gap: 10px;
 						">
 							<div>
-								<div>${userData.peoples.follower.length} followers</div>
+								<div>${userData.peoples.followers.length} followers</div>
 							</div>
 							<div>
 								<div>${userData.peoples.following.length} following</div>
 							</div>
 							<div>
-								<div>${userData.peoples.following.length} Projects</div>
+								<div>${userData.peoples.projects.length} Projects</div>
 							</div>
 						</div>
 					</div>
@@ -1567,8 +1501,8 @@ const view = {
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							" id=view>
-								<img src=./more/media/chat.png
+							" id=hire>
+								<img src=./more/media/hired.png
 									style="
 										width:16px;
 										height:16px;
@@ -1579,7 +1513,7 @@ const view = {
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							" id=view>
+							" id=chat>
 								<img src=./more/media/chat.png
 									style="
 										width:16px;
@@ -1591,7 +1525,13 @@ const view = {
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							">FOLLOW</div>
+							" id=follow>
+								<img src=./more/media/follow.png
+								style="
+									width:16px;
+									height:16px;
+								"
+								>FOLLOW</div>
 						</div>
 					</div>
 				</div>
@@ -1660,17 +1600,27 @@ const view = {
 			`,
 			onadded(){
 				this.generateMore();
-				this.generateContent();
+				//this.generateContent();
+				
+				//setup edit profile.
+				this.find('#editProfile').onclick = ()=>{
+					this.edit();
+				}
+				this.find('#editPicture').onclick = ()=>{
+					this.editPicture();
+				}
+				this.find('#editbanner').onclick = ()=>{
+					this.editbanner();
+				}
 			},
 			generateMore(){
-				for(let i in userData.moreInfo){
+				for(let i in userData.more){
 					this.find('#info').addChild(makeElement('div',{
 						style:`
 							margin-top: 10px;
 							border-top: 1px solid whitesmoke;
 							padding-top: 2px;
 						`,
-						infodata:userData.moreInfo[i],
 						innerHTML:`
 							<div>${i}</div>
 							<div id=infodata
@@ -1679,21 +1629,17 @@ const view = {
 								gap:8px;
 								overflow:auto;
 							"
-							></div>
-						`,
-						onadded(){
-							this.infodata.forEach(data=>{
-								this.find('#infodata').addChild(makeElement('div',{
-									style:`
-										padding:2px 5px;
-										background:whitesmoke;
-										border-radius:20px;
-										white-space: nowrap;
-									`,
-									innerHTML:data
-								}))
-							});
-						}
+							>
+								<div style="
+									padding:2px 5px;
+									background:whitesmoke;
+									border-radius:20px;
+									white-space: nowrap;
+								">
+									${userData.more[i]}
+								</div>
+							</div>
+						`
 					}))
 				}
 			},
@@ -1706,6 +1652,15 @@ const view = {
 						})
 					}
 				}))
+			},
+			edit(){
+				view.main.addChild(view.editPop());
+			},
+			editbanner(){
+				view.main.addChild(view.editBanner(this));
+			},
+			editPicture(){
+				view.main.addChild(view.editPic(this));
 			}
 		})
 	},
@@ -1861,7 +1816,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					border-radius:0 0 20px 20px;
 					background:white;
 				" class=innerBox>
 					<div style="
@@ -1970,7 +1924,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					border-radius:0 0 20px 20px;
 					background:white;
 				" class=innerBox>
 					<div style="
@@ -2431,6 +2384,173 @@ const view = {
 			}
 		})
 	},
+	editPop(){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					height:70%;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Edit Profil
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:flex-start;
+						gap:10px;
+						overflow:auto;
+						flex-direction:column;
+						height:100%;
+					" id=datasparent>
+						<div>
+							<div>Username</div>
+							<div>
+								<input value=${app.userData.username} readonly id=username>
+							</div>
+						</div>
+						<div>
+							<div>Nama</div>
+							<div>
+								<input placeholder="Masukan Nama Anda" id=name value="${app.userData.name||''}">
+							</div>
+						</div>
+						<div>
+							<div>Bio</div>
+							<div>
+								<input placeholder="Masukan Bio" id=bio value="${app.userData.bio||''}">
+							</div>
+						</div>
+						<div style="
+							margin-top:10px;
+							display:flex;
+							flex-direction:column;
+							gap:8px;
+							align-items:center;
+						">
+							<div>Info Tambahan</div>
+							<div style="
+								cursor:pointer;
+								border:1px solid black;
+								padding:10px;
+								border-radius:50%;
+							" id=moreinfobutton>
+								<img src=./more/media/plus.png style="
+									width:24px;
+									height:24px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=save>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Simpan
+						</div>
+					</div>
+				</div>
+			`,
+			handleResponse(x,data){
+				if(!x){
+					forceRecheck(view.main,'Berhasil Mengedit Profil');
+					Object.assign(app.userData,data);
+					view.content.openProfile();
+					this.remove();
+				}
+			},
+			generateMore(){
+				for(let i in app.userData.more){
+					this.find('#datasparent').addBefore(makeElement('div',{
+						innerHTML:`
+							<div>
+								<div>${i}</div>
+								<div>
+									<input placeholder="Masukan Nama Anda" id="${i}" value="${app.userData.more[i]}">
+								</div>
+							</div>
+						`
+					}),this.find('#datasparent').children[this.find('#datasparent').children.length-1]);
+				}
+			},
+			DoRequest(data){
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}`,'update',data]).then((x)=>{
+					this.handleResponse(x,data);
+				})
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.find('#save').onclick = ()=>{this.save()};
+				//this.text = this.find('#text');
+				//this.DoRequest();
+				this.moreInfo();
+				this.generateMore();
+			},
+			collectData(){
+				const userData = {more:{}};
+				this.findall('input').forEach((input,i)=>{
+					if(input.value.length>0){
+						if(i>2){
+							userData.more[input.id] = input.value;
+						}else userData[input.id] = input.value;
+					}
+				})
+				return userData;
+			},
+			save(){
+				this.DoRequest(this.collectData());
+			},
+			moreInfo(){
+				this.find('#moreinfobutton').onclick = ()=>{
+					view.main.addChild(view.moreinfoadd(this));
+				}
+			},
+			add(data){
+				this.find('#datasparent').addBefore(makeElement('div',{
+					innerHTML:`
+						<div>${data.iddata}</div>
+						<div>
+							<input placeholder="Masukan ${data.iddata}" id="${data.iddata}" value="${data.valuedata}">
+						</div>
+					`,
+				}),this.find('#datasparent').children[this.find('#datasparent').children.length-1]);
+				this.find('#moreinfobutton').scrollIntoView();
+			}
+		})
+	},
 	nodata(){
 		return makeElement('div',{
 			innerHTML:`
@@ -2443,6 +2563,651 @@ const view = {
 				align-items:center;
 				justify-content:center;
 			`
+		})
+	},
+	moreinfoadd(goal){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				top:0;
+				left:0;
+				width:100%;
+				height:100%;
+				display:flex;
+				justify-content:center;
+				align-items:flex-start;
+				background:rgba(0, 0, 0, 0.25);
+			`,
+			innerHTML:`
+				<div class=innerBox style="
+					background:white;
+				">
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Data Tambahan
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="padding:10px 20px;">
+						<div>Nama Data</div>
+						<div>
+							<input placeholder="Masukan Nama Data" id=iddata>
+						</div>
+					</div>
+					<div style="padding:10px 20px;">
+						<div>Isi Data</div>
+						<div>
+							<input placeholder="Masukan Isi Data" id=valuedata>
+						</div>
+					</div>
+					<div style="
+						padding:10px 20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=thebutton>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Tambah Data
+						</div>
+					</div>
+				</div>
+			`,
+			collectData(){
+				const moreData = {};
+				this.findall('input').forEach((input)=>{
+					moreData[input.id] = input.value;
+				})
+				return moreData;
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.find('#thebutton').onclick = ()=>{
+					goal.add(this.collectData());
+					this.remove();
+				}
+			}
+		})
+	},
+	editPic(profilePage){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Edit Foto Profil
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:flex-start;
+						gap:10px;
+						overflow:auto;
+						flex-direction:column;
+					" id=datasparent>
+						<div>
+							<div>Pilih Foto</div>
+							<div>
+								<input id=fileimg type=file accept=image/*>
+							</div>
+						</div>
+						<div>
+							<div>Preview</div>
+							<div
+							style="
+								display: flex;
+								justify-content: center;
+								background: whitesmoke;
+								padding: 20px 0;
+								border: 1px solid #e0e0e0;
+							"
+							>
+								<div style="
+									padding:8px;
+									background:white;
+									border-radius:50%;
+									width:128px;
+									height:128px;
+								">
+									<img id=preview src=${app.userData.profilepicture||app.noProfilePng}
+									style="
+										width:128px;
+										height:128px;
+										object-fit:cover;
+										border-radius:50%;
+									"
+									>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id=upnotice style="
+						padding:20px;
+						text-align:center;
+						display:none;
+					">
+						Mohon Tunggu, Sedang Mengupload Foto Profil
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=save>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Simpan
+						</div>
+					</div>
+				</div>
+			`,
+			getfile(){
+				const getbutton = this.find('#fileimg');
+				getbutton.onchange = ()=>{
+					this.file = getbutton.files[0];
+					this.showPreview();
+				}
+			},
+			showPreview(){
+				const fn = new FileReader();
+				fn.onload = ()=>{
+					this.preview.src = fn.result;
+					this.find('#save').onclick = ()=>{this.save()};
+				}
+				fn.readAsDataURL(this.file);
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.preview = this.find('#preview');
+				this.getfile();
+				this.upnotice = this.find('#upnotice');
+			},
+			save(){
+				this.find('#datasparent').hide();
+				this.upnotice.show('block');
+				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
+					const url = await x.ref.getDownloadURL();
+					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{profilepicture:url}]).then(x=>{
+						profilePage.find('#profilepicture').src = url;
+						this.remove();
+					})
+				})
+			}
+		})
+	},
+	editBanner(profilePage){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Edit Foto Banner
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:flex-start;
+						gap:10px;
+						overflow:auto;
+						flex-direction:column;
+					" id=datasparent>
+						<div>
+							<div>Pilih Foto</div>
+							<div>
+								<input id=fileimg type=file accept=image/*>
+							</div>
+						</div>
+						<div>
+							<div>Preview</div>
+							<div
+							style="
+								display: flex;
+								justify-content: center;
+								background: whitesmoke;
+								padding: 20px 0;
+								border: 1px solid #e0e0e0;
+							"
+							>
+								<div style="
+									padding:8px;
+									background:white;
+									height:150px;
+									width:100%;
+								">
+									<img id=preview src=${app.userData.bannerpic||app.noProfilePng}
+									style="
+										height:150px;
+										width:100%;
+										object-fit:cover;
+									"
+									>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id=upnotice style="
+						padding:20px;
+						text-align:center;
+						display:none;
+					">
+						Mohon Tunggu, Sedang Mengupload Foto Profil
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=save>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Simpan
+						</div>
+					</div>
+				</div>
+			`,
+			getfile(){
+				const getbutton = this.find('#fileimg');
+				getbutton.onchange = ()=>{
+					this.file = getbutton.files[0];
+					this.showPreview();
+				}
+			},
+			showPreview(){
+				const fn = new FileReader();
+				fn.onload = ()=>{
+					this.preview.src = fn.result;
+					this.find('#save').onclick = ()=>{this.save()};
+				}
+				fn.readAsDataURL(this.file);
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.preview = this.find('#preview');
+				this.getfile();
+				this.upnotice = this.find('#upnotice');
+			},
+			save(){
+				this.find('#datasparent').hide();
+				this.upnotice.show('block');
+				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
+					const url = await x.ref.getDownloadURL();
+					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
+						profilePage.find('#bannerimg').src = url;
+						this.remove();
+					})
+				})
+			}
+		})
+	},
+	servicesOfferPage(data){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Buat Tawaran
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:flex-start;
+						gap:10px;
+						overflow:auto;
+						flex-direction:column;
+					" id=datasparent>
+						<div>
+							<div>Jasa</div>
+							<div>
+								<input value="${data.subject}" readonly>
+							</div>
+						</div>
+						<div>
+							<div>Ajukan Fee <span class=star>Min Rp${getPrice(data.minFee)}</span></div>
+							<div>
+								<input type=number id=fee placeholder="Masukan Fee Yang Diinginkan" min=${data.minFee} value=${data.minFee}>
+							</div>
+						</div>
+						<div>
+							<div>Deskripsi Anda</div>
+							<div>
+								<textarea placeholder="Masukan Deskripsi..." id=offerDescription style="height:150px;"></textarea>
+							</div>
+						</div>
+					</div>
+					<div id=upnotice style="
+						padding:20px;
+						text-align:center;
+						display:none;
+					">
+						Mohon Tunggu, Sedang Mengupload Foto Profil
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=save>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Kirim
+						</div>
+					</div>
+				</div>
+			`,
+			getfile(){
+				const getbutton = this.find('#fileimg');
+				getbutton.onchange = ()=>{
+					this.file = getbutton.files[0];
+					this.showPreview();
+				}
+			},
+			showPreview(){
+				const fn = new FileReader();
+				fn.onload = ()=>{
+					this.preview.src = fn.result;
+					this.find('#save').onclick = ()=>{this.save()};
+				}
+				fn.readAsDataURL(this.file);
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.upnotice = this.find('#upnotice');
+			},
+			save(){
+				this.find('#datasparent').hide();
+				this.upnotice.show('block');
+				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
+					const url = await x.ref.getDownloadURL();
+					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
+						profilePage.find('#bannerimg').src = url;
+						this.remove();
+					})
+				})
+			}
+		})
+	},
+	jobsOfferPage(data){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Buat Tawaran
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:flex-start;
+						gap:10px;
+						overflow:auto;
+						flex-direction:column;
+					" id=datasparent>
+						<div>
+							<div>Job</div>
+							<div>
+								<input value="${data.subject}" readonly>
+							</div>
+						</div>
+						<div>
+							<div>Ajukan Fee <span class=star>Max Rp${getPrice(data.maxFee)}</span></div>
+							<div>
+								<input type=number id=fee placeholder="Masukan Fee Yang Diinginkan" max=${data.maxFee} value=${data.maxFee}>
+							</div>
+						</div>
+						<div>
+							<div>Deskripsi Anda</div>
+							<div>
+								<textarea placeholder="Masukan Deskripsi..." id=offerDescription style="height:150px;"></textarea>
+							</div>
+						</div>
+					</div>
+					<div id=upnotice style="
+						padding:20px;
+						text-align:center;
+						display:none;
+					">
+						Mohon Tunggu, Sedang Mengupload Foto Profil
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					" id=save>
+						<div class=button id=goSignin style="
+							width: 100%;
+							text-align: center;
+							border-radius:20px;
+						">
+							Kirim
+						</div>
+					</div>
+				</div>
+			`,
+			getfile(){
+				const getbutton = this.find('#fileimg');
+				getbutton.onchange = ()=>{
+					this.file = getbutton.files[0];
+					this.showPreview();
+				}
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.upnotice = this.find('#upnotice');
+				this.find('#save').onclick = ()=>{
+					this.save();
+				}
+			},
+			collectData(){
+				const xdata = {
+					fee:this.find('#fee').value,
+					bidId:getUniqueID(),
+					description:this.find('#offerDescription').value,
+					bidder:app.userData.username,
+					date:getFullDate(),
+					owner:data.owner,
+					profilepicture:data.profilepicture
+				}
+				return xdata;
+			},
+			save(){
+				
+				Object.assign(data,this.collectData());
+				//adding bid data to the project.
+				app.doglas.do(['database','bid/jobs',data.bidId,'update',data]).then(async x=>{
+					//get the data first.
+					const biddata = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					biddata.push({type:'jobs',bidId:data.bidId,fee:data.fee,description:data.description,subject:data.subject,date:data.date,owner:data.owner,profilepicture:data.profilepicture});
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddata]);
+					app.userData.bid = biddata;
+					forceRecheck(view.main,'Berhasil mengirim penawaran');
+					this.remove();
+				})
+				
+				this.find('#datasparent').hide();
+				this.upnotice.show('block');
+				
+			}
+		})
+	},
+	inbox(){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+			`,
+			generateChat(){
+				app.userData.bid.forEach((bid,i)=>{
+					this.addChild(view.inboxItem(i,bid,(i!==app.userData.bid.length-1)?true:false));
+				})
+			},
+			onadded(){
+				this.generateChat();
+			}
+		});
+	},
+	inboxItem(i,data,bt){
+		console.log(data);
+		const Dot = '...';
+		return makeElement('div',{
+			className:'lines',
+			innerHTML:`
+				<div class=item style=${!bt?'border-bottom:0;':''}>
+					<div class=thumbnail>
+						<div>#${i+1}</div>
+					</div>
+					<div class=moreinfo>
+						<div id=fee>
+							${data.type} - ${data.type==='Jobs'?'Maks':'Min'} Bid Rp. ${getPrice(data.fee)}
+						</div>
+						<div class=title>
+							${data.subject.slice(0,100) + Dot}
+						</div>
+						<div class=addressinfo>
+							<div>
+								<img class=profileimg src=${data.profilepicture}>
+							</div>
+							<div class=username>${data.owner},</div>
+							<div class=date>${data.date}</div>
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				
+			},
 		})
 	}
 }

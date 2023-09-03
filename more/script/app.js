@@ -1,5 +1,5 @@
 const app = {
-	noProfilePng:'./more/media/user.png',
+	noProfilePng:'./more/media/gemaprofile.png',
 	dataFiktif:[
 		{
 			title:'How to code a game using PYTHON!!!',
@@ -109,6 +109,9 @@ const app = {
 		doglas:firebase,
 		do(args){ //[db/orsomething,parentchild,child,get/orupdate,datapass].
 			return this.doglas[args[0]]().ref(`${args[1]}/${args[2]}`)[args[3]](args[4]);
+		},
+		save(args){
+			return this.doglas.storage().ref().child(args[0]).put(args[1],args[2]);
 		}
 	},
 	err(){

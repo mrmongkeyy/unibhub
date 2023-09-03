@@ -160,7 +160,11 @@ const toInject = {
 		},
 		addChild(child){
 			this.appendChild(child);
-			flex.components.push(child);
+			//flex.components.push(child);
+			if(child.onadded)child.onadded();
+		},
+		addBefore(child,oldChild){
+			this.insertBefore(child,oldChild);
 			if(child.onadded)child.onadded();
 		},
 		show(setting='block'){
@@ -415,12 +419,11 @@ const forceRecheck = function(el,msg,inf=false){
 		id:'frcel',
 		style:`
 			position:absolute;
-			background:white;
-			padding:10px;
-			color:red;
+			background:black;
+			color:white;
+			padding:15px;
 			z-index:1;
 			right:0;
-			margin:10px;
 			font-size:16px;
 			margin-top: ${50*allfrc.length+1}px;
 		`,

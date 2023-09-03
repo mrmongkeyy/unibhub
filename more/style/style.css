@@ -42,7 +42,6 @@ input,textarea{
 	transition: .25s ease;
 	box-shadow: none;
 	background:whitesmoke;
-	border-radius:20px;
 	font-family:poppinslight;
 }
 .button{
