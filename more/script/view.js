@@ -402,9 +402,13 @@ const view = {
 			this.find('#reactTo').hide();
 			this.find('#searchWare').hide();
 		},
-		openInbox(){
-			//if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+		async openInbox(){
+			if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			this.clearLinesParent();
+			
+			//update the user bid data.
+			app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
+			
 			this.find('#linesparent').addChild(view.inbox());
 			this.find('#stateLabel').innerHTML = 'Inbox';
 			this.find('#reactTo').hide();
@@ -697,6 +701,7 @@ const view = {
 			},
 			publish(){
 				const data = this.collectData();
+				if(data.description.length<2000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 2000 Huruf.');
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
@@ -1018,8 +1023,6 @@ const view = {
 				overflow:auto;
 				display:flex;
 				flex-direction:column;
-				position:relative;
-				overflow:hidden;
 			`,
 			innerHTML:`
 				<div style="
@@ -1035,51 +1038,41 @@ const view = {
 					<div class=date>${data.time}</div>
 				</div>
 				<div style="
+					font-family:poppinsbold;
+					margin:10px 0;
+				">${data.title}</div>
+				<div style="
 					height:100%;
 				">
+					${data.description.replaceAll('\n','<br>')}
 					<div style="
-						font-family:poppinsbold;
-						margin:10px 0;
-					">${data.title}</div>
-					<textarea readonly
-					style="
-						height: 100%;
-				    border-radius: 0;
-				    padding: 0;
-				    border: 0;
-				    background: white;
-				    resize:none;
-						font-size:20px;
-						padding-bottom:100px;
-					"
-					>${data.description}</textarea>
-				</div>
-				<div style="
-					position:sticky;
-					bottom:0;
-					width:100%;
-					height:50px;
-					left:0;
-					display:flex;
-					justify-content:center;
-				">
-					<div style="
-						padding:20px;
-						padding-bottom:10px;
-						background:black;
-						color:white;
-						border:1px solid black;
-						border-bottom:none;
-						border-radius:20px 20px 0 0;
-						gap:10px;
+						position:sticky;
+						bottom:0;
+						width:100%;
+						height:50px;
+						left:0;
 						display:flex;
 						justify-content:center;
-						align-items:center;
-						cursor:pointer;
 					">
-						Lihat Komentar
+						<div style="
+							padding:20px;
+							padding-bottom:10px;
+							background:black;
+							color:white;
+							border:1px solid black;
+							border-bottom:none;
+							border-radius:20px 20px 0 0;
+							gap:10px;
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							cursor:pointer;
+						">
+							Lihat Komentar
+						</div>
 					</div>
 				</div>
+				
 			`,
 			onadded(){
 				//this.generateComment('randomid');
@@ -1099,7 +1092,9 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:hidden;
+				overflow:auto;
+				display:flex;
+				flex-direction:column;
 			`,
 			innerHTML:`
 				<div style="
@@ -1122,21 +1117,12 @@ const view = {
 						font-family:poppinsbold;
 						margin:10px 0;
 					">${data.title}</div>
-					<textarea readonly
-					style="
-						height: 100%;
-				    border-radius: 0;
-				    padding: 0;
-				    border: 0;
-				    background: white;
-				    resize:none;
-						font-size:20px;
-						padding-bottom:100px;
-					"
-					>${data.description}</textarea>
+					<div>
+						${data.description.replaceAll('\n','<br>')}
+					</div>
 				</div>
 				<div style="
-					position:absolute;
+					position:sticky;
 					bottom:0;
 					width:100%;
 					height:50px;
@@ -1179,7 +1165,9 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:hidden;
+				display:flex;
+				flex-direction:column;
+				overflow:auto;
 			`,
 			innerHTML:`
 				<div style="
@@ -1202,21 +1190,10 @@ const view = {
 						font-family:poppinsbold;
 						margin:10px 0;
 					">${data.title}</div>
-					<textarea readonly
-					style="
-						height: 100%;
-				    border-radius: 0;
-				    padding: 0;
-				    border: 0;
-				    background: white;
-				    resize:none;
-						font-size:20px;
-						padding-bottom:100px;
-					"
-					>${data.description}</textarea>
+					<div>${data.description.replaceAll('\n','<br>')}</div>
 				</div>
 				<div style="
-					position:absolute;
+					position:sticky;
 					bottom:0;
 					width:100%;
 					height:50px;
@@ -1249,6 +1226,8 @@ const view = {
 			},
 			doOffers(){
 				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+				//handling owner bid owner.
+				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
 				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
 			}
 		})
@@ -1259,7 +1238,9 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:hidden;
+				overflow:auto;
+				display:flex;
+				flex-direction:column;
 			`,
 			innerHTML:`
 				<div style="
@@ -1275,49 +1256,38 @@ const view = {
 					<div class=date>${data.time}</div>
 				</div>
 				<div style="
+					font-family:poppinsbold;
+					margin:10px 0;
+				">${data.title}</div>
+				<div style="
 					height:100%;
 				">
+					${data.description.replaceAll('\n','<br>')}
 					<div style="
-						font-family:poppinsbold;
-						margin:10px 0;
-					">${data.title}</div>
-					<textarea readonly
-					style="
-						height: 100%;
-				    border-radius: 0;
-				    padding: 0;
-				    border: 0;
-				    background: white;
-				    resize:none;
-						font-size:20px;
-						padding-bottom:100px;
-					"
-					>${data.description}</textarea>
-				</div>
-				<div style="
-					position:absolute;
-					bottom:0;
-					width:100%;
-					height:50px;
-					left:0;
-					display:flex;
-					justify-content:center;
-				">
-					<div style="
-						padding:20px;
-						padding-bottom:10px;
-						background:black;
-						color:white;
-						border:1px solid black;
-						border-bottom:none;
-						border-radius:20px 20px 0 0;
-						gap:10px;
+						position:sticky;
+						bottom:0;
+						width:100%;
+						height:50px;
+						left:0;
 						display:flex;
 						justify-content:center;
-						align-items:center;
-						cursor:pointer;
 					">
-						Lihat Komentar
+						<div style="
+							padding:20px;
+							padding-bottom:10px;
+							background:black;
+							color:white;
+							border:1px solid black;
+							border-bottom:none;
+							border-radius:20px 20px 0 0;
+							gap:10px;
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							cursor:pointer;
+						">
+							Lihat Komentar
+						</div>
 					</div>
 				</div>
 			`,
@@ -1358,7 +1328,7 @@ const view = {
 						width:100%;
 						height:150px;
 						object-fit:cover;
-					" src="${userData.bannerpic}">
+					" src="${userData.bannerpic}" ${!userData.bannerpic?'hidden':''}>
 					<div style="
 						position: absolute;
 						top: 0;
@@ -2262,6 +2232,7 @@ const view = {
 			},
 			publish(){
 				const data = this.collectData();
+				if(data.description.length<2000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 2000 Huruf.');
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
@@ -2774,6 +2745,7 @@ const view = {
 					const url = await x.ref.getDownloadURL();
 					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{profilepicture:url}]).then(x=>{
 						profilePage.find('#profilepicture').src = url;
+						app.userData.profilepicture = url;
 						this.remove();
 					})
 				})
@@ -2907,7 +2879,14 @@ const view = {
 				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
 					const url = await x.ref.getDownloadURL();
 					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
-						profilePage.find('#bannerimg').src = url;
+						const banner = profilePage.find('#bannerimg');
+						banner.src = url;
+						if(!app.userData.bannerpic){
+							banner.onload = ()=>{
+								banner.removeAttribute('hidden');
+								app.userData.bannerpic = url;
+							}
+						}
 						this.remove();
 					})
 				})
@@ -3136,22 +3115,29 @@ const view = {
 					bidId:getUniqueID(),
 					description:this.find('#offerDescription').value,
 					bidder:app.userData.username,
+					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
 					owner:data.owner,
-					profilepicture:data.profilepicture
+					profilepicture:data.profilepicture,
+					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
 			},
 			save(){
 				
 				Object.assign(data,this.collectData());
+				console.log(data);
 				//adding bid data to the project.
 				app.doglas.do(['database','bid/jobs',data.bidId,'update',data]).then(async x=>{
+					delete data.inbox;
 					//get the data first.
-					const biddata = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
-					biddata.push({type:'jobs',bidId:data.bidId,fee:data.fee,description:data.description,subject:data.subject,date:data.date,owner:data.owner,profilepicture:data.profilepicture});
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddata]);
-					app.userData.bid = biddata;
+					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					biddatauser.push(data);
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
+					biddataowner.push(data);
+					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
+					app.userData.bid = biddatauser;
 					forceRecheck(view.main,'Berhasil mengirim penawaran');
 					this.remove();
 				})
@@ -3172,6 +3158,17 @@ const view = {
 				app.userData.bid.forEach((bid,i)=>{
 					this.addChild(view.inboxItem(i,bid,(i!==app.userData.bid.length-1)?true:false));
 				})
+				if(app.userData.bid.length===0){
+					this.addChild(makeElement('div',{
+						innerHTML:`Anda Belum Melakukan Aktifitas Penawaran!`,
+						style:`
+							height:200px;
+							display:flex;
+							align-items:center;
+							justify-content:center;
+						`
+					}))
+				}
 			},
 			onadded(){
 				this.generateChat();
@@ -3179,7 +3176,6 @@ const view = {
 		});
 	},
 	inboxItem(i,data,bt){
-		console.log(data);
 		const Dot = '...';
 		return makeElement('div',{
 			className:'lines',
@@ -3208,6 +3204,317 @@ const view = {
 			onadded(){
 				
 			},
+			onclick(){
+				view.main.addChild(view.openChatBid(data));
+			}
+		})
+	},
+	openChatBid(data){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				background:white;
+			`,
+			innerHTML:`
+				<div class=innerBox
+				style="
+					height:100%;
+					background:white;
+					display:flex;
+					flex-direction:column;
+				"
+				>
+					<div style="
+						width: 100%;
+						min-height: 100px;
+						border-bottom: 1px solid whitesmoke;
+						display: flex;
+						align-items: center;
+						justify-content: space-around;
+					">
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=closethis style="cursor:pointer;">
+								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							</div>
+						</div>
+						<div style="
+							width:80%;
+						">
+							<div>${data.subject.slice(0,30)+'...'}</div>
+							<div>Rp. ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+						</div>
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=moremenu style="cursor:pointer;">
+								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						width:90%;
+						height:94%;
+						background:whitesmoke;
+						overflow:auto;
+						padding:5%;
+					" id=boxinbox>
+						
+					</div>
+					<div style="
+						width: 94%;
+						/* height: 69px; */
+						border-top: 1px solid whitesmoke;
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: whitesmoke;
+					">
+						<div style="
+							width: 80%;
+							/* height: 100%; */
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							background: white;
+							border-radius: 20px 0 0 20px;
+							padding:10px;
+						">
+							<textarea style="
+								height: 81px;
+								background: white;
+								border: none;
+								border-radius: 20px 0 0 20px;
+								min-height:100px;
+								min-width:100%;
+							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
+						</div>
+						<div style="
+							width: 20%;
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style=cursor:pointer id=sendbutton>
+								<img src=./more/media/send.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			collectData(){
+				const msg = {
+					from:app.userData.username,
+					date:getFullDate(),
+					msg:this.msgbox.value
+				}
+				return msg;
+			},
+			moreMenuInit(){
+				this.find('#moremenu').onclick = ()=>{
+					view.main.addChild(view.moremenubid(data));
+				}
+			},
+			initSendButton(){
+				this.find('#sendbutton').onclick = ()=>{
+					this.sendMsg();
+				}
+			},
+			async sendMsg(){
+				const msgData = this.collectData();
+				if(msgData.msg.length===0)return;
+				
+				//send the msg to the server.
+				const inbox = (await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'get'])).val();
+				inbox.push(msgData);
+				const result = await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'set',inbox]);
+				this.putMsg(msgData);
+				//set msgbox value to zero.
+				this.msgbox.value = '';
+			},
+			downKeys:[],
+			initEnterSend(){
+				this.msgbox.onkeydown = (e)=>{
+					if(!this.downKeys.includes(e.key))this.downKeys.push(e.key);
+					if(this.downKeys.includes('Enter') && !this.downKeys.includes('Shift')){
+						this.sendMsg();
+					}
+				}
+				this.msgbox.onkeyup = (e)=>{
+					this.downKeys.pop();
+				}
+			},
+			listen(){
+				app.doglas.get(`bid/${data.type.toLowerCase()}/${data.bidId}/inbox`).on('value',(x)=>{
+					const data = x.val();
+					if(data[data.length-1].from!==app.userData.username){
+						this.putMsg(data[data.length-1]);
+					}
+				})
+			},
+			init(){
+				this.boxinbox = this.find('#boxinbox');
+				this.showInboxInit();
+				this.msgbox = this.find('#msgbox');
+				this.initSendButton();
+				this.initEnterSend();
+				this.moreMenuInit();
+				setTimeout(()=>{this.listen()},2000);
+			},
+			async showInboxInit(){
+				const inbox = (await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'get'])).val();
+				inbox.forEach((item)=>{
+					this.putMsg(item);
+				})
+			},
+			putMsg(msg){
+				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				this.boxinbox.addChild(this.inboxItem(msg));
+				this.puttedMsg = msg;
+			},
+			onadded(){
+				//close event.
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				this.init();
+			},
+			inboxItem(item){
+				return makeElement('div',{
+					style:`
+						display:flex;
+						flex-direction:column;
+						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						width:100%;
+						gap:5px;
+					`,
+					innerHTML:`
+						<div>${item.from}</div>
+						<div style="
+							background:${item.from===app.userData.username?'white':'gray'};
+							color:${item.from===app.userData.username?'black':'white'};
+							padding:10px;
+							border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+						">${item.msg.replaceAll('\n','<br>')}</div>
+						<div style=font-size:12px>${item.date}</div>
+					`,
+					onadded(){
+						this.scrollIntoView();
+					}
+				})
+			}
+		})
+	},
+	moremenubid(data){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						">
+							Pilih Tindakan
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					">
+						<div
+						style="
+							width:94%;
+							height:100%;
+							display:flex;
+							align-items:center;
+							gap:8px;
+							justify-content:space-around;
+							flex-direction:column;
+						"
+						>
+							<div style="width:100%">
+								<div class="button buttonstyled" style="
+									border-radius:20px;display:flex;
+									align-items:center;gap:5px;justify-content:center;
+								" id=hire>
+									<img src=./more/media/hired.png
+										style="
+											width:16px;
+											height:16px;
+										"
+									>Terima</div>
+							</div>
+							<div style="width:100%">
+								<div class="button buttonstyled" style="
+									border-radius:20px;display:flex;
+									align-items:center;gap:5px;
+									justify-content:center;
+								" id=chat>
+									<img src=./more/media/rejection.png
+										style="
+											width:16px;
+											height:16px;
+										"
+									>Tolak</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()}
+			}
 		})
 	}
 }

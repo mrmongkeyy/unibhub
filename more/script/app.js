@@ -112,6 +112,9 @@ const app = {
 		},
 		save(args){
 			return this.doglas.storage().ref().child(args[0]).put(args[1],args[2]);
+		},
+		get(refId){
+			return this.doglas.database().ref(refId);
 		}
 	},
 	err(){
