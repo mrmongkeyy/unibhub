@@ -1155,7 +1155,9 @@ const view = {
 			},
 			doOffers(){
 				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
-				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postid}));
+				//handling owner bid owner.
+				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
+				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
 			}
 		})
 	},
@@ -2894,6 +2896,7 @@ const view = {
 		})
 	},
 	servicesOfferPage(data){
+		console.log(data);
 		return makeElement('div',{
 			style:`
 				width:100%;
@@ -2985,28 +2988,49 @@ const view = {
 					this.showPreview();
 				}
 			},
-			showPreview(){
-				const fn = new FileReader();
-				fn.onload = ()=>{
-					this.preview.src = fn.result;
-					this.find('#save').onclick = ()=>{this.save()};
-				}
-				fn.readAsDataURL(this.file);
-			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()};
 				this.upnotice = this.find('#upnotice');
+				this.find('#save').onclick = ()=>{
+					this.save();
+				}
+			},
+			collectData(){
+				const xdata = {
+					fee:this.find('#fee').value,
+					bidId:getUniqueID(),
+					description:this.find('#offerDescription').value,
+					bidder:app.userData.username,
+					bidderProfileId:app.userData.cleanEmail,
+					date:getFullDate(),
+					owner:data.owner,
+					profilepicture:data.profilepicture,
+					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+				}
+				return xdata;
 			},
 			save(){
+				
+				Object.assign(data,this.collectData());
+				console.log(data);
+				//adding bid data to the project.
+				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
+					delete data.inbox;
+					//get the data first.
+					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					biddatauser.push(data);
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
+					biddataowner.push(data);
+					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
+					app.userData.bid = biddatauser;
+					forceRecheck(view.main,'Berhasil mengirim penawaran');
+					this.remove();
+				})
+				
 				this.find('#datasparent').hide();
 				this.upnotice.show('block');
-				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
-					const url = await x.ref.getDownloadURL();
-					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
-						profilePage.find('#bannerimg').src = url;
-						this.remove();
-					})
-				})
+				
 			}
 		})
 	},
@@ -3128,7 +3152,7 @@ const view = {
 				Object.assign(data,this.collectData());
 				console.log(data);
 				//adding bid data to the project.
-				app.doglas.do(['database','bid/jobs',data.bidId,'update',data]).then(async x=>{
+				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
 					//get the data first.
 					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
@@ -3352,9 +3376,9 @@ const view = {
 				if(msgData.msg.length===0)return;
 				
 				//send the msg to the server.
-				const inbox = (await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'get'])).val();
+				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val();
 				inbox.push(msgData);
-				const result = await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'set',inbox]);
+				const result = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'set',inbox]);
 				this.putMsg(msgData);
 				//set msgbox value to zero.
 				this.msgbox.value = '';
@@ -3372,7 +3396,7 @@ const view = {
 				}
 			},
 			listen(){
-				app.doglas.get(`bid/${data.type.toLowerCase()}/${data.bidId}/inbox`).on('value',(x)=>{
+				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(data[data.length-1].from!==app.userData.username){
 						this.putMsg(data[data.length-1]);
@@ -3389,7 +3413,7 @@ const view = {
 				setTimeout(()=>{this.listen()},2000);
 			},
 			async showInboxInit(){
-				const inbox = (await app.doglas.do(['database','bid',`${data.type.toLowerCase()}/${data.bidId}/inbox`,'get'])).val();
+				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val();
 				inbox.forEach((item)=>{
 					this.putMsg(item);
 				})
