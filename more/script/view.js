@@ -3623,12 +3623,18 @@ const view = {
 				console.log(deleteR);
 				//for user.
 				this.generateNewUserBidData();
+<<<<<<< HEAD
 				console.log(app.userData.bid);
 				const saveBidUser = await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'update',app.userData.bid]);
+=======
+				console.log(this.userData.bid);
+				const saveBidUser = (await app.doglas.do(['database','users',`${data.bidderProfileId}`,'update',this.userData.bid])).val();
+>>>>>>> 3926aba13d79921b1eaa6cc2a37c231374f7ebce
 				console.log(saveBidUser);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
+<<<<<<< HEAD
 				if(app.userData.bid.length>0){
 					app.userData.bid.forEach(bidId=>{
 						console.log(bidId);
@@ -3636,6 +3642,12 @@ const view = {
 					})	
 				}
 				app.userData.bid = bidData;
+=======
+				this.userData.bid.forEach(bidId=>{
+					if(bidId.bidId!=data.bidId)bidData.push(bidId);
+				})
+				this.userData.bid = bidData;
+>>>>>>> 3926aba13d79921b1eaa6cc2a37c231374f7ebce
 			}
 		})
 	}
