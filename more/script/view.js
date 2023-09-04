@@ -2257,7 +2257,8 @@ const view = {
 			`,
 			className:'NotifParent',
 			generateNotifList(NotifList){
-				NotifList.forEach((item,i)=>{
+				for(let i=NotifList.length-1;i>=0;i--){
+					const item = NotifList[i];
 					this.addChild(makeElement('div',{
 						style:`
 							width:96%;
@@ -2268,24 +2269,47 @@ const view = {
 							border-bottom:${i===NotifList.length-1?'':'1px solid whitesmoke'};
 						`,
 						innerHTML:`
-							<img src=./more/media/deer-shape.png style="
-								width:32px;
-								height:32px;
+							<div style="
+								width:10%;
 							">
-							<div>
+								<img src=${item.profilepicture} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>							
+							<div style="
+								width:90%;
+							">
 								<div>${item.who}, ${item.when}</div>
 								<div class=bold>${item.what}</div>
 							</div>
 						`
 					}))
-				})
+				}
+				if(NotifList.length===0){
+					this.addChild(makeElement('div',{
+						style:`
+							width:96%;
+							display:flex;
+							gap:12px;
+							padding:2%;
+							align-items:center;
+						`,
+						innerHTML:`
+							Belum Ada Notifikasi...
+						`
+					}))
+				}
 			},
 			onadded(){
-				this.generateNotifList([
-					{who:'gemasajaa',when:'12 sep 2023',what:'Liking Your Boobs'},
-					{who:'someguy',when:'15 sep 2023',what:'Liking Your Photos'}
-				]);
-			}
+				this.loadNotifData();
+			},
+			async loadNotifData(){
+				const data = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				this.generateNotifList(data);
+			},
 		})
 	},
 	loadingPost(datatoupload){
@@ -2896,7 +2920,6 @@ const view = {
 		})
 	},
 	servicesOfferPage(data){
-		console.log(data);
 		return makeElement('div',{
 			style:`
 				width:100%;
@@ -3004,10 +3027,35 @@ const view = {
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
 					owner:data.owner,
+					status:'unset',
 					profilepicture:data.profilepicture,
 					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
+			},
+			async handleNotifOwner(){
+				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
+			},
+			async handleNotifUser(){
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
 			},
 			save(){
 				
@@ -3024,6 +3072,9 @@ const view = {
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
 					app.userData.bid = biddatauser;
+					//Notif
+					this.handleNotifOwner();
+					this.handleNotifUser();
 					forceRecheck(view.main,'Berhasil mengirim penawaran');
 					this.remove();
 				})
@@ -3142,10 +3193,35 @@ const view = {
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
 					owner:data.owner,
+					status:'unset',
 					profilepicture:data.profilepicture,
 					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
+			},
+			async handleNotifOwner(){
+				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
+			},
+			async handleNotifUser(){
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
 			},
 			save(){
 				
@@ -3162,6 +3238,9 @@ const view = {
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
 					app.userData.bid = biddatauser;
+					//Notif
+					this.handleNotifOwner();
+					this.handleNotifUser();
 					forceRecheck(view.main,'Berhasil mengirim penawaran');
 					this.remove();
 				})
@@ -3295,7 +3374,7 @@ const view = {
 					<div id=userActionBidder style="
 				    padding: 2% 0;
 				    background: white;
-				    display: flex;
+				    display: ${data.owner===app.userData.cleanEmail?'flex':'none'};
 				    gap: 8px;
 				    justify-content: space-around;
 					">
@@ -3306,7 +3385,18 @@ const view = {
 					    width: 100%;
 					    text-align: center;
 							cursor:pointer;
-						">Rekrut</div>
+							display: flex;
+							align-items: center;
+							gap: 8px;
+							font-weight: bold;
+							justify-content: center;
+						">
+						<img src=./more/media/correct.png
+						style="
+							width:24px;
+							height:24px;
+						"
+						>Rekrut</div>
 						<div id=reject style="
 							padding: 10px;
 					    background: red;
@@ -3314,7 +3404,19 @@ const view = {
 					    width: 100%;
 					    text-align: center;
 							cursor:pointer;
-						">Tolak</div>
+							display: flex;
+							align-items: center;
+							gap: 8px;
+							font-weight: bold;
+							justify-content: center;
+						">
+						<img src=./more/media/closewhite.png
+						style="
+							width:24px;
+							height:24px;
+						"
+						>
+						Tolak</div>
 					</div>
 					<div style="
 						width:90%;
@@ -3396,18 +3498,62 @@ const view = {
 				//this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
 			},
 			async reject(){
+				//give the indicator.
+				const indicator = view.actionIndicator(this);
+				view.main.addChild(indicator);
+				//send info to bidder chat.
+				await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/status`,'set','r']);
 				//should update to bid db and also user bidder and owner bidder.
 				//global bid db.
 				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
-				console.log(deleteR);
 				//for user.
 				this.generateNewUserBidData();
 				if(app.userData.bid.length===0){
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'remove']);
+				}else{
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',app.userData.bid]);
+				}
+				//for bidder
+				const bidderBid = (await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'get'])).val()||[];
+				if(bidderBid.length===0){
 					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'remove']);
 				}else{
-					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'set',app.userData.bid]);
+					const bidderNewBid = [];
+					bidderBid.forEach(bidId=>{
+						if(bidId.bidId!==data.bidId){
+							bidderNewBid.push(bidId);
+						}
+					})
+					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'set',bidderNewBid]);
 				}
-				console.log('already process the reject');
+				//notif
+				this.handleNotifOwner(`${data.owner} menolak penawaran kamu sebesar Rp. ${getPrice(data.fee)}`);
+				this.handleNotifUser(`Kamu menolak penawaran dari ${data.bidder} sebesar Rp. ${getPrice(data.fee)}`);
+				indicator.find('#text').innerHTML = 'Bidder Berhasil Ditolak!';
+			},
+			async handleNotifOwner(what){
+				let ownerNotif = (await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'set',ownerNotif]);
+			},
+			async handleNotifUser(what){
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what});
+				if(ownerNotif.length>20){
+					const newOwnerNotif = [];
+					for(let i=0;i<10;i++){
+						newOwnerNotif.push(ownerNotif[i+11]);
+					}
+					ownerNotif = newOwnerNotif;
+				}
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
@@ -3418,7 +3564,6 @@ const view = {
 						}
 					})	
 				}
-				console.log(bidData);
 				app.userData.bid = bidData;
 			},
 			moreMenuInit(){
@@ -3456,6 +3601,12 @@ const view = {
 					this.downKeys.pop();
 				}
 			},
+			handleRejectMsg(){
+				const indicator = view.actionIndicator(this);
+				indicator.find('#topTitle').innerHTML = 'Notifikasi';
+				indicator.find('#text').innerHTML = 'Owner Menolak Tawaran Anda';
+				view.main.addChild(indicator);
+			},
 			listen(){
 				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
 					const data = x.val();
@@ -3463,6 +3614,14 @@ const view = {
 						this.putMsg(data[data.length-1]);
 					}
 				})
+				if(data.bidderProfileId===app.userData.cleanEmail){
+					app.doglas.get(`bid/${data.type}/${data.bidId}/status`).on('value',(x)=>{
+						const data = x.val();
+						if(data==='r'){
+							this.handleRejectMsg();
+						}
+					})
+				}
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
@@ -3487,6 +3646,7 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{
+					view.content.openInbox();
 					this.remove();
 				}
 				this.init();
@@ -3623,18 +3783,12 @@ const view = {
 				console.log(deleteR);
 				//for user.
 				this.generateNewUserBidData();
-<<<<<<< HEAD
 				console.log(app.userData.bid);
 				const saveBidUser = await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'update',app.userData.bid]);
-=======
-				console.log(this.userData.bid);
-				const saveBidUser = (await app.doglas.do(['database','users',`${data.bidderProfileId}`,'update',this.userData.bid])).val();
->>>>>>> 3926aba13d79921b1eaa6cc2a37c231374f7ebce
 				console.log(saveBidUser);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
-<<<<<<< HEAD
 				if(app.userData.bid.length>0){
 					app.userData.bid.forEach(bidId=>{
 						console.log(bidId);
@@ -3642,12 +3796,61 @@ const view = {
 					})	
 				}
 				app.userData.bid = bidData;
-=======
-				this.userData.bid.forEach(bidId=>{
-					if(bidId.bidId!=data.bidId)bidData.push(bidId);
-				})
-				this.userData.bid = bidData;
->>>>>>> 3926aba13d79921b1eaa6cc2a37c231374f7ebce
+			}
+		})
+	},
+	actionIndicator(chatpage){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:poppinsbold;
+							margin-left:5px;
+						" id=topTitle>
+							Loading...
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					">
+						<div id=text>
+							Memproses Penolakan.
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					chatpage.remove();
+					view.content.openInbox();
+					this.remove();
+				}
 			}
 		})
 	}
