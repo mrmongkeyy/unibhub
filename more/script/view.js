@@ -3490,12 +3490,18 @@ const view = {
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 						</div>
 					</div>
+					<div id=hiredMsg style="display:none;padding:20px;">
+						<div>Berhasil menerima pembidder, silahkan lanjutkan percakapan atau aktifitas lain</div>
+					</div>
+					<div id=rejectedMsg style="display:none;padding:20px;">
+						<div>Berhasil mereject pembidder, pembidder akan diblock untuk kembali membidder dan percakapan sebelumnya akan di hapus</div>
+					</div>
 					<div style="
 						padding:20px;
 						display:flex;
 						justify-content:center;
 						gap:10px;
-					">
+					" id=buttonsMenu>
 						<div
 						style="
 							width:94%;
@@ -3543,13 +3549,29 @@ const view = {
 			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.buttonsMenu = this.find('#buttonsMenu');
 				this.buttonsEvent();
 			},
 			hire(){
 				console.log('To Hire ',data);
+				this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
 			},
-			reject(){
-				console.log('To reject ',data);
+			async reject(){
+				console.log('To Reject ',data);
+				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
+				console.log(deleteR);
+				//for user.
+				this.generateNewUserBidData();
+				console.log(this.userData.bid);
+				const saveBidUser = (await app.doglas.do(['database','users',`${data.bidderProfileId}`,'update',this.userData.bid])).val();
+				console.log(saveBidUser);
+			},
+			generateNewUserBidData(){
+				const bidData = [];
+				this.userData.bid.forEach(bidId=>{
+					if(bidId.bidId!=data.bidId)bidData.push(bidId);
+				})
+				this.userData.bid = bidData;
 			}
 		})
 	}

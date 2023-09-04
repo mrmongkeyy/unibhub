@@ -177,6 +177,10 @@ const toInject = {
 				this.style.display = 'none';
 			}
 		},
+		changeTo(el,typeDisplay='block'){
+			this.hide();
+			el.style.display = typeDisplay;
+		},
 		saveRemove(p){
 			const el =	this.querySelector(p);
 			if(el)el.remove();
