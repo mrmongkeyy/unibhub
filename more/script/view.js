@@ -3179,6 +3179,7 @@ const view = {
 				height:100%;
 			`,
 			generateChat(){
+				if(!app.userData.bid)app.userData.bid = [];
 				app.userData.bid.forEach((bid,i)=>{
 					this.addChild(view.inboxItem(i,bid,(i!==app.userData.bid.length-1)?true:false));
 				})
@@ -3258,7 +3259,6 @@ const view = {
 					<div style="
 						width: 100%;
 						min-height: 100px;
-						border-bottom: 1px solid whitesmoke;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
@@ -3292,6 +3292,30 @@ const view = {
 							</div>
 						</div>
 					</div>
+					<div id=userActionBidder style="
+				    padding: 2% 0;
+				    background: white;
+				    display: flex;
+				    gap: 8px;
+				    justify-content: space-around;
+					">
+						<div id=hire style="
+							padding: 10px;
+					    background: green;
+					    color: white;
+					    width: 100%;
+					    text-align: center;
+							cursor:pointer;
+						">Rekrut</div>
+						<div id=reject style="
+							padding: 10px;
+					    background: red;
+					    color: white;
+					    width: 100%;
+					    text-align: center;
+							cursor:pointer;
+						">Tolak</div>
+					</div>
 					<div style="
 						width:90%;
 						height:94%;
@@ -3322,11 +3346,10 @@ const view = {
 							padding:10px;
 						">
 							<textarea style="
-								height: 81px;
 								background: white;
 								border: none;
 								border-radius: 20px 0 0 20px;
-								min-height:100px;
+								min-height:40px;
 								min-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
@@ -3361,7 +3384,45 @@ const view = {
 				}
 				return msg;
 			},
+			initUserActionToBidder(){
+				this.findall('#userActionBidder div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			hire(){
+				console.log('To Hire ',data);
+				//this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
+			},
+			async reject(){
+				//should update to bid db and also user bidder and owner bidder.
+				//global bid db.
+				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
+				console.log(deleteR);
+				//for user.
+				this.generateNewUserBidData();
+				if(app.userData.bid.length===0){
+					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'remove']);
+				}else{
+					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'set',app.userData.bid]);
+				}
+				console.log('already process the reject');
+			},
+			generateNewUserBidData(){
+				const bidData = [];
+				if(app.userData.bid.length>0){
+					app.userData.bid.forEach(bidId=>{
+						if(bidId.bidId!==data.bidId){
+							bidData.push(bidId);
+						}
+					})	
+				}
+				console.log(bidData);
+				app.userData.bid = bidData;
+			},
 			moreMenuInit(){
+				this.initUserActionToBidder();
 				this.find('#moremenu').onclick = ()=>{
 					view.main.addChild(view.moremenubid(data));
 				}
@@ -3490,12 +3551,18 @@ const view = {
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 						</div>
 					</div>
+					<div id=hiredMsg style="display:none;padding:20px;">
+						<div>Berhasil menerima pembidder, silahkan lanjutkan percakapan atau aktifitas lain</div>
+					</div>
+					<div id=rejectedMsg style="display:none;padding:20px;">
+						<div>Berhasil mereject pembidder, pembidder akan diblock untuk kembali membidder dan percakapan sebelumnya akan di hapus</div>
+					</div>
 					<div style="
 						padding:20px;
 						display:flex;
 						justify-content:center;
 						gap:10px;
-					">
+					" id=buttonsMenu>
 						<div
 						style="
 							width:94%;
@@ -3543,13 +3610,32 @@ const view = {
 			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.buttonsMenu = this.find('#buttonsMenu');
 				this.buttonsEvent();
 			},
 			hire(){
 				console.log('To Hire ',data);
+				this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
 			},
-			reject(){
-				console.log('To reject ',data);
+			async reject(){
+				console.log('To Reject ',data);
+				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
+				console.log(deleteR);
+				//for user.
+				this.generateNewUserBidData();
+				console.log(app.userData.bid);
+				const saveBidUser = await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'update',app.userData.bid]);
+				console.log(saveBidUser);
+			},
+			generateNewUserBidData(){
+				const bidData = [];
+				if(app.userData.bid.length>0){
+					app.userData.bid.forEach(bidId=>{
+						console.log(bidId);
+						if(bidId.bidId!=data.bidId)bidData.push(bidId);
+					})	
+				}
+				app.userData.bid = bidData;
 			}
 		})
 	}
