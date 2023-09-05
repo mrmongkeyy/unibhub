@@ -139,18 +139,18 @@ const app = {
 		})
 	},
 	checkPass(datauser,data){
-		console.log(datauser,data);
 		if(datauser.userPass === data.password)return true;
 		return false;
 	},
 	saveDataLogin(datatosave){
+		datatosave.exp = getTimePlus(600000);
 		this.ls.put(datatosave);
 		delete datatosave.password;
 		this.userData = datatosave;
 	},
 	ls:{
 		init(){
-			this.id = getUniqueID();
+			this.id = 'simpsonsportal';
 		},
 		put(data){
 			localStorage.setItem(this.id,JSON.stringify(data));

@@ -279,6 +279,35 @@ const view = {
 					</div>
 					
 				</div>
+				<div style="
+					width: 100%;
+					display: none;
+					justify-content: flex-end;
+					margin-right: 3%;
+					gap:8px;
+				"
+				id=logout
+				>
+					<div style=display:flex;>
+						<div class="buttonstyled" style="
+							display: flex;
+							align-items: center;
+							gap: 5px;
+							background: none;
+							font-size: 12px;
+							font-weight: bold;
+							cursor: pointer;
+						">
+							<img src=./more/media/exit.png
+							style="
+								width:18px;
+								height:18px;
+							"
+							>Keluar
+						</div>
+					</div>
+					
+				</div>
 			</div>
 			<div
 			style="
@@ -291,13 +320,26 @@ const view = {
 			id=linesparent
 			></div>
 		`,
+		logoutEvent(){
+			this.logout.onclick = ()=>{
+				console.log('User wanna out');
+			}
+		},
 		clearLinesParent(){
 			this.linesParent.clear();
 		},
 		onadded(){
 			this.linesParent = this.find('#linesparent');
+			this.stateLabel = this.find('#stateLabel');
+			this.logout = this.find('#logout');
+			this.reactTo = this.find('#reactTo');
+			this.searchWare = this.find('#searchWare');
+			
 			//this.openArticle(app.dataFiktif);
 			this.displayList([],'loadartikel',true);
+			
+			//logoutbutton.
+			this.logoutEvent();
 		},
 		displayList(data,nav,boot){
 			this.clearLinesParent();
@@ -309,51 +351,52 @@ const view = {
 			if(data.length===0){
 				this.find('#linesparent').addChild(view.nodata());
 			}
-			this.find('#stateLabel').innerHTML = 'Beranda';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').show('flex');
+			this.stateLabel.innerHTML = 'Beranda';
+			this.reactTo.hide();
+			this.searchWare.show('flex');
+			this.logout.hide();
 		},
 		newArticle(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.articlenew());
-			this.find('#stateLabel').innerHTML = 'Artikel Baru';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.articlenew());
+			this.stateLabel.innerHTML = 'Artikel Baru';
+			this.reactTo.hide();
+			this.searchWare.hide();
 		},
 		newCerpen(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.cerpennew());
-			this.find('#stateLabel').innerHTML = 'Cerpen Baru';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.cerpennew());
+			this.stateLabel.innerHTML = 'Cerpen Baru';
+			this.reactTo.hide();
+			this.searchWare.hide();
 		},
 		openArticles(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.openArticles());
-			this.find('#stateLabel').innerHTML = 'Baca Artikel';
-			this.find('#reactTo').show('flex');
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.openArticles());
+			this.stateLabel.innerHTML = 'Baca Artikel';
+			this.reactTo.show('flex');
+			this.searchWare.hide();
 		},
 		openShortStories(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.openShortStories());
-			this.find('#stateLabel').innerHTML = 'Baca Cerpen';
-			this.find('#reactTo').show('flex');
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.openShortStories());
+			this.stateLabel.innerHTML = 'Baca Cerpen';
+			this.reactTo.show('flex');
+			this.searchWare.hide();
 		},
 		openJobs(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.openJobs());
-			this.find('#stateLabel').innerHTML = 'Info Loker';
-			this.find('#reactTo').show('flex');
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.openJobs());
+			this.stateLabel.innerHTML = 'Info Loker';
+			this.reactTo.show('flex');
+			this.searchWare.hide();
 		},
 		openServices(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.openServices());
-			this.find('#stateLabel').innerHTML = 'Info Jasa';
-			this.find('#reactTo').show('flex');
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.openServices());
+			this.stateLabel.innerHTML = 'Info Jasa';
+			this.reactTo.show('flex');
+			this.searchWare.hide();
 		},
 		isInProfile(){
 			let result = false;
@@ -370,10 +413,11 @@ const view = {
 				return this.getIn();
 			}
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.profilePage(userId));
-			this.find('#stateLabel').innerHTML = 'Profil Pengguna';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.profilePage(userId));
+			this.stateLabel.innerHTML = 'Profil Pengguna';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.show('flex');
 		},
 		newPost(){
 			if(!app.userData){
@@ -383,36 +427,47 @@ const view = {
 		},
 		newJasa(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.jasanew());
-			this.find('#stateLabel').innerHTML = 'Post Jasa';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.jasanew());
+			this.stateLabel.innerHTML = 'Post Jasa';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.hide();
 		},
 		newLoker(){
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.lokernew());
-			this.find('#stateLabel').innerHTML = 'Post Loker';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.lokernew());
+			this.stateLabel.innerHTML = 'Post Loker';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.hide();
 		},
 		openNotif(){
+			if(!app.getInfoLogin()){
+				view.content.getIn();
+				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			}
 			this.clearLinesParent();
-			this.find('#linesparent').addChild(view.notif());
-			this.find('#stateLabel').innerHTML = 'Notifmu';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.notif());
+			this.stateLabel.innerHTML = 'Notifmu';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.hide();
 		},
 		async openInbox(){
-			if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			if(!app.getInfoLogin()){
+				view.content.getIn();
+				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			}
 			this.clearLinesParent();
 			
 			//update the user bid data.
 			app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
 			
-			this.find('#linesparent').addChild(view.inbox());
-			this.find('#stateLabel').innerHTML = 'Inbox';
-			this.find('#reactTo').hide();
-			this.find('#searchWare').hide();
+			this.linesParent.addChild(view.inbox());
+			this.stateLabel.innerHTML = 'Inbox';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.hide();
 		}
 	}),
 	footer:makeElement('footer',{
@@ -2266,7 +2321,7 @@ const view = {
 							gap:12px;
 							padding:2%;
 							align-items:center;
-							border-bottom:${i===NotifList.length-1?'':'1px solid whitesmoke'};
+							border-bottom:${i===0?'':'1px solid whitesmoke'};
 						`,
 						innerHTML:`
 							<div style="
