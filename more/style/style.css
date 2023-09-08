@@ -82,10 +82,12 @@ input,textarea{
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width:100%;
-	font-weight:bold;
-	flex-direction:column;
-	font-size:11px;
+	width: 100%;
+	font-weight: bold;
+	flex-direction: column;
+	font-size: 11px;
+	padding: 0 10px;
+	white-space: nowrap;
 }
 .star{
 	color:red;

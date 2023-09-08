@@ -182,6 +182,8 @@ const view = {
 					height: 100%;
 					display: flex;
 					align-items: center;
+					overflow:auto;
+					overflow-y:hidden;
 				" id=ourmenu class=innerBox>
 					<div id=newPost>
 						<img src=./more/media/pen.png class=navimg>
@@ -191,9 +193,17 @@ const view = {
 						<img src=./more/media/home.png class=navimg>
 						Beranda
 					</div>
+					<div id=openMyproject>
+						<img src=./more/media/worker.png class=navimg>
+						ProjectKu
+					</div>
 					<div id=openInbox>
 						<img src=./more/media/chat.png class=navimg>
 						Pesan
+					</div>
+					<div id=openGlobalChat>
+						<img src=./more/media/global-communication.png class=navimg>
+						Global Chat
 					</div>
 					<div id=openNotif>
 						<img src=./more/media/bell.png class=navimg>
@@ -322,7 +332,8 @@ const view = {
 		`,
 		logoutEvent(){
 			this.logout.onclick = ()=>{
-				console.log('User wanna out');
+				app.ls.remove();
+				location.reload();
 			}
 		},
 		clearLinesParent(){
@@ -391,6 +402,39 @@ const view = {
 			this.reactTo.show('flex');
 			this.searchWare.hide();
 		},
+		async openMyproject(data=[],nav='OnGoing',boot){
+			if(!app.getInfoLogin()){
+				view.content.getIn();
+				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			}
+			this.clearLinesParent();
+			//update the user projectData data.
+			//app.userData.onGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
+			if(nav==='loadartikel')nav='OnGoing';
+			console.log(nav);
+			this.find('#linesparent').addChild(view.myProjectDiv(nav,boot));
+			data.forEach((item,i)=>{
+				this.find('#linesparent').addChild(view.projectList(item,i+1,(i===data.length-1)?false:true));
+			})
+			console.log(app.userData.onGoingProjects);
+			//zerodata handler.
+			if(data.length===0){
+				this.find('#linesparent').addChild(view.nodata());
+			}
+			this.stateLabel.innerHTML = 'My Projects';
+			this.reactTo.hide();
+			this.searchWare.hide();
+			this.logout.hide();
+		},
+		openGlobalChat(){
+			if(!app.getInfoLogin()){
+				view.content.getIn();
+				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+			}
+			view.main.addChild(view.globalChat(()=>{
+				view.content.displayList([],'loadartikel','true');
+			}));
+		},
 		openServices(){
 			this.clearLinesParent();
 			this.linesParent.addChild(view.openServices());
@@ -420,8 +464,9 @@ const view = {
 			this.logout.show('flex');
 		},
 		newPost(){
-			if(!app.userData){
-				return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+			if(!app.getInfoLogin()){
+				view.content.getIn();
+				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.addChild(view.newPost());
 		},
@@ -473,6 +518,91 @@ const view = {
 	footer:makeElement('footer',{
 		
 	}),
+	myProjectDiv(nav='OnGoing',boot=false){
+		return makeElement('div',{
+			nav,
+			style:`
+				width: 100%;
+				display: flex;
+				overflow: auto;
+				/* margin-right: 10px; */
+				margin: 2% 0;
+				background: white;
+				border-bottom: 1px solid whitesmoke;
+				align-items: center;
+				position:sticky;
+				top:0;
+			`,
+			innerHTML:`
+				<div style="
+					  width: 100%;
+						display: flex;
+						justify-content: flex-start;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=OnGoing
+					>
+						<img src=./more/media/development.png class=navimg>
+						OnGoing
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=Finished
+					>
+						<img src=./more/media/verified.png class=navimg>
+						Finished
+					</div>
+				</div>
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				console.log(this.nav);
+				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).scrollIntoView();
+				this.buttonSetup();
+				if(boot){
+					console.log('boot is true');
+					this.OnGoing();
+				}
+			},
+			OnGoing(){
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
+					let datacb = data.val()||[];
+					view.content.openMyproject(datacb,'OnGoing');
+				})
+			},
+			Finished(){
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					let datacb = data.val()||[];
+					view.content.openMyproject(datacb,'Finished');
+				})
+			}
+		})
+	},
 	searchDiv(nav='loadartikel',boot=false){
 		return makeElement('div',{
 			nav,
@@ -596,9 +726,6 @@ const view = {
 		const Dot = (data.title.length>100)?'...':'';
 		if(!data.more){
 			data.more = {
-				share:[],
-				like:[],
-				comment:[],
 				view:[]
 			}
 		}
@@ -640,6 +767,46 @@ const view = {
 					view.content[`open${data.type}`]();
 				}
 			},
+		})
+	},
+	projectList(data,i,bt=true){
+		const Dot = (data.title.length>100)?'...':'';
+		return makeElement('div',{
+			className:'lines',
+			innerHTML:`
+				<div class=item style=${!bt?'border-bottom:0;':''}>
+					<div class=thumbnail>
+						<div>#${i}</div>
+					</div>
+					<div class=moreinfo>
+						<div id=fee>
+							Fee Rp. ${getPrice(data.fee)}
+						</div>
+						<div class=title>
+							${data.title.slice(0,100) + Dot}
+						</div>
+						<div class=addressinfo>
+							<div>
+								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
+							</div>
+							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.username},</div>
+							<div class=date>${data.time}</div>
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('.item').onclick = ()=>{
+					this.chatData = data;
+					this.openChat();
+				}
+			},
+			openChat(){
+				console.log(this.chatData);
+				view.main.addChild(view.OnGoingChat(this.chatData,()=>{
+					view.content.openMyproject([],'OnGoing',true);
+				}));
+			}
 		})
 	},
 	articlenew(){
@@ -1043,7 +1210,8 @@ const view = {
 						share:[],
 						comments:[],
 						view:[]
-					}
+					},
+					winner:'unset'
 				})
 				return Data;
 			},
@@ -1755,6 +1923,7 @@ const view = {
 				flex-direction: column;
 				overflow: auto;
 				height: 100%;
+				padding-top:0;
 			">
 				<div style="
 					font-family:poppinsbold;
@@ -1762,6 +1931,10 @@ const view = {
 					align-items:center;
 					justify-content:space-between;
 					padding:0 5px;
+					position:sticky;
+					top:0;
+					padding:10px;
+					background:white;
 				">
 					Postingan Baru
 					<img src=./more/media/close.png class=navimg style="
@@ -3082,7 +3255,7 @@ const view = {
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
 					owner:data.owner,
-					status:'unset',
+					reject:'unset',
 					profilepicture:data.profilepicture,
 					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
@@ -3250,6 +3423,7 @@ const view = {
 					owner:data.owner,
 					status:'unset',
 					profilepicture:data.profilepicture,
+					bidderProfileIdPic:app.userData.profilepicture,
 					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
@@ -3296,6 +3470,10 @@ const view = {
 					//Notif
 					this.handleNotifOwner();
 					this.handleNotifUser();
+				
+					//update project bidder id.
+					this.updateBidderId();
+				
 					forceRecheck(view.main,'Berhasil mengirim penawaran');
 					this.remove();
 				})
@@ -3303,6 +3481,17 @@ const view = {
 				this.find('#datasparent').hide();
 				this.upnotice.show('block');
 				
+			},
+			async updateBidderId(){
+
+				//get Data bidder first.
+				let biddata = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
+				console.log(biddata);
+				biddata.push(app.userData.cleanEmail);
+				await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'set',biddata]);
+				const biddingList =  (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
+				biddingList.push(data.bidId);
+				await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'set',biddingList]);
 			}
 		})
 	},
@@ -3352,9 +3541,9 @@ const view = {
 						</div>
 						<div class=addressinfo>
 							<div>
-								<img class=profileimg src=${data.profilepicture}>
+								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
-							<div class=username>${data.owner},</div>
+							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.owner},</div>
 							<div class=date>${data.date}</div>
 						</div>
 					</div>
@@ -3368,7 +3557,7 @@ const view = {
 			}
 		})
 	},
-	openChatBid(data){
+	openChatBid(data,customCloseThis){
 		return makeElement('div',{
 			style:`
 				position:absolute;
@@ -3537,7 +3726,8 @@ const view = {
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
-					msg:this.msgbox.value
+					msg:this.msgbox.value,
+					profilepicture:app.userData.profilepicture
 				}
 				return msg;
 			},
@@ -3550,17 +3740,123 @@ const view = {
 			},
 			hire(){
 				console.log('To Hire ',data);
-				//this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
+
+				//1. add admin.
+				//2. set status.
+				//3. send notif to others bidder.
+
+
+
+				//send notif to people who bidding.
+				this.handleNotifToOthers();
+			},
+			async handleContinueRoom(winner,project){
+				console.log('the project is',project);
+				//remove ineficience data.
+				delete project.biddingList;
+				delete project.bidder;
+				delete project.winner;
+				
+				//getting admin data.
+				const admins = (await app.doglas.do(['database','admins','','get'])).val()||[];
+				console.log('admins data',admins);
+				
+				
+				
+				//set global room //onGoingRoom
+				const roomId = getUniqueID();
+				console.log(roomId, 'is room id');
+				project.OnGoingRoomId = roomId;
+				
+				await app.doglas.do(['database','OnGoingRooms',roomId,'set',project]);
+				console.log('global room updateed');
+				
+				
+				//set room for owner.
+				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
+				console.log(ownerOnGoingProjects);
+				
+				//sing the value of data to project.
+				Object.assign(project,data);
+				console.log('the project is',project);
+				ownerOnGoingProjects.push(project);
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
+
+				//set room for the winner
+				console.log('winner is',winner);
+				const winnerOnGoingProjects = (await app.doglas.do(['database','user',`${winner}/onGoingProjects`,'get'])).val()||[];
+				console.log(winnerOnGoingProjects);
+				winnerOnGoingProjects.push(project);
+				await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'set',winnerOnGoingProjects]);
+			},
+			async setWinner(param){
+				await app.doglas.do(['database','post',`${data.type}/${data.postid}/winner`,'set',param]);
+				//delete bid history.
+				const biddingList = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
+				console.log('the list of bid ',biddingList);
+				biddingList.forEach(async (bidId)=>{
+					console.log('removing bid data', bidId);
+					await app.doglas.get(`bid/${data.type}/${bidId}`).remove();
+				})
+				const project = (await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'get'])).val();
+				await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'remove']);
+				console.log('project deleted, post');
+
+
+				//so far its ok.
+
+
+				//now time to work on room.
+				this.handleContinueRoom(param,project);
+			},
+			async handleNotifToOthers(){
+				//give the indicator.
+				const actionIndicator = view.actionIndicator(this);
+				view.main.addChild(actionIndicator);
+				actionIndicator.find('#text').innerHTML = `Memperoses Rekrutmen Kepada ${data.bidder} sebesar Rp. ${getPrice(data.fee)}`;
+
+				//getting peoples id.
+				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val();
+				//adding owner id also, we need owner bid also updated.
+				bidders.push(app.userData.cleanEmail);
+				console.log(bidders);
+
+				bidders.forEach(async bidder=>{
+						
+					//deleting the bid list from this user.
+					const userBidList = (await app.doglas.do(['database','users',`${bidder}/bid`,'get'])).val()||[];
+					const userNewBidList = [];
+					userBidList.forEach(bid=>{
+						if(bid.postid!==data.postid){
+							userNewBidList.push(bid);
+						}
+					})
+					console.log('User new bid ',userNewBidList);
+					await app.doglas.do(['database','users',`${bidder}/bid`,'set',userNewBidList]);
+					
+					//get people notif list.
+					const notifs = (await app.doglas.do(['database','users',`${bidder}/notif`,'get'])).val()||[];
+					notifs.push({who:(bidder===app.userData.cleanEmail?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture,when:getFullDate(),
+						what:`Telah menerima penawaran dari ${data.bidderProfileId===bidder?'Kamu':data.bidder} sebesar Rp. ${getPrice(data.fee)}`
+					});
+					//adding notification to user notif list.
+					await app.doglas.do(['database','users',`${bidder}/notif`,'set',notifs]);
+					console.log('Adding new notif');
+
+				})
+
+				//remove the projects out from the global db.
+				this.setWinner(data.bidderProfileId);
+				actionIndicator.find('#text').innerHTML = `Berhasil Menerima Bid Dari ${data.bidder} sebesar ${data.fee}`;
+				this.out();
 			},
 			async reject(){
 				//give the indicator.
 				const indicator = view.actionIndicator(this);
 				view.main.addChild(indicator);
-				//send info to bidder chat.
-				await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/status`,'set','r']);
-				//should update to bid db and also user bidder and owner bidder.
-				//global bid db.
-				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
+				await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/reject`,'set','ok']);
+				await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
+				
 				//for user.
 				this.generateNewUserBidData();
 				if(app.userData.bid.length===0){
@@ -3568,6 +3864,7 @@ const view = {
 				}else{
 					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',app.userData.bid]);
 				}
+				
 				//for bidder
 				const bidderBid = (await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'get'])).val()||[];
 				if(bidderBid.length===0){
@@ -3662,20 +3959,45 @@ const view = {
 				indicator.find('#text').innerHTML = 'Owner Menolak Tawaran Anda';
 				view.main.addChild(indicator);
 			},
+			handleWinMsg(winner){
+				const indicator = view.actionIndicator(this);
+				indicator.find('#topTitle').innerHTML = 'Notifikasi';
+				indicator.find('#text').innerHTML = `Owner Menerima Tawaran ${winner}`;
+				view.main.addChild(indicator);
+			},
+			async removeMyBid(){
+				await app.doglas.get(`bid/${data.type}/${data.bidId}`).remove();
+				console.log('Lose, deleting my own bid data');
+			},
 			listen(){
 				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
 					const data = x.val();
+					if(!data)return;
 					if(data[data.length-1].from!==app.userData.username){
 						this.putMsg(data[data.length-1]);
 					}
 				})
 				if(data.bidderProfileId===app.userData.cleanEmail){
-					app.doglas.get(`bid/${data.type}/${data.bidId}/status`).on('value',(x)=>{
-						const data = x.val();
-						if(data==='r'){
-							this.handleRejectMsg();
-						}
+					app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).on('value',(x)=>{
+						const rejected = x.val();
+						console.log(rejected);
+						if(rejected==='unset' || !rejected)return;
+						this.handleRejectMsg();
+						app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).off('value');
+						//remove the listener for the project.
+						app.doglas.get(`post/${data.type}/${data.postid}/winner`).off('value');
 					})
+					app.doglas.get(`post/${data.type}/${data.postid}/winner`).on('value',(x)=>{
+						const winner = x.val();
+						console.log(winner);
+						if(winner==='unset' || !winner)return;
+						if(winner===app.userData.cleanEmail){
+							this.handleWinMsg('Anda');
+						}else{
+							this.handleWinMsg(winner);
+						}
+						app.doglas.get(`post/${data.type}/${data.postid}/winner`).off('value');
+					})	
 				}
 			},
 			init(){
@@ -3698,12 +4020,279 @@ const view = {
 				this.boxinbox.addChild(this.inboxItem(msg));
 				this.puttedMsg = msg;
 			},
+			onCloseClickded(){
+				if(customCloseThis){
+					customCloseThis();
+				}else view.content.openInbox();
+				this.remove();
+			},
 			onadded(){
 				//close event.
-				this.find('#closethis').onclick = ()=>{
-					view.content.openInbox();
-					this.remove();
+				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.init();
+			},
+			inboxItem(item){
+				return makeElement('div',{
+					style:`
+						display:flex;
+						flex-direction:column;
+						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						width:100%;
+						gap:5px;
+					`,
+					innerHTML:`
+						<div>${item.from}</div>
+						<div style="
+							display:flex;
+						">
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'none':'block'};
+							">
+								<img src=${item.profilepicture||app.noProfilePng} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+							<div style="
+								background:${item.from===app.userData.username?'white':'gray'};
+								color:${item.from===app.userData.username?'black':'white'};
+								padding:10px;
+								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+							">${item.msg.replaceAll('\n','<br>')}</div>
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'block':'none'};
+							">
+								<img src=${item.profilepicture||app.noProfilePng} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+						</div>
+						<div style=font-size:12px>${item.date}</div>
+					`,
+					onadded(){
+						this.scrollIntoView();
+					}
+				})
+			}
+		})
+	},
+	OnGoingChat(data,customCloseThis){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				background:white;
+			`,
+			innerHTML:`
+				<div class=innerBox
+				style="
+					height:100%;
+					background:white;
+					display:flex;
+					flex-direction:column;
+				"
+				>
+					<div style="
+						width: 100%;
+						min-height: 100px;
+						display: flex;
+						align-items: center;
+						justify-content: space-around;
+					">
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=closethis style="cursor:pointer;">
+								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							</div>
+						</div>
+						<div style="
+							width:80%;
+						">
+							<div>${data.subject.slice(0,30)+'...'}</div>
+							<div>Rp. ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+						</div>
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=moremenu style="cursor:pointer;">
+								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						width:90%;
+						height:94%;
+						background:whitesmoke;
+						overflow:auto;
+						padding:5%;
+					" id=boxinbox>
+						
+					</div>
+					<div style="
+						width: 94%;
+						/* height: 69px; */
+						border-top: 1px solid whitesmoke;
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: whitesmoke;
+					">
+						<div style="
+							width: 80%;
+							/* height: 100%; */
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							background: white;
+							border-radius: 20px 0 0 20px;
+							padding:10px;
+						">
+							<textarea style="
+								background: white;
+								border: none;
+								border-radius: 20px 0 0 20px;
+								min-height:40px;
+								min-width:100%;
+							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
+						</div>
+						<div style="
+							width: 20%;
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style=cursor:pointer id=sendbutton>
+								<img src=./more/media/send.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			collectData(){
+				const msg = {
+					from:app.userData.username,
+					date:getFullDate(),
+					msg:this.msgbox.value
 				}
+				return msg;
+			},
+			initUserActionToBidder(){
+				this.findall('#userActionBidder div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			moreMenuInit(){
+				//this.initUserActionToBidder();
+				this.find('#moremenu').onclick = ()=>{
+					view.main.addChild(view.moremenubid(data));
+				}
+			},
+			initSendButton(){
+				this.find('#sendbutton').onclick = ()=>{
+					this.sendMsg();
+				}
+			},
+			async sendMsg(){
+				const msgData = this.collectData();
+				if(msgData.msg.length===0)return;
+				
+				//send the msg to the server.
+				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val();
+				inbox.push(msgData);
+				const result = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'set',inbox]);
+				this.putMsg(msgData);
+				//set msgbox value to zero.
+				this.msgbox.value = '';
+			},
+			downKeys:[],
+			initEnterSend(){
+				this.msgbox.onkeydown = (e)=>{
+					if(!this.downKeys.includes(e.key))this.downKeys.push(e.key);
+					if(this.downKeys.includes('Enter') && !this.downKeys.includes('Shift')){
+						this.sendMsg();
+					}
+				}
+				this.msgbox.onkeyup = (e)=>{
+					this.downKeys.pop();
+				}
+			},
+			listen(){
+				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
+					const data = x.val();
+					if(!data)return;
+					if(data[data.length-1].from!==app.userData.username){
+						this.putMsg(data[data.length-1]);
+					}
+				})
+			},
+			init(){
+				this.boxinbox = this.find('#boxinbox');
+				this.showInboxInit();
+				this.msgbox = this.find('#msgbox');
+				this.initSendButton();
+				this.initEnterSend();
+				this.moreMenuInit();
+				setTimeout(()=>{this.listen()},2000);
+			},
+			async showInboxInit(){
+				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val()||[];
+				inbox.forEach((item)=>{
+					this.putMsg(item);
+				})
+			},
+			putMsg(msg){
+				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				this.boxinbox.addChild(this.inboxItem(msg));
+				this.puttedMsg = msg;
+			},
+			onCloseClickded(){
+				if(customCloseThis){
+					customCloseThis();
+				}else view.content.openInbox();
+				this.remove();
+			},
+			onadded(){
+				//close event.
+				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
 				this.init();
 			},
 			inboxItem(item){
@@ -3906,6 +4495,273 @@ const view = {
 					view.content.openInbox();
 					this.remove();
 				}
+			}
+		})
+	},
+	globalChat(customCloseThis){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				background:white;
+			`,
+			innerHTML:`
+				<div class=innerBox
+				style="
+					height:100%;
+					background:white;
+					display:flex;
+					flex-direction:column;
+				"
+				>
+					<div style="
+						width: 100%;
+						min-height: 100px;
+						display: flex;
+						align-items: center;
+						justify-content: space-around;
+					">
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=closethis style="cursor:pointer;">
+								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							</div>
+						</div>
+						<div style="
+							width:80%;
+						">
+							<div>The Simpsons Group</div>
+							<div>Katakan Hai Pada Mereka!</div>
+						</div>
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=moremenu style="cursor:pointer;">
+								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						width:90%;
+						height:94%;
+						background:whitesmoke;
+						overflow:auto;
+						padding:5%;
+					" id=boxinbox>
+						
+					</div>
+					<div style="
+						width: 94%;
+						/* height: 69px; */
+						border-top: 1px solid whitesmoke;
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: whitesmoke;
+					">
+						<div style="
+							width: 80%;
+							/* height: 100%; */
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							background: white;
+							border-radius: 20px 0 0 20px;
+							padding:10px;
+						">
+							<textarea style="
+								background: white;
+								border: none;
+								border-radius: 20px 0 0 20px;
+								min-height:40px;
+								min-width:100%;
+							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
+						</div>
+						<div style="
+							width: 20%;
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style=cursor:pointer id=sendbutton>
+								<img src=./more/media/send.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			collectData(){
+				const msg = {
+					from:app.userData.username,
+					date:getFullDate(),
+					msg:this.msgbox.value,
+					profilepicture:app.userData.profilepicture
+				}
+				return msg;
+			},
+			moreMenuInit(){
+				//this.initUserActionToBidder();
+				this.find('#moremenu').onclick = ()=>{
+					view.main.addChild(view.moremenubid(data));
+				}
+			},
+			initSendButton(){
+				this.find('#sendbutton').onclick = ()=>{
+					this.sendMsg();
+				}
+			},
+			async sendMsg(){
+				const msgData = this.collectData();
+				if(msgData.msg.length===0)return;
+				
+				//send the msg to the server.
+				let inbox = (await app.doglas.do(['database','globalGroupChat',``,'get'])).val()||[];
+				if(inbox.length>=30){
+					//slicing the array cause i wanna protect the size.
+					inbox = inbox.slice(19,30);
+				}
+				inbox.push(msgData);
+				const result = await app.doglas.do(['database','globalGroupChat',``,'set',inbox]);
+				this.putMsg(msgData);
+				//set msgbox value to zero.
+				this.msgbox.value = '';
+			},
+			downKeys:[],
+			initEnterSend(){
+				this.msgbox.onkeydown = (e)=>{
+					if(!this.downKeys.includes(e.key))this.downKeys.push(e.key);
+					if(this.downKeys.includes('Enter') && !this.downKeys.includes('Shift')){
+						this.sendMsg();
+					}
+				}
+				this.msgbox.onkeyup = (e)=>{
+					this.downKeys.pop();
+				}
+			},
+			listen(){
+				app.doglas.get(`globalGroupChat`).on('value',(x)=>{
+					const data = x.val();
+					if(!data)return;
+					if(data[data.length-1].from!==app.userData.username){
+						this.putMsg(data[data.length-1]);
+					}
+				})
+			},
+			init(){
+				this.boxinbox = this.find('#boxinbox');
+				this.showInboxInit();
+				this.msgbox = this.find('#msgbox');
+				this.initSendButton();
+				this.initEnterSend();
+				this.moreMenuInit();
+				setTimeout(()=>{this.listen()},2000);
+			},
+			async showInboxInit(){
+				const inbox = (await app.doglas.do(['database','globalGroupChat',``,'get'])).val()||[];
+				inbox.forEach((item)=>{
+					this.putMsg(item);
+				})
+			},
+			putMsg(msg){
+				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				this.boxinbox.addChild(this.inboxItem(msg));
+				this.puttedMsg = msg;
+			},
+			removeListen(){
+				app.doglas.get(`globalGroupChat`).off('value');
+			},
+			onCloseClickded(){
+				if(customCloseThis){
+					customCloseThis();
+				}else view.content.openInbox();
+				//delete the event
+				this.removeListen();
+				this.remove();
+			},
+			onadded(){
+				//close event.
+				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.init();
+			},
+			inboxItem(item){
+				return makeElement('div',{
+					style:`
+						display:flex;
+						flex-direction:column;
+						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						width:100%;
+						gap:5px;
+					`,
+					innerHTML:`
+						<div>${item.from}</div>
+						<div style="
+							display:flex;
+						">
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'none':'block'};
+							">
+								<img src=${item.profilepicture} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+							<div style="
+								background:${item.from===app.userData.username?'white':'gray'};
+								color:${item.from===app.userData.username?'black':'white'};
+								padding:10px;
+								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+							">${item.msg.replaceAll('\n','<br>')}</div>
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'block':'none'};
+							">
+								<img src=${item.profilepicture} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+						</div>
+						<div style=font-size:12px>${item.date}</div>
+					`,
+					onadded(){
+						this.scrollIntoView();
+					}
+				})
 			}
 		})
 	}

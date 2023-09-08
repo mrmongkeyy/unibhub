@@ -1,5 +1,5 @@
 const app = {
-	noProfilePng:'./more/media/gemaprofile.png',
+	noProfilePng:'./more/media/user.png',
 	dataFiktif:[
 		{
 			title:'How to code a game using PYTHON!!!',
@@ -82,8 +82,19 @@ const app = {
 		//flextoshowsa init.
 		if(!this.flextoshowsa.init())return this.err();
 	},
+	validDataChecker(x){
+		const now = getTime();
+		if(now>x.exp)return false;
+		return true;
+	},
 	getInfoLogin(){
 		if(this.userData)return true;
+		return false;
+		const databefore = this.ls.get();
+		if(databefore && this.validDataChecker(databefore)){
+			this.userData = databefore;
+			return true;
+		}
 		return false;
 	},
 	flextoshowsa:{
@@ -157,6 +168,9 @@ const app = {
 		},
 		get(){
 			return JSON.parse(localStorage.getItem(this.id));
+		},
+		remove(){
+			localStorage.removeItem(this.id);
 		}
 	}
 }
