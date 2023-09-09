@@ -106,7 +106,7 @@ input,textarea{
 	gap:8px;
 	align-items:center;
 	height:100%;
-	margin:40px 20px;
+	margin:20px 20px 40px 20px;
 	justify-content:flex-start;
 	flex-direction:column;
 }
@@ -128,7 +128,9 @@ input,textarea{
 	width:48;
 	height:48;
 }
-
+#berandadivmenu div{
+	border-bottom:1px solid whitesmoke;
+}
 #berandadivmenu div:hover{
 	border-bottom:1px solid black;
 }

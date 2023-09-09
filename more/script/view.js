@@ -149,7 +149,7 @@ const view = {
 	header:makeElement('header',{
 		style:`
 			width:100%;
-			height:128px;
+			height:200px;
 			display:flex;
 			justify-content:center;
 			border-bottom:1px solid whitesmoke;
@@ -610,10 +610,8 @@ const view = {
 				width: 100%;
 				display: flex;
 				overflow: auto;
-				/* margin-right: 10px; */
 				margin: 2% 0;
 				background: white;
-				border-bottom: 1px solid whitesmoke;
 				align-items: center;
 				position:sticky;
 				top:0;
@@ -623,7 +621,6 @@ const view = {
 					  width: 100%;
 						display: flex;
 						justify-content: flex-start;
-						/* margin: 2%; */
 						background: white;
 				" id=berandadivmenu>
 					<div style="
