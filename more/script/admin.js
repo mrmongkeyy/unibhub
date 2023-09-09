@@ -174,7 +174,7 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">TheSimpsons<span style=font-size:12px;font-family:montserratregular> Portal</span></div>
+					">TheSimpsons<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -185,10 +185,6 @@ const view = {
 					overflow:auto;
 					overflow-y:hidden;
 				" id=ourmenu class=innerBox>
-					<div id=newPost style=padding-left:30px;>
-						<img src=./more/media/pen.png class=navimg>
-						Post
-					</div>
 					<div id=displayList>
 						<img src=./more/media/home.png class=navimg>
 						Beranda
@@ -501,7 +497,7 @@ const view = {
 			this.clearLinesParent();
 			view.addLoading();
 			//update the user bid data.
-			app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
+			app.userData.bid = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/bid`,'get'])).val();
 			view.unloading();
 			this.linesParent.addChild(view.inbox());
 			this.stateLabel.innerHTML = 'Inbox';
@@ -586,7 +582,7 @@ const view = {
 			},
 			OnGoing(){
 				view.addLoading()
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','admin',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'OnGoing');
@@ -594,7 +590,7 @@ const view = {
 			},
 			Finished(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','admin',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'Finished');
@@ -695,7 +691,7 @@ const view = {
 			},
 			loadjasa(){
 				view.addLoading();
-				app.doglas.do(['database','post','Services','get','']).then(data=>{
+				app.doglas.do(['database','pending','Services','get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadjasa');
@@ -703,7 +699,7 @@ const view = {
 			},
 			loadcerpen(){
 				view.addLoading();
-				app.doglas.do(['database','post','ShortStories','get','']).then(data=>{
+				app.doglas.do(['database','pending','ShortStories','get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadcerpen');
@@ -711,7 +707,7 @@ const view = {
 			},
 			loadartikel(){
 				view.addLoading();
-				app.doglas.do(['database','post','Articles','get','']).then(data=>{
+				app.doglas.do(['database','pending','Articles','get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadartikel');
@@ -719,7 +715,7 @@ const view = {
 			},
 			loadloker(){
 				view.addLoading();
-				app.doglas.do(['database','post','Jobs','get','']).then(data=>{
+				app.doglas.do(['database','pending','Jobs','get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadloker');
@@ -1361,31 +1357,54 @@ const view = {
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:black;
+						background:green;
 						color:white;
-						border:1px solid black;
-						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
 						display:flex;
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
-					" id=dooffers>
-						Buat Penawaran
+					" id=publish>
+						Publish Penawaran
+					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=cancel>
+						Hapus Penawaran
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.find('#dooffers').onclick = ()=>{
-					this.doOffers();
+				this.find('#publish').onclick = ()=>{
+					this.publish();
+				}
+				this.find('#cancel').onclick = ()=>{
+					this.cancel();
 				}
 			},
-			doOffers(){
-				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
-				//handling owner bid owner.
-				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
-				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+			cancel(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.removePost(data));
+			},
+			publish(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.loadingPost(data));
 			}
 		})
 	},
@@ -1430,35 +1449,59 @@ const view = {
 					left:0;
 					display:flex;
 					justify-content:center;
+					gap:10px;
 				">
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:black;
+						background:green;
 						color:white;
-						border:1px solid black;
-						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
 						display:flex;
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
-					" id=dooffers>
-						Buat Penawaran
+					" id=publish>
+						Publish Penawaran
+					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=cancel>
+						Hapus Penawaran
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.find('#dooffers').onclick = ()=>{
-					this.doOffers();
+				this.find('#publish').onclick = ()=>{
+					this.publish();
+				}
+				this.find('#cancel').onclick = ()=>{
+					this.cancel();
 				}
 			},
-			doOffers(){
-				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
-				//handling owner bid owner.
-				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
-				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+			cancel(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.removePost(data));
+			},
+			publish(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.loadingPost(data));
 			}
 		})
 	},
@@ -2036,7 +2079,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Login TheSimpsons
+							Login Admin TheSimpsons
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2104,7 +2147,7 @@ const view = {
 			goIn(){
 				//time to check user login data.
 				const userPData = this.collectData();
-				app.checkLogin(userPData,this);
+				app.checkAdminLogin(userPData,this);
 			},
 			goSignin(){
 				view.main.addChild(view.siginBox());
@@ -2144,7 +2187,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Akun Baru TheSimpsons
+							Akun Admin Baru TheSimpsons
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2337,18 +2380,19 @@ const view = {
 			},
 			completeIt(data){
 				this.submitData({
-					username:data.username.value,
+					username:`admin-${data.username.value}`,
 					password:data.userpassone.value,
 					email:data.emailuser.value,
 					uniqueId:getUniqueID(),
 					date:getFullDate(),
-					cleanEmail:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@'))
+					cleanEmail:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@')),
+					profilepicture:app.noProfilePng
 				});
 			},
 			submitData(data){
 				this.hideFormAndButtons();
 				this.find('#loading').show('flex');
-				app.doglas.do(['database','users',data.cleanEmail,'update',data]).then(()=>{
+				app.doglas.do(['database','admin',data.cleanEmail,'update',data]).then(()=>{
 					this.showTheAnounce('Pendaftaran Berhasil! Silahkan Lakukan Login.');
 					setTimeout(()=>{this.goIn()},1000);
 				});
@@ -2542,7 +2586,7 @@ const view = {
 			},
 			async loadNotifData(){
 				view.addLoading();
-				const data = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				const data = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
 				view.unloading();
 				this.generateNotifList(data);
 			},
@@ -2598,20 +2642,127 @@ const view = {
 			handleResponse(x){
 				console.log(x);
 				if(!x){
-					this.text.innerHTML = 'Data berhasil diupload, menunggu persetujuan dari admin untuk dipublish';
-					view.content.newPost();
+					this.text.innerHTML = 'Data Berhasil DiPublish';
 				}else{
 					this.text.innerHTML = 'Terjadi Masalah Saat Mengupload, coba lagi nanti.';
 					this.remove();
 				}
 			},
-			DoRequest(){
-				app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]).then((x)=>{
-					this.handleResponse(x);
+			async DoRequest(){
+				//send notif to owner.
+				const ownerNotifs = (await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'get'])).val()||[];
+				ownerNotifs.push({
+					profilepicture:app.noProfilePng,
+					who:'Admin',
+					when:getFullDate(),
+					what:`Postingan ${this.datatoupload.type} anda ${this.datatoupload.title} telah dipublish`
 				})
+				await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'set',ownerNotifs]);
+				//send notif to admin.
+				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				adminNotifs.push({
+					profilepicture:app.noProfilePng,
+					who:'Kamu',
+					when:getFullDate(),
+					what:`Mempublish Postingan ${this.datatoupload.type} ${this.datatoupload.title} dari ${this.datatoupload.owner}`
+				})
+				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				const x = await app.doglas.do(['database','post',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]);
+				await app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'remove']);
+				this.handleResponse(x);
 			},
 			onadded(){
-				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.find('#closethis').onclick = ()=>{
+					view.content.displayList([],'loadartikel',true);
+					this.remove();
+				}
+				this.text = this.find('#text');
+				this.DoRequest();
+			}
+		})
+	},
+	removePost(datatoupload){
+		return makeElement('div',{
+			datatoupload,
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:montserratbold;
+							margin-left:5px;
+						">
+							Proses Uploading
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					">
+						<div id=text>
+							Mohon Tunggu Sebentar, Sedang Mengupload Data.
+						</div>
+					</div>
+				</div>
+			`,
+			handleResponse(x){
+				if(!x){
+					this.text.innerHTML = 'Data Berhasil Hapus';
+				}else{
+					this.text.innerHTML = 'Terjadi Masalah Saat Mengupload, coba lagi nanti.';
+					this.remove();
+				}
+			},
+			async DoRequest(){
+				//send notif to owner.
+				const ownerNotifs = (await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'get'])).val()||[];
+				ownerNotifs.push({
+					profilepicture:app.noProfilePng,
+					who:'Admin',
+					when:getFullDate(),
+					what:`Postingan ${this.datatoupload.type} anda ${this.datatoupload.title} Ditolak publish`
+				})
+				await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'set',ownerNotifs]);
+				//send notif to admin.
+				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				adminNotifs.push({
+					profilepicture:app.noProfilePng,
+					who:'Kamu',
+					when:getFullDate(),
+					what:`Menolak Postingan ${this.datatoupload.type} ${this.datatoupload.title} dari ${this.datatoupload.owner}`
+				})
+				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				await app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'remove']);
+				this.handleResponse();
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					view.content.displayList([],'loadartikel',true);
+					this.remove();
+				}
 				this.text = this.find('#text');
 				this.DoRequest();
 			}
@@ -3768,20 +3919,10 @@ const view = {
 				delete project.winner;
 				
 				//getting admin data.
-				const admins = (await app.doglas.do(['database','admin','','get'])).val()||{};
+				const admins = (await app.doglas.do(['database','admins','','get'])).val()||[];
 				console.log('admins data',admins);
-				project.admin = objToArray(admins).getRandom().cleanEmail;
-				console.log(project.admin);
 				
-				//updating admin notif.
-				const adminNotifs = (await app.doglas.do(['database','admin',`${project.admin}/notif`,'get'])).val()||[];
-				adminNotifs.push({
-					profilepicture:app.noProfilePng,
-					who:'Sistem',
-					when:getFullDate(),
-					what:`Anda terpilih sebagai admin ${project.type} ${project.title} dari ${project.owner}`
-				})
-				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				
 				
 				//set global room //onGoingRoom
 				const roomId = getUniqueID();
@@ -3791,30 +3932,23 @@ const view = {
 				await app.doglas.do(['database','OnGoingRooms',roomId,'set',project]);
 				console.log('global room updateed');
 				
-				//sign the value of data to project.
-				Object.assign(project,data);
-				console.log('the project is',project);
-				
 				
 				//set room for owner.
 				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
 				console.log(ownerOnGoingProjects);
+				
+				//sing the value of data to project.
+				Object.assign(project,data);
+				console.log('the project is',project);
 				ownerOnGoingProjects.push(project);
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
 
 				//set room for the winner
 				console.log('winner is',winner);
-				const winnerOnGoingProjects = (await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'get'])).val()||[];
+				const winnerOnGoingProjects = (await app.doglas.do(['database','user',`${winner}/onGoingProjects`,'get'])).val()||[];
 				console.log(winnerOnGoingProjects);
 				winnerOnGoingProjects.push(project);
 				await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'set',winnerOnGoingProjects]);
-				
-				//set room for the admin
-				console.log('winner is',winner);
-				const adminOnGoingProjects = (await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'get'])).val()||[];
-				console.log(adminOnGoingProjects);
-				adminOnGoingProjects.push(project);
-				await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'set',adminOnGoingProjects]);
 			},
 			async setWinner(param){
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/winner`,'set',param]);
@@ -4027,11 +4161,6 @@ const view = {
 					})	
 				}
 			},
-			removeListen(){
-				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).off('value');
-				app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).off('value');
-				app.doglas.get(`post/${data.type}/${data.postid}/winner`).off('value');
-			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
 				this.showInboxInit();
@@ -4053,7 +4182,6 @@ const view = {
 				this.puttedMsg = msg;
 			},
 			onCloseClickded(){
-				this.removeListen();
 				if(customCloseThis){
 					customCloseThis();
 				}else view.content.openInbox();

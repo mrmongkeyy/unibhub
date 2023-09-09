@@ -132,6 +132,23 @@ const app = {
 		view.main.clear();
 		forceRecheck(view.main,'Error, Youre OFF! Please Check Back Your Internet Connection!',true);
 	},
+	checkAdminLogin(datauser,toRemove){
+		this.doglas.do(['database','admin',`${datauser.cleanEmail}`,'get']).then((callbackData)=>{
+			const data = callbackData.val();
+			if(!data){
+				forceRecheck(view.main,'Admin Tidak Ditemukan! Periksa Kembali Email Anda!');	
+				return false;
+			}
+			const passed = this.checkPass(datauser,data);
+			if(!passed){
+				forceRecheck(view.main,'Kata Sandi Salah! Periksa Kembali.');
+				return false;
+			}
+			this.saveDataLogin(data);
+			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			toRemove.remove();
+		})
+	},
 	checkLogin(datauser,toRemove){
 		this.doglas.do(['database','users',`${datauser.cleanEmail}`,'get']).then((callbackData)=>{
 			const data = callbackData.val();
