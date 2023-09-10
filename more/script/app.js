@@ -82,13 +82,14 @@ const app = {
 		//flextoshowsa init.
 		if(!this.flextoshowsa.init())return this.err();
 	},
+	userData:{},
 	validDataChecker(x){
 		const now = getTime();
 		if(now>x.exp)return false;
 		return true;
 	},
 	getInfoLogin(){
-		if(this.userData)return true;
+		if(this.userData.cleanEmail)return true;
 		return false;
 		const databefore = this.ls.get();
 		if(databefore && this.validDataChecker(databefore)){
@@ -163,6 +164,9 @@ const app = {
 			}
 			this.saveDataLogin(data);
 			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			//handle callback if theres one.
+			console.log(toRemove.after);
+			if(toRemove.after)toRemove.after();
 			toRemove.remove();
 		})
 	},

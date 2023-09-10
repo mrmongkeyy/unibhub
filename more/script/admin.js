@@ -3829,6 +3829,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4312,6 +4314,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+					  scrollbar-color: gray whitesmoke;
+					  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4460,7 +4464,15 @@ const view = {
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
 				this.init();
 			},
+			getRole(item){
+				let role = '';
+				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
+				else if(item.from===data.username)role='Owner';
+				else if(item.from===data.bidder)role='Worker';
+				return role;
+			},
 			inboxItem(item){
+				const role = this.getRole(item);
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -4470,7 +4482,7 @@ const view = {
 						gap:5px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div>${item.from}: ${role}</div>
 						<div style="
 							display:flex;
 						">
@@ -4756,6 +4768,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+					  scrollbar-color: gray whitesmoke;
+					  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>

@@ -403,7 +403,7 @@ const view = {
 		},
 		openMyproject(data=[],nav='OnGoing',boot){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.openMyproject()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -423,7 +423,7 @@ const view = {
 		},
 		openGlobalChat(){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.openGlobalChat()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			view.main.addChild(view.globalChat(()=>{
@@ -444,12 +444,12 @@ const view = {
 			}
 			return result;
 		},
-		getIn(){
-			view.main.addChild(view.loginBox());
+		getIn(after){
+			view.main.addChild(view.loginBox(after));
 		},
 		openProfile(userId){
 			if(!this.isInProfile()){
-				return this.getIn();
+				return this.getIn(()=>{view.content.openProfile()});
 			}
 			this.clearLinesParent();
 			this.linesParent.addChild(view.profilePage(userId));
@@ -460,7 +460,7 @@ const view = {
 		},
 		newPost(){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.newPost()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.addChild(view.newPost());
@@ -483,7 +483,7 @@ const view = {
 		},
 		openNotif(){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.openNotif()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -495,7 +495,7 @@ const view = {
 		},
 		async openInbox(){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.openInbox()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -1436,29 +1436,126 @@ const view = {
 						padding-bottom:10px;
 						background:black;
 						color:white;
-						border:1px solid black;
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:flex;
+						display:${app.userData?data.owner===app.userData.cleanEmail?'none':'flex':'flex'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=dooffers>
 						Buat Penawaran
 					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:${app.userData?data.owner===app.userData.cleanEmail?'flex':'none':'none'};
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=delete>
+						Hapus Penawaran
+					</div>
 				</div>
 			`,
 			onadded(){
-				this.find('#dooffers').onclick = ()=>{
-					this.doOffers();
-				}
+				this.find('#dooffers').onclick = ()=>{this.doOffers()};
+				this.find('#delete').onclick = ()=>{this.deletePost()};
+			},
+			deletePost(){
+				view.main.addChild(view.userRemovePost(data));
 			},
 			doOffers(){
-				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
-				//handling owner bid owner.
-				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openJobs();
+					});
+					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+				}
 				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+			}
+		})
+	},
+	userRemovePost(datatoupload){
+		return makeElement('div',{
+			datatoupload,
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				background:#00000040;
+			`,
+			innerHTML:`
+				<div style="
+					border-radius:0 0 20px 20px;
+					background:white;
+				" class=innerBox>
+					<div style="
+						width:94%;
+						display:flex;
+						justify-content:space-between;
+						padding:3%;
+						align-items:center;
+						background:whitesmoke;
+					">
+						<div style="
+							font-family:montserratbold;
+							margin-left:5px;
+						">
+							Proses Uploading
+						</div>
+						<div id=closethis style="cursor:pointer;">
+							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						display:flex;
+						justify-content:center;
+						gap:10px;
+					">
+						<div id=text>
+							Mohon Tunggu Sebentar, Sedang Mengapus Data.
+						</div>
+					</div>
+				</div>
+			`,
+			handleResponse(x){
+				if(!x){
+					this.text.innerHTML = 'Data Berhasil Hapus';
+				}else{
+					this.text.innerHTML = 'Terjadi masalah saat menghapus, coba lagi nanti.';
+					this.remove();
+				}
+			},
+			async DoRequest(){
+				//send notif to owner.
+				const ownerNotifs = (await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'get'])).val()||[];
+				ownerNotifs.push({
+					profilepicture:app.userData.profilepicture,
+					who:'Kamu',
+					when:getFullDate(),
+					what:`Menghapus postingan ${this.datatoupload.type} ${this.datatoupload.title}`
+				})
+				await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'set',ownerNotifs]);
+				await app.doglas.do(['database','post',`${this.datatoupload.type}/${this.datatoupload.postId}`,'remove']);
+				this.handleResponse();
+			},
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					view.content.displayList([],'loadartikel',true);
+					this.remove();
+				}
+				this.text = this.find('#text');
+				this.DoRequest();
 			}
 		})
 	},
@@ -2009,8 +2106,9 @@ const view = {
 			}
 		})
 	},
-	loginBox(){
+	loginBox(after){
 		return makeElement('div',{
+			after,
 			style:`
 				width:100%;
 				height:100%;
@@ -3678,6 +3776,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+					  scrollbar-color: gray whitesmoke;
+					  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4184,6 +4284,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+					  scrollbar-color: gray whitesmoke;
+					  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4332,7 +4434,15 @@ const view = {
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
 				this.init();
 			},
+			getRole(item){
+				let role = '';
+				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
+				else if(item.from===data.username)role='Owner';
+				else if(item.from===data.bidder)role='Worker';
+				return role;
+			},
 			inboxItem(item){
+				const role = this.getRole(item);
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -4342,7 +4452,7 @@ const view = {
 						gap:5px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div>${item.from}: ${role}</div>
 						<div style="
 							display:flex;
 						">
@@ -4628,6 +4738,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
