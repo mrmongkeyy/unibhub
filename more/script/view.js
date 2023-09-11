@@ -152,7 +152,8 @@ const view = {
 			height:200px;
 			display:flex;
 			justify-content:center;
-			border-bottom:1px solid whitesmoke;
+			border-bottom:5px solid whitesmoke;
+			background:white;
 		`,
 		innerHTML:`
 			<div style="
@@ -169,6 +170,7 @@ const view = {
 					display: flex;
 					align-items: center;
 					justify-content:center;
+					background:black;color:white;
 				">
 					<div style="
 						cursor:pointer;
@@ -447,16 +449,21 @@ const view = {
 		getIn(after){
 			view.main.addChild(view.loginBox(after));
 		},
-		openProfile(userId){
-			if(!this.isInProfile()){
+		async openProfile(userId){
+			if(typeof userId==='object')userId = null;
+			let userData;
+			if(!this.isInProfile() && !userId){
 				return this.getIn(()=>{view.content.openProfile()});
 			}
 			this.clearLinesParent();
-			this.linesParent.addChild(view.profilePage(userId));
+			if(userId){
+				userData = (await app.doglas.do(['database','users',userId,'get'])).val();
+			}
+			this.linesParent.addChild(view.profilePage(userData));
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
 			this.searchWare.hide();
-			this.logout.show('flex');
+			if(!userId)this.logout.show('flex');
 		},
 		newPost(){
 			if(!app.getInfoLogin()){
@@ -493,17 +500,18 @@ const view = {
 			this.searchWare.hide();
 			this.logout.hide();
 		},
-		async openInbox(){
+		openInbox(data=[],nav='bid',boot){
 			if(!app.getInfoLogin()){
 				view.content.getIn(()=>{view.content.openInbox()});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
-			view.addLoading();
+			if(nav==='loadartikel')nav='bid';
+			this.find('#linesparent').addChild(view.myInboxDiv(nav,boot));
 			//update the user bid data.
-			app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
-			view.unloading();
-			this.linesParent.addChild(view.inbox());
+			//app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
+			app.userData[nav] = data;
+			this.linesParent.addChild(view.inbox(nav));
 			this.stateLabel.innerHTML = 'Inbox';
 			this.reactTo.hide();
 			this.searchWare.hide();
@@ -598,6 +606,95 @@ const view = {
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'Finished');
+				})
+			}
+		})
+	},
+	myInboxDiv(nav='bid',boot=false){
+		return makeElement('div',{
+			nav,
+			style:`
+				width: 100%;
+				display: flex;
+				overflow: auto;
+				/* margin-right: 10px; */
+				margin: 2% 0;
+				background: white;
+				border-bottom: 1px solid whitesmoke;
+				align-items: center;
+				position:sticky;
+				top:0;
+			`,
+			innerHTML:`
+				<div style="
+					  width: 100%;
+						display: flex;
+						justify-content: flex-start;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=bid
+					>
+						<img src=./more/media/worker.png class=navimg>
+						Bid
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=inbox
+					>
+						<img src=./more/media/chat.png class=navimg>
+						Inbox
+					</div>
+				</div>
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				console.log(this.nav);
+				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).scrollIntoView();
+				this.buttonSetup();
+				if(boot){
+					console.log('boot is true');
+					this.bid();
+				}
+			},
+			bid(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openInbox(datacb,'bid');
+				})
+			},
+			inbox(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openInbox(datacb,'inbox');
 				})
 			}
 		})
@@ -767,9 +864,13 @@ const view = {
 				if(data.maxFee||data.minFee){
 					this.find('.vshareinfo').remove();
 				}else this.find('#fee').remove();
-				this.find('.item').onclick = ()=>{
+				this.find('.title').onclick = ()=>{
 					app.dataContent = data;
 					view.content[`open${data.type}`]();
+				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.content.openProfile(data.owner);
 				}
 			},
 		})
@@ -801,13 +902,16 @@ const view = {
 				</div>
 			`,
 			onadded(){
-				this.find('.item').onclick = ()=>{
+				this.find('.title').onclick = ()=>{
 					this.chatData = data;
 					this.openChat();
 				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.content.openProfile(data.bidderProfileId);
+				}
 			},
 			openChat(){
-				console.log(this.chatData);
 				view.main.addChild(view.OnGoingChat(this.chatData,()=>{
 					view.content.openMyproject([],'OnGoing',true);
 				}));
@@ -1630,8 +1734,8 @@ const view = {
 			}
 		})
 	},
-	profilePage(){
-		const userData = app.userData;
+	profilePage(userData){
+		if(!userData)userData = app.userData;
 		if(!userData.peoples){
 			userData.peoples = {
 				followers:[],
@@ -1662,7 +1766,7 @@ const view = {
 						right: 0;
 						padding: 10px;
 						background: white;
-						display: flex;
+						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};
 						align-items: center;
 						justify-content: center;
 						border-radius: 0 0 0 20px;
@@ -1714,6 +1818,7 @@ const view = {
 							border: 2px solid whitesmoke;
 							border-radius: 50%;
 							cursor: pointer;
+							display:${userData.cleanEmail===app.userData.cleanEmail?'':'none'};
 						" id=editPicture>
 							<img src=./more/media/edit.png style="
 								width:24px;
@@ -1726,7 +1831,7 @@ const view = {
 						background:white;
 						border:2px solid whitesmoke;
 						border-radius:20px;
-						display:flex;
+						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};;
 						gap:5px;
 						cursor:pointer;
 					" id=editProfile>
@@ -1795,18 +1900,6 @@ const view = {
 						justify-content:space-around;
 					"
 					>
-						<div>
-							<div class="button buttonstyled" style="
-								border-radius:20px;display:flex;
-								align-items:center;gap:5px;font-size:10px;
-							" id=hire>
-								<img src=./more/media/hired.png
-									style="
-										width:16px;
-										height:16px;
-									"
-								>Rekrut</div>
-						</div>
 						<div>
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
@@ -1910,6 +2003,9 @@ const view = {
 				this.find('#editbanner').onclick = ()=>{
 					this.editbanner();
 				}
+				this.find('#chat').onclick = ()=>{
+					this.sendmemsg();
+				}
 			},
 			generateMore(){
 				for(let i in userData.more){
@@ -1959,6 +2055,10 @@ const view = {
 			},
 			editPicture(){
 				view.main.addChild(view.editPic(this));
+			},
+			followme(){},
+			sendmemsg(){
+				//view.main.addChild(view.
 			}
 		})
 	},
@@ -2115,18 +2215,20 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
 				<div style="
 					background:white;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -2223,18 +2325,20 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
 				<div style="
 					background:white;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -2723,13 +2827,13 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
 				<div style="
 					background:white;
-					height:70%;
+					height:100%;
 					display:flex;
 					flex-direction:column;
 				" class=innerBox>
@@ -2737,7 +2841,8 @@ const view = {
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -2758,7 +2863,6 @@ const view = {
 						gap:10px;
 						overflow:auto;
 						flex-direction:column;
-						height:100%;
 					" id=datasparent>
 						<div>
 							<div>Username</div>
@@ -2905,19 +3009,21 @@ const view = {
 				width:100%;
 				height:100%;
 				display:flex;
-				justify-content:center;
+				justify-content:flex-end;
 				align-items:flex-start;
 				background:rgba(0, 0, 0, 0.25);
 			`,
 			innerHTML:`
 				<div class=innerBox style="
 					background:white;
+					height:100%;
 				">
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -2983,7 +3089,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -2991,12 +3097,14 @@ const view = {
 					background:white;
 					display:flex;
 					flex-direction:column;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -3120,7 +3228,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -3128,12 +3236,14 @@ const view = {
 					background:white;
 					display:flex;
 					flex-direction:column;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -3261,7 +3371,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -3269,12 +3379,14 @@ const view = {
 					background:white;
 					display:flex;
 					flex-direction:column;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -3363,7 +3475,7 @@ const view = {
 					owner:data.owner,
 					reject:'unset',
 					profilepicture:data.profilepicture,
-					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
 			},
@@ -3427,7 +3539,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -3435,12 +3547,14 @@ const view = {
 					background:white;
 					display:flex;
 					flex-direction:column;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -3527,10 +3641,11 @@ const view = {
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
 					owner:data.owner,
+					ownerUsername:data.username,
 					status:'unset',
 					profilepicture:data.profilepicture,
 					bidderProfileIdPic:app.userData.profilepicture,
-					inbox:[{date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
 			},
@@ -3601,7 +3716,7 @@ const view = {
 			}
 		})
 	},
-	inbox(){
+	inbox(nav){
 		return makeElement('div',{
 			style:`
 				width:100%;
@@ -3609,12 +3724,12 @@ const view = {
 			`,
 			generateChat(){
 				if(!app.userData.bid)app.userData.bid = [];
-				app.userData.bid.forEach((bid,i)=>{
+				app.userData[nav].forEach((bid,i)=>{
 					this.addChild(view.inboxItem(i,bid,(i!==app.userData.bid.length-1)?true:false));
 				})
-				if(app.userData.bid.length===0){
+				if(app.userData[nav].length===0){
 					this.addChild(makeElement('div',{
-						innerHTML:`Anda Belum Melakukan Aktifitas Penawaran!`,
+						innerHTML:`${nav==='bid'?'Anda Belum Melakukan Aktifitas Penawaran!':'Tidak Ada Pesan!'}`,
 						style:`
 							height:200px;
 							display:flex;
@@ -3658,10 +3773,16 @@ const view = {
 				</div>
 			`,
 			onadded(){
-				
+				this.find('.title').onclick = ()=>{
+					view.main.addChild(view.openChatBid(data));
+				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.content.openProfile(data.owner);
+				}
 			},
 			onclick(){
-				view.main.addChild(view.openChatBid(data));
+				
 			}
 		})
 	},
@@ -3675,8 +3796,8 @@ const view = {
 				left:0;
 				display:flex;
 				align-items:center;
-				justify-content:center;
-				background:white;
+				justify-content:flex-end;
+				background:rgba(0, 0, 0, 0.4);
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -3689,10 +3810,12 @@ const view = {
 				>
 					<div style="
 						width: 100%;
-						min-height: 100px;
+						min-height: 77px;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
+						background:black;
+						color:white;
 					">
 						<div style="
 							height: 100%;
@@ -3701,7 +3824,11 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=closethis style="cursor:pointer;">
+							<div id=closethis style="cursor:pointer;
+								padding:5px;
+								background:white;
+								border-radius:10px;
+							">
 								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 							</div>
 						</div>
@@ -3719,7 +3846,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
 							</div>
 						</div>
 					</div>
@@ -3776,8 +3903,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
-					  scrollbar-color: gray whitesmoke;
-					  scrollbar-width: thin;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -3789,7 +3916,7 @@ const view = {
 						align-items: center;
 						justify-content: space-between;
 						padding: 3%;
-						background: whitesmoke;
+						background: white;
 					">
 						<div style="
 							width: 80%;
@@ -3820,8 +3947,12 @@ const view = {
 							background: white;
 							border-radius: 0 20px 20px 0;
 						">
-							<div style=cursor:pointer id=sendbutton>
-								<img src=./more/media/send.png
+							<div style="cursor:pointer;
+								padding:10px;
+								background:black;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/whitesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -4156,7 +4287,7 @@ const view = {
 				this.removeListen();
 				if(customCloseThis){
 					customCloseThis();
-				}else view.content.openInbox();
+				}else view.content.openInbox([],'bid',true);
 				this.remove();
 			},
 			onadded(){
@@ -4230,8 +4361,8 @@ const view = {
 				left:0;
 				display:flex;
 				align-items:center;
-				justify-content:center;
-				background:white;
+				justify-content:flex-end;
+				background:rgba(0, 0, 0, 0.4);
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4244,10 +4375,12 @@ const view = {
 				>
 					<div style="
 						width: 100%;
-						min-height: 100px;
+						min-height: 77px;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
+						background:black;
+						color:white;
 					">
 						<div style="
 							height: 100%;
@@ -4256,7 +4389,11 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=closethis style="cursor:pointer;">
+							<div id=closethis style="cursor:pointer;
+								padding:5px;
+								background:white;
+								border-radius:10px;
+							">
 								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 							</div>
 						</div>
@@ -4274,7 +4411,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
 							</div>
 						</div>
 					</div>
@@ -4284,8 +4421,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
-					  scrollbar-color: gray whitesmoke;
-					  scrollbar-width: thin;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4297,7 +4434,7 @@ const view = {
 						align-items: center;
 						justify-content: space-between;
 						padding: 3%;
-						background: whitesmoke;
+						background: white;
 					">
 						<div style="
 							width: 80%;
@@ -4328,8 +4465,12 @@ const view = {
 							background: white;
 							border-radius: 0 20px 20px 0;
 						">
-							<div style=cursor:pointer id=sendbutton>
-								<img src=./more/media/send.png
+							<div style="cursor:pointer;
+								padding:10px;
+								background:black;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/whitesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -4506,7 +4647,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -4518,7 +4659,8 @@ const view = {
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -4526,7 +4668,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Pilih Tindakan
+							Project Info
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -4539,8 +4681,31 @@ const view = {
 						<div>Berhasil mereject pembidder, pembidder akan diblock untuk kembali membidder dan percakapan sebelumnya akan di hapus</div>
 					</div>
 					<div style="
+						    padding: 20px;
+								display: flex;
+								flex-direction: column;
+								gap: 5px
+					">
+						<div><b>Admin</b></div>
+						<div>
+							<input value=${data.admin} readonly>
+						</div>
+						<div><b>Owner</b></div>
+						<div>
+							<input value=${data.username} readonly>
+						</div>
+						<div><b>Bidder</b></div>
+						<div>
+							<input value=${data.bidder} readonly>
+						</div>
+						<div><b>Fee</b></div>
+						<div>
+							<input value="Rp. ${getPrice(data.fee)}" readonly>
+						</div>
+					</div>
+					<div style="
 						padding:20px;
-						display:flex;
+						display:none;
 						justify-content:center;
 						gap:10px;
 					" id=buttonsMenu>
@@ -4555,30 +4720,33 @@ const view = {
 							flex-direction:column;
 						"
 						>
+							<div><b>Admin Kontrol</b></div>
 							<div style="width:100%">
 								<div class="button buttonstyled" style="
 									border-radius:20px;display:flex;
 									align-items:center;gap:5px;justify-content:center;
+									background:green;color:white;
 								" id=hire>
 									<img src=./more/media/hired.png
 										style="
 											width:16px;
 											height:16px;
 										"
-									>Terima</div>
+									>Selesai</div>
 							</div>
 							<div style="width:100%">
 								<div class="button buttonstyled" style="
 									border-radius:20px;display:flex;
 									align-items:center;gap:5px;
 									justify-content:center;
+									background:red;color:white;
 								" id=reject>
 									<img src=./more/media/rejection.png
 										style="
 											width:16px;
 											height:16px;
 										"
-									>Tolak</div>
+									>Batalkan</div>
 							</div>
 						</div>
 					</div>
@@ -4628,7 +4796,7 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
+				justify-content:flex-end;
 				background:#00000040;
 			`,
 			innerHTML:`
@@ -4640,7 +4808,8 @@ const view = {
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
 					">
@@ -4685,8 +4854,8 @@ const view = {
 				left:0;
 				display:flex;
 				align-items:center;
-				justify-content:center;
-				background:white;
+				justify-content:flex-end;
+				background:#00000066;
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4699,10 +4868,12 @@ const view = {
 				>
 					<div style="
 						width: 100%;
-						min-height: 100px;
+						min-height: 77px;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
+						background:black;
+						color:white;
 					">
 						<div style="
 							height: 100%;
@@ -4711,7 +4882,11 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=closethis style="cursor:pointer;">
+							<div id=closethis style="cursor:pointer;
+								padding:5px;
+								background:white;
+								border-radius:10px;
+							">
 								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
 							</div>
 						</div>
@@ -4728,7 +4903,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
 							</div>
 						</div>
 					</div>
@@ -4751,7 +4926,7 @@ const view = {
 						align-items: center;
 						justify-content: space-between;
 						padding: 3%;
-						background: whitesmoke;
+						background: white;
 					">
 						<div style="
 							width: 80%;
@@ -4782,8 +4957,12 @@ const view = {
 							background: white;
 							border-radius: 0 20px 20px 0;
 						">
-							<div style=cursor:pointer id=sendbutton>
-								<img src=./more/media/send.png
+							<div style="cursor:pointer;
+								padding:10px;
+								background:black;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/whitesend.png
 								style="
 									width:32px;
 									height:32px;
