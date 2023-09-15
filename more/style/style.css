@@ -66,8 +66,8 @@ input,textarea{
 }
 .button{
 	border: none;
-	border-radius: 0;
-	background: black;
+	border-radius: 20px;
+	background: #15244e;
 	color: #fff;
 	padding: 0 20px;
 	line-height: 40px;
@@ -84,8 +84,9 @@ input,textarea{
 	transition: .3s ease;
 }
 .buttonstyled{
-	background:whitesmoke;
-	color:black;
+	background:#15244e;
+	color:white;
+	border-radius: 10px;
 }
 .innerBox{
 	width:40%;
@@ -140,14 +141,18 @@ input,textarea{
 	cursor: pointer;
 	width: 100%;
 	min-height: 50px;
-	background: whitesmoke;
+	background: #15244e;
+	color:white;
 	padding: 20px;
 	/* justify-content: center; */
-	border-radius: 20px;
+	border-radius: 10px;
 }
 .newpostmenu div img{
 	width:48;
 	height:48;
+	background:white;
+	padding:10px;
+	border-radius:10px;
 }
 #berandadivmenu div{
 	border-bottom:1px solid whitesmoke;
@@ -199,7 +204,8 @@ input,textarea{
 	font-weight:bold;
 	padding:10px;
 	border-radius:0 50px 50px 0;
-	background:whitesmoke;
+	background:#15244e;
+	color:white;
 	width: 48px;
 	height: 48px;
 	display:flex;

@@ -170,7 +170,7 @@ const view = {
 					display: flex;
 					align-items: center;
 					justify-content:center;
-					background:black;color:white;
+					background:#15244e;color:white;
 				">
 					<div style="
 						cursor:pointer;
@@ -308,6 +308,7 @@ const view = {
 							font-size: 12px;
 							font-weight: bold;
 							cursor: pointer;
+							color:black;
 						">
 							<img src=./more/media/exit.png
 							style="
@@ -449,17 +450,25 @@ const view = {
 		getIn(after){
 			view.main.addChild(view.loginBox(after));
 		},
-		async openProfile(userId){
+		async openProfile(data=[],nav='home',boot,userId){
 			if(typeof userId==='object')userId = null;
 			let userData;
 			if(!this.isInProfile() && !userId){
-				return this.getIn(()=>{view.content.openProfile()});
+				return this.getIn(()=>{view.content.openProfile([],'home',false,null)});
 			}
 			this.clearLinesParent();
 			if(userId){
 				userData = (await app.doglas.do(['database','users',userId,'get'])).val();
 			}
-			this.linesParent.addChild(view.profilePage(userData));
+			if(nav==='loadartikel')nav='home';
+			this.linesParent.addChild(view.profileDiv(nav,boot,userId));
+			if(nav==='home')this.linesParent.addChild(view.profilePage(userData));
+			else if(nav==='statistic')this.linesParent.addChild(view.statistic(userId));
+			else {
+				data.forEach((item,i)=>{
+					this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
+				})
+			}
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
 			this.searchWare.hide();
@@ -528,8 +537,6 @@ const view = {
 				width: 100%;
 				display: flex;
 				overflow: auto;
-				/* margin-right: 10px; */
-				margin: 2% 0;
 				background: white;
 				border-bottom: 1px solid whitesmoke;
 				align-items: center;
@@ -617,8 +624,6 @@ const view = {
 				width: 100%;
 				display: flex;
 				overflow: auto;
-				/* margin-right: 10px; */
-				margin: 2% 0;
 				background: white;
 				border-bottom: 1px solid whitesmoke;
 				align-items: center;
@@ -677,8 +682,7 @@ const view = {
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
-					console.log('boot is true');
-					this.bid();
+					this[this.nav]();
 				}
 			},
 			bid(){
@@ -870,7 +874,8 @@ const view = {
 				}
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
-					view.content.openProfile(data.owner);
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
 				}
 			},
 		})
@@ -908,7 +913,8 @@ const view = {
 				}
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
-					view.content.openProfile(data.bidderProfileId);
+					view.addLoading();
+					view.content.openProfile([],'home',true,data.bidderProfileId);
 				}
 			},
 			openChat(){
@@ -932,8 +938,7 @@ const view = {
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
-					background: whitesmoke;
-					border-radius: 20px;
+					gap:10px;
 				"
 				id=newartilebuttons
 				>
@@ -1057,8 +1062,7 @@ const view = {
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
-					background: whitesmoke;
-					border-radius: 20px;
+					gap:10px;
 				"
 				id=newartilebuttons
 				>
@@ -1208,8 +1212,7 @@ const view = {
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
-					background: whitesmoke;
-					border-radius: 20px;
+					gap:10px;
 				"
 				id=newartilebuttons
 				>
@@ -1389,7 +1392,7 @@ const view = {
 						<div style="
 							padding:20px;
 							padding-bottom:10px;
-							background:black;
+							background:#15244e;
 							color:white;
 							border:1px solid black;
 							border-bottom:none;
@@ -1465,7 +1468,7 @@ const view = {
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:black;
+						background:#15244e;
 						color:white;
 						border:1px solid black;
 						border-bottom:none;
@@ -1538,7 +1541,7 @@ const view = {
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:black;
+						background:#15244e;
 						color:white;
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
@@ -1706,7 +1709,7 @@ const view = {
 						<div style="
 							padding:20px;
 							padding-bottom:10px;
-							background:black;
+							background:#15244e;
 							color:white;
 							border:1px solid black;
 							border-bottom:none;
@@ -1831,7 +1834,7 @@ const view = {
 						background:white;
 						border:2px solid whitesmoke;
 						border-radius:20px;
-						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};;
+						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};
 						gap:5px;
 						cursor:pointer;
 					" id=editProfile>
@@ -1884,7 +1887,7 @@ const view = {
 				</div>
 				<div style="
 					border-bottom:1px solid whitesmoke;
-					display:flex;
+					display: ${userData.cleanEmail===app.userData.cleanEmail?'none':'flex'};
 					color: white;
 					font-family: 'montserratbold';
 					overflow:auto;
@@ -1905,7 +1908,7 @@ const view = {
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
 							" id=chat>
-								<img src=./more/media/chat.png
+								<img src=./more/media/whitechat.png
 									style="
 										width:16px;
 										height:16px;
@@ -1917,74 +1920,12 @@ const view = {
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
 							" id=follow>
-								<img src=./more/media/follow.png
+								<img src=./more/media/followwhite.png
 								style="
 									width:16px;
 									height:16px;
 								"
 								>FOLLOW</div>
-						</div>
-					</div>
-				</div>
-				<div style="
-					height: 48px;
-					border-bottom: 1px solid whitesmoke;
-					display: flex;
-					gap: 1px;
-					position: sticky;
-					top: 0;
-					background: white;
-					/* color: white; */
-					/* font-family: 'montserratbold';
-				">
-					<div
-					style="
-						width:100%;
-						height:100%;
-						display:flex;
-						align-items:center;
-					"
-					>
-						<div style="
-								width: 100%;
-								display: flex;
-								justify-content: space-around;
-						" id=berandadivmenu>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								height: 100%;
-								width: 100%;
-								border-bottom: 1px solid black;
-								padding: 10px;
-								justify-content: center;
-							">
-								<img src=./more/media/papers.png class=navimg>
-								Artikel
-							</div>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								width: 100%;
-								justify-content: center;
-								padding: 10px;
-							">
-								<img src=./more/media/worker.png class=navimg>
-								Project
-							</div>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								width: 100%;
-								justify-content: center;
-								padding: 10px;
-							">
-								<img src=./more/media/construction-worker.png class=navimg>
-								Jasa
-							</div>
 						</div>
 					</div>
 				</div>
@@ -2006,6 +1947,9 @@ const view = {
 				this.find('#chat').onclick = ()=>{
 					this.sendmemsg();
 				}
+
+				//if loading.
+				view.unloading();
 			},
 			generateMore(){
 				for(let i in userData.more){
@@ -2057,8 +2001,61 @@ const view = {
 				view.main.addChild(view.editPic(this));
 			},
 			followme(){},
-			sendmemsg(){
-				//view.main.addChild(view.
+			async sendmemsg(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{this.sendmemsg()});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+				
+				//case is only checking for user, not with opponent.
+				//have to check the opponent.
+				let ourRoom;
+				const opponentChatList = (await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'get'])).val()||[];
+				opponentChatList.forEach((item)=>{
+					if(item.to===app.userData.cleanEmail){
+						ourRoom = item;
+						return
+					}
+				})
+				
+				//checking the chat list.
+				//finding the userId. If One, this mean i dont have to create new room
+				let room = null;
+				chatList.forEach((item)=>{
+					console.log(item.to,userData.cleanEmail);
+					if(item.to===userData.cleanEmail){
+						room = item;
+						return
+					}
+				})
+				let roomId;
+				if(!room){
+					//no room found. make new one.
+					//send notif to both user.
+					//for sender.
+					if(!ourRoom)roomId = getUniqueID();
+					else roomId = ourRoom.roomId;
+					//get sender chat list.
+					const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+					room = {roomId,to:userData.cleanEmail,toProfile:userData.profilepicture,date:getFullDate(),toUsername:userData.username};
+					chatList.push(room);
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'set',chatList]);
+					//set initial data.
+					await app.doglas.do(['database','privateChat',`${roomId}/peoples`,'set',[app.userData.cleanEmail,userData.cleanEmail]]);
+				}
+
+				if(!ourRoom){
+					console.log('Opps, theres no room at this db, so i build one');
+					//for reciever.
+					if(!roomId)roomId=room.roomId;
+					const recieverChatList = (await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'get'])).val()||[];
+					recieverChatList.push({roomId,to:app.userData.cleanEmail,toProfile:app.userData.profilepicture,date:getFullDate(),toUsername:app.userData.username});
+					await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'set',recieverChatList]);	
+				}
+				
+				view.main.addChild(view.openPrivateChat(room));
+				console.log(userData);
 			}
 		})
 	},
@@ -2116,6 +2113,7 @@ const view = {
 				height:100%;
 				display:flex;
 				align-items:flex-start;
+				z-index:1;
 			`,
 			innerHTML:`
 			<div style="
@@ -2217,6 +2215,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -2322,7 +2321,7 @@ const view = {
 			style:`
 				width:100%;
 				height:100%;
-				position:absolute;
+				position:absolute;z-index:1;
 				display:flex;
 				align-items:flex-start;
 				justify-content:flex-end;
@@ -2576,8 +2575,7 @@ const view = {
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
-					background: whitesmoke;
-					border-radius: 20px;
+					gap:10px;
 				"
 				id=newartilebuttons
 				>
@@ -2923,7 +2921,7 @@ const view = {
 				if(!x){
 					forceRecheck(view.main,'Berhasil Mengedit Profil');
 					Object.assign(app.userData,data);
-					view.content.openProfile();
+					view.content.openProfile([],'home',false,null);
 					this.remove();
 				}
 			},
@@ -3724,8 +3722,13 @@ const view = {
 			`,
 			generateChat(){
 				if(!app.userData.bid)app.userData.bid = [];
-				app.userData[nav].forEach((bid,i)=>{
-					this.addChild(view.inboxItem(i,bid,(i!==app.userData.bid.length-1)?true:false));
+				app.userData[nav].forEach(async (bid,i)=>{
+					let msgs = null;
+					if(nav==='inbox'){
+						//getting the latest msg from chat.
+						msgs = (await app.doglas.do(['database','privateChat',`${bid.roomId}/inbox`,'get'])).val()||[];
+					}
+					this.addChild(view[`${nav}Item`](i,bid,(i!==app.userData.bid.length-1)?true:false,msgs));
 				})
 				if(app.userData[nav].length===0){
 					this.addChild(makeElement('div',{
@@ -3746,7 +3749,65 @@ const view = {
 			}
 		});
 	},
-	inboxItem(i,data,bt){
+	inboxItem(i,data,bt,msgs){
+		const Dot = '...';
+		return makeElement('div',{
+			className:'lines',
+			innerHTML:`
+				<div class=item style=${!bt?'':'border-bottom:1px solid whitesmoke'}>
+					<div class=thumbnail>
+						<div>#${i+1}</div>
+					</div>
+					<div class=moreinfo>
+						<div class=title>
+							${msgs[msgs.length-1].msg.slice(0,20)+Dot}
+						</div>
+						<div class=addressinfo>
+							<div>
+								<img class=profileimg src=${data.toProfile}>
+							</div>
+							<div class=username>${data.toUsername},</div>
+							<div class=date>${msgs[msgs.length-1].date}</div>
+						</div>
+					</div>
+					<div style="
+						display:flex;
+						justify-content:center;
+						width:20%;
+					">
+						<div style="
+							padding: 5px;
+					    background: whitesmoke;
+					    border-radius: 50%;
+					    cursor: pointer;
+						" id=morebutton>
+							<img src=./more/media/moreicon.png style="
+								width:24px;
+								height:24px;
+							">
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('.title').onclick = ()=>{
+					view.main.addChild(view.openPrivateChat(data));
+				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',true,data.to);
+				}
+				this.find('#morebutton').onclick = ()=>{
+					this.openMoreMenu();
+				}
+			},
+			openMoreMenu(){
+				view.main.addChild(view.moreMenuInbox(data));
+			}
+		})
+	},
+	bidItem(i,data,bt){
 		const Dot = '...';
 		return makeElement('div',{
 			className:'lines',
@@ -3778,7 +3839,8 @@ const view = {
 				}
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
-					view.content.openProfile(data.owner);
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
 				}
 			},
 			onclick(){
@@ -3814,7 +3876,7 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:black;
+						background:#15244e;
 						color:white;
 					">
 						<div style="
@@ -4273,7 +4335,7 @@ const view = {
 				setTimeout(()=>{this.listen()},2000);
 			},
 			async showInboxInit(){
-				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val();
+				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val()||[];
 				inbox.forEach((item)=>{
 					this.putMsg(item);
 				})
@@ -4363,6 +4425,7 @@ const view = {
 				align-items:center;
 				justify-content:flex-end;
 				background:rgba(0, 0, 0, 0.4);
+				z-index:1;
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4379,7 +4442,7 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:black;
+						background:#15244e;
 						color:white;
 					">
 						<div style="
@@ -4649,6 +4712,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -4794,6 +4858,7 @@ const view = {
 				width:100%;
 				height:100%;
 				position:absolute;
+				z-index:1;
 				display:flex;
 				align-items:flex-start;
 				justify-content:flex-end;
@@ -4856,6 +4921,7 @@ const view = {
 				align-items:center;
 				justify-content:flex-end;
 				background:#00000066;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4872,7 +4938,7 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:black;
+						background:#15244e;
 						color:white;
 					">
 						<div style="
@@ -5134,6 +5200,7 @@ const view = {
 				justify-content:center;
 				position:absolute;
 				top:0;left:0;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -5160,7 +5227,600 @@ const view = {
 		this.content.addChild(view.openLoading());
 	},
 	unloading(){
-		this.content.find('#openLoading').remove();
+		this.content.saveRemove('#openLoading');
+	},
+	openPrivateChat(room){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				display:flex;
+				align-items:center;
+				justify-content:flex-end;
+				background:rgba(0, 0, 0, 0.4);
+				z-index:1;
+			`,
+			innerHTML:`
+				<div class=innerBox
+				style="
+					height:100%;
+					background:white;
+					display:flex;
+					flex-direction:column;
+				"
+				>
+					<div style="
+						width: 100%;
+						min-height: 77px;
+						display: flex;
+						align-items: center;
+						justify-content: space-around;
+						background:#15244e;
+						color:white;
+					">
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=closethis style="cursor:pointer;
+								padding:5px;
+								background:white;
+								border-radius:10px;
+							">
+								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							</div>
+						</div>
+						<div style="
+							width:80%;
+						">
+							<div>Kirim pesan ke ${room.toUsername}</div>
+						</div>
+						<div style="
+							height: 100%;
+							width: 64px;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=moremenu style="cursor:pointer;">
+								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
+							</div>
+						</div>
+					</div>
+					<div style="
+						width:90%;
+						height:94%;
+						background:whitesmoke;
+						overflow:auto;
+						padding:5%;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
+					" id=boxinbox>
+						
+					</div>
+					<div style="
+						width: 94%;
+						/* height: 69px; */
+						border-top: 1px solid whitesmoke;
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+					">
+						<div style="
+							width: 80%;
+							/* height: 100%; */
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							background: white;
+							border-radius: 20px 0 0 20px;
+							padding:10px;
+						">
+							<textarea style="
+								background: white;
+								border: none;
+								border-radius: 20px 0 0 20px;
+								min-height:40px;
+								min-width:100%;
+							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
+						</div>
+						<div style="
+							width: 20%;
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:black;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			async fixRoom(){
+				//case is only checking for user, not with opponent.
+				//have to check the opponent.
+				let ourRoom;
+				const opponentChatList = (await app.doglas.do(['database','users',`${room.to}/inbox`,'get'])).val()||[];
+				opponentChatList.forEach((item)=>{
+					if(item.to===app.userData.cleanEmail){
+						ourRoom = item;
+						return
+					}
+				})
+				let roomId;
+				if(!ourRoom){
+					console.log('Opps, theres no room at this db, so i build one');
+					//for reciever.
+					if(!roomId)roomId=room.roomId;
+					const recieverChatList = (await app.doglas.do(['database','users',`${room.to}/inbox`,'get'])).val()||[];
+					recieverChatList.push({roomId,to:app.userData.cleanEmail,toProfile:app.userData.profilepicture,date:getFullDate(),toUsername:app.userData.username});
+					await app.doglas.do(['database','users',`${room.to}/inbox`,'set',recieverChatList]);	
+				}
+			},
+			collectData(){
+				const msg = {
+					from:app.userData.username,
+					date:getFullDate(),
+					msg:this.msgbox.value,
+					profilepicture:app.userData.profilepicture
+				}
+				return msg;
+			},
+			moreMenuInit(){
+				this.find('#moremenu').onclick = ()=>{
+					view.main.addChild(view.moremenubid(data));
+				}
+			},
+			initSendButton(){
+				this.find('#sendbutton').onclick = ()=>{
+					this.sendMsg();
+				}
+			},
+			async sendMsg(){
+
+				this.fixRoom();
+
+				const msgData = this.collectData();
+				if(msgData.msg.length===0)return;
+				
+				//send the msg to the server.
+				const inbox = (await app.doglas.do(['database','privateChat',`${room.roomId}/inbox`,'get'])).val()||[];
+				inbox.push(msgData);
+				const result = await app.doglas.do(['database','privateChat',`${room.roomId}/inbox`,'set',inbox]);
+				this.putMsg(msgData);
+				//set msgbox value to zero.
+				this.msgbox.value = '';
+			},
+			downKeys:[],
+			initEnterSend(){
+				this.msgbox.onkeydown = (e)=>{
+					if(!this.downKeys.includes(e.key))this.downKeys.push(e.key);
+					if(this.downKeys.includes('Enter') && !this.downKeys.includes('Shift')){
+						this.sendMsg();
+					}
+				}
+				this.msgbox.onkeyup = (e)=>{
+					this.downKeys.pop();
+				}
+			},
+			listen(){
+				app.doglas.get(`privateChat/${room.roomId}/inbox`).on('value',(x)=>{
+					const data = x.val();
+					if(!data)return;
+					if(data[data.length-1].from!==app.userData.username){
+						this.putMsg(data[data.length-1]);
+					}
+				})
+			},
+			removeListen(){
+				app.doglas.get(`privateChat/${room.roomId}/inbox`).off('value');
+			},
+			init(){
+				this.boxinbox = this.find('#boxinbox');
+				this.showInboxInit();
+				this.msgbox = this.find('#msgbox');
+				this.initSendButton();
+				this.initEnterSend();
+				this.moreMenuInit();
+				setTimeout(()=>{this.listen()},2000);
+			},
+			async showInboxInit(){
+				const inbox = (await app.doglas.do(['database','privateChat',`${room.roomId}/inbox`,'get'])).val();
+				inbox.forEach((item)=>{
+					this.putMsg(item);
+				})
+			},
+			putMsg(msg){
+				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				this.boxinbox.addChild(this.inboxItem(msg));
+				this.puttedMsg = msg;
+			},
+			onCloseClickded(){
+				this.removeListen();
+				view.content.openInbox([],'inbox',true);
+				this.remove();
+			},
+			onadded(){
+				//close event.
+				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.init();
+			},
+			inboxItem(item){
+				return makeElement('div',{
+					style:`
+						display:flex;
+						flex-direction:column;
+						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						width:100%;
+						gap:5px;
+					`,
+					innerHTML:`
+						<div>${item.from}</div>
+						<div style="
+							display:flex;
+						">
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'none':'block'};
+							">
+								<img src=${item.profilepicture||app.noProfilePng} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+							<div style="
+								background:${item.from===app.userData.username?'white':'gray'};
+								color:${item.from===app.userData.username?'black':'white'};
+								padding:10px;
+								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+							">${item.msg.replaceAll('\n','<br>')}</div>
+							<div style="
+								padding:8px;
+								border-radius:50%;
+								background:whitesmoke;
+								display:${item.from===app.userData.username?'block':'none'};
+							">
+								<img src=${item.profilepicture||app.noProfilePng} style="
+									width:32px;
+									height:32px;
+									border-radius:50%;
+									object-fit:cover;
+								">
+							</div>
+						</div>
+						<div style=font-size:12px>${item.date}</div>
+					`,
+					onadded(){
+						this.scrollIntoView();
+					}
+				})
+			}
+		})
+	},
+	moreMenuInbox(toRemove){
+		return makeElement('div',{
+			style:`
+				width: 100%;
+		    height: 100%;
+		    background: #00000036;
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    position: absolute;
+		    top: 0px;
+		    left: 0px;
+			`,
+			innerHTML:`
+				<div style="
+					position:relative;
+					background: white;
+			    width: 200px;
+			    height: 200px;
+			    border-radius: 20px;
+			    padding: 20px;
+			    padding-top: 10px;
+			    overflow:auto;
+			    display:flex;
+			    flex-direction:column;
+			    gap:10px;
+				">
+					<div style="
+						position:absolute;
+						left:0;top:0;
+						padding:10px;
+					">
+						<div style="cursor:pointer;" id=closethis>
+							<img src=./more/media/close.png
+							style="
+								width:16px;
+								height:16px;
+							"
+							>
+						</div>
+					</div>
+					<div style="
+						text-align: center;
+				    margin-bottom: 20px;
+				    border-bottom: 1px solid whitesmoke;
+				    padding-bottom: 5px;
+				    position:sticky;top:0;
+					"><b>More Menu!</b></div>
+					<div class=action style="
+						display: flex;
+				    align-items: center;
+				    /* height: 100%; */
+				    background: whitesmoke;
+				    padding: 10px;
+				    border-radius: 20px;
+				    cursor: pointer;
+					" id=removeChat>
+						<div style="
+							display: flex;
+					    gap: 10px;
+					    justify-content: center;
+					    align-items: center;
+						">
+							<img src=./more/media/deleteicon.png style="
+								width:24px;
+								height:24px;
+							">
+							Hapus
+						</div>
+					</div>
+					<div class=action style="
+						display: flex;
+				    align-items: center;
+				    /* height: 100%; */
+				    background: whitesmoke;
+				    padding: 10px;
+				    border-radius: 20px;
+				    cursor: pointer;
+					" id=reportChat>
+						<div style="
+							display: flex;
+					    gap: 10px;
+					    justify-content: center;
+					    align-items: center;
+						">
+							<img src=./more/media/deleteicon.png style="
+								width:24px;
+								height:24px;
+							">
+							Laporkan
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				this.findall('.action').forEach((button)=>{
+					button.onclick = ()=>{this[button.id]();}
+				})
+			},
+			async removeChat(){
+				//remove that chat from user db.
+				console.log(toRemove);
+				const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+				//filtering chat list.
+				const newChatList = [];
+				chatList.forEach((item)=>{
+					if(item.roomId!==toRemove.roomId){
+						newChatList.push(item);
+					}
+				})
+				//now its time to remove.
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'set',newChatList]);
+				view.content.openInbox([],'inbox',true);
+				this.remove();
+			},
+			reportChat(){
+				//reporting this chat to admin.
+			}
+		})
+	},
+	profileDiv(nav='home',boot=false,userId){
+		return makeElement('div',{
+			nav,
+			style:`
+				width: 100%;
+				display: flex;
+				overflow: auto;
+				background: white;
+				align-items: center;
+				position:sticky;
+				top:0;
+				z-index:1;
+			`,
+			innerHTML:`
+				<div style="
+					  width: 100%;
+						display: flex;
+						justify-content: flex-start;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=home
+					>
+						<img src=./more/media/home.png class=navimg>
+						Beranda
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=article
+					>
+						<img src=./more/media/papers.png class=navimg>
+						Artikel
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=jobs
+					>
+						<img src=./more/media/worker.png class=navimg>
+						Loker
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=services
+					>
+						<img src=./more/media/construction-worker.png class=navimg>
+						Jasa
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=statistic
+					>
+						<img src=./more/media/development.png class=navimg>
+						Statistik
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=bidderSay
+					>
+						<img src=./more/media/rating.png class=navimg>
+						Testimoni
+					</div>
+				</div>
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				console.log(this.nav);
+				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).scrollIntoView();
+				this.buttonSetup();
+				if(boot){
+					console.log('boot is true');
+					this.home();
+				}
+			},
+			home(){
+				view.addLoading()
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'home',false,userId);
+				})
+			},
+			article(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'article',false,userId);
+				})
+			},
+			jobs(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'jobs',false,userId);
+				})
+			},
+			services(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'services',false,userId);
+				})
+			},
+			statistic(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'statistic',false,userId);
+				})
+			},
+			bidderSay(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openProfile(datacb,'bidderSay',false,userId);
+				})
+			}
+		})
 	}
 }
 

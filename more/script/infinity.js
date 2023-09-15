@@ -149,7 +149,9 @@ const objlen = function(obj){
 
 const toInject = {
 		find(p){
-			return Object.assign(this.querySelector(p),this);
+			const el = this.querySelector(p);
+			if(!el)return null;
+			return Object.assign(el,this);
 		},
 		findall(p){
 			const els = this.querySelectorAll(p);
