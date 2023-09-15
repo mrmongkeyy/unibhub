@@ -141,8 +141,7 @@ input,textarea{
 	cursor: pointer;
 	width: 100%;
 	min-height: 50px;
-	background: #15244e;
-	color:white;
+	border:2px solid #15244e;
 	padding: 20px;
 	/* justify-content: center; */
 	border-radius: 10px;
@@ -172,14 +171,15 @@ input,textarea{
 .lines{
 	width: 100%;
 	display: flex;
-	gap: 10px;
 	align-items: flex-start;
+	flex-direction:column;
 }
 .lines .item{
 	width: 100%;
 	border-bottom: 1px solid lightgray;
 	display: flex;
 	align-items: center;
+	justify-content:space-between;
 }
 
 .lines .title:hover{
@@ -192,7 +192,6 @@ input,textarea{
 }
 
 .item .thumbnail{
-	width: 20%;
 	/* height: 48px; */
 	margin: 2%;
 	/* background: black; */
@@ -216,7 +215,7 @@ input,textarea{
 .item .moreinfo{
 	height:26%;
 	margin:2%;
-	width:96%;
+	width:100%;
 }
 .moreinfo .title{
 	display:flex;

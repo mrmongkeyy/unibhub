@@ -174,7 +174,7 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">TheSimpsons<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
+					">Platonix<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -2079,7 +2079,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Login Admin TheSimpsons
+							Login Admin Platonix
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2187,7 +2187,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Akun Admin Baru TheSimpsons
+							Akun Admin Baru Platonix
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>

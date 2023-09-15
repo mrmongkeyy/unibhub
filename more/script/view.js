@@ -176,7 +176,7 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">TheSimpsons<span style=font-size:12px;font-family:montserratregular> Portal</span></div>
+					">Platonix<span style=font-size:12px;font-family:montserratregular> Portal</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -592,6 +592,7 @@ const view = {
 				//set the nav.
 				console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
@@ -679,6 +680,7 @@ const view = {
 				//set the nav.
 				console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
@@ -862,6 +864,19 @@ const view = {
 							</div>
 						</div>
 					</div>
+					<div style="
+						height:68px;
+						width:30%;
+						border-radius:10px;
+						margin-right:5px;
+					">
+						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+							height:100%;
+							width:100%;
+							object-fit:cover;
+							border-radius:10px;
+						">
+					</div>
 				</div>
 			`,
 			onadded(){
@@ -903,6 +918,19 @@ const view = {
 							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.username},</div>
 							<div class=date>${data.time}</div>
 						</div>
+					</div>
+					<div style="
+						height:68px;
+						width:30%;
+						border-radius:10px;
+						margin-right:5px;
+					">
+						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+							height:100%;
+							width:100%;
+							object-fit:cover;
+							border-radius:10px;
+						">
 					</div>
 				</div>
 			`,
@@ -1204,50 +1232,73 @@ const view = {
 				margin:3%;
 				display:flex;
 				flex-direction:column;
-				height:94%;
 				gap:10px;
 			`,
 			innerHTML:`
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Preview
+					</div>
+					<div style="
+						height:100px;
+						width:100%;
+						background:whitesmoke;
+						border:1px solid #e0e0e0;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						position:relative;
+					">
+						<div style="
+							width:100%;
+							height:100%;
+						">
+							<img id=preview style="
+								width:100%;
+								height:100%;
+								object-fit:cover;
+								display:none;
+							">
+						</div>
+						<div style="
+							background: white;
+							padding: 5px;
+							border-radius: 50%;
+							border: 1px solid #e0e0e0;
+							cursor: pointer;
+							position:absolute;
+							z-index:1;
+						" id=choosePreview class=thebutton>
+							<img src=./more/media/plus.png style="
+								width:32px;
+								height:32px;
+							">
+						</div>
+					</div>
+				</div>
 				<div style="
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
 					gap:10px;
+					position:sticky;
+					top:0;
+					background:white;
 				"
 				id=newartilebuttons
 				>
-					<div style=width:100%; class="thebutton" id=addFiles>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Files</div>
-					</div>
-					<div style=width:100%; class=thebutton id=saveToDraft>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Simpan</div>
-					</div>
 					<div style=width:100%; class=thebutton id=publish>
 						<div class="button buttonstyled" style="
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
 						">
-							<img src=./more/media/save.png
+							<img src=./more/media/whiteupload.png
 								style="
 									width:16px;
 									height:16px;
@@ -1268,7 +1319,7 @@ const view = {
 					<div style="
 						height:100%;
 					">
-						<input placeholder="Misal 200.000.00" type=number style="height:100%;resize:none;border-radius:0;">
+						<input placeholder="Misal 200.000.00" type=number style="height:100%;border-radius:0;">
 					</div>
 				</div>
 				<div style="
@@ -1298,15 +1349,36 @@ const view = {
 						Deskripsi Dan Persyaratan
 					</div>
 					<div style="
-						height:100%;
+						height:200px;
 					">
 						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
 				</div>
 			`,
+			choosePreview(){
+				const showPreview = (file)=>{
+					this.filepreview = file;
+					const fs = new FileReader();
+					fs.onload = ()=>{
+						this.find('#preview').src = fs.result;
+						this.find('#preview').show('block');
+					}
+					fs.readAsDataURL(file);
+				}
+				if(!this.preview)this.preview = makeElement('input',{
+					type:'file',
+					accept:'image/*',
+					onchange(){
+						const file = this.files[0];
+						showPreview(file);
+					}
+				})
+				this.preview.click();
+			},
 			collectData(){
 				const maxFee = this.find('input').value;
 				const Data = {maxFee};
+				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
 					Data[input.id] = input.value;
 				})
@@ -1328,7 +1400,7 @@ const view = {
 				return Data;
 			},
 			setupButton(){
-				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+				this.findall('.thebutton').forEach(button=>{
 					button.onclick = ()=>{
 						this[button.id]();
 					}
@@ -1507,6 +1579,16 @@ const view = {
 				overflow:auto;
 			`,
 			innerHTML:`
+				<div style="
+					width:100%;
+					height:200px;
+				">
+					<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+						width:100%;
+						height:100%;
+						object-fit:cover;
+					">
+				</div>
 				<div style="
 					display:flex;
 					align-items:center;
@@ -1755,7 +1837,7 @@ const view = {
 				<div style="
 					height:150px;
 					width:100%;
-					background:lightblue;
+					background:#15244e;
 					position:relative;
 				">
 					<img id=bannerimg style="
@@ -2235,7 +2317,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Login TheSimpsons
+							Login Platonix
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2269,15 +2351,29 @@ const view = {
 						<div style="
 							width: 100%;
 							text-align: center;
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:5px;
 						" class=button id=goIn>
+							<img src=./more/media/whitelogin.png style="
+								width:24px;
+								height:24px;
+							">
 							Masuk
 						</div>
 						<div style="
-							background: lightgray;
-							color: black;
 							width: 100%;
 							text-align: center;
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:5px;
 						" class=button id=goSignin>
+							<img src=./more/media/whitesignup.png style="
+								width:24px;
+								height:24px;
+							">
 							Daftar
 						</div>
 					</div>
@@ -2345,7 +2441,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Akun Baru TheSimpsons
+							Akun Baru Platonix
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2404,18 +2500,32 @@ const view = {
 						justify-content:center;
 						gap:10px;
 					" id=buttons>
-						<div class=button id=goSignin style="
+						<div style="
 							width: 100%;
 							text-align: center;
-						">
-							Buat Akun
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:5px;
+						" class=button id=goSignin>
+							<img src=./more/media/whitesignup.png style="
+								width:24px;
+								height:24px;
+							">
+							Daftar
 						</div>
 						<div style="
-							background:lightgray;
-							color:black;
 							width: 100%;
 							text-align: center;
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:5px;
 						" class=button id=goIn>
+							<img src=./more/media/whitelogin.png style="
+								width:24px;
+								height:24px;
+							">
 							Masuk
 						</div>
 					</div>
@@ -2759,6 +2869,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:center;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -2805,10 +2916,16 @@ const view = {
 					this.remove();
 				}
 			},
-			DoRequest(){
-				app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]).then((x)=>{
-					this.handleResponse(x);
-				})
+			async DoRequest(){
+				console.log(this.datatoupload);
+				if(this.datatoupload.preview){
+					//upload preview file.first.
+					const file = await app.doglas.save([getUniqueID(),this.datatoupload.preview,this.datatoupload.preview.contentType]);
+					const url = await file.ref.getDownloadURL();
+					this.datatoupload.preview = url;
+				}
+				const x = await app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]);
+				this.handleResponse(x);
 			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()};
@@ -2827,6 +2944,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3010,6 +3128,7 @@ const view = {
 				justify-content:flex-end;
 				align-items:flex-start;
 				background:rgba(0, 0, 0, 0.25);
+				z-index:1;
 			`,
 			innerHTML:`
 				<div class=innerBox style="
@@ -3089,6 +3208,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3228,6 +3348,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3539,6 +3660,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:flex-end;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3671,10 +3793,9 @@ const view = {
 				}
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
 			},
-			save(){
+			async save(){
 				
 				Object.assign(data,this.collectData());
-				console.log(data);
 				//adding bid data to the project.
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
@@ -3830,6 +3951,19 @@ const view = {
 							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.owner},</div>
 							<div class=date>${data.date}</div>
 						</div>
+					</div>
+					<div style="
+						height:68px;
+						width:30%;
+						border-radius:10px;
+						margin-right:5px;
+					">
+						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+							height:100%;
+							width:100%;
+							object-fit:cover;
+							border-radius:10px;
+						">
 					</div>
 				</div>
 			`,
@@ -5765,6 +5899,7 @@ const view = {
 				//set the nav.
 				console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
