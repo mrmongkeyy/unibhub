@@ -425,13 +425,14 @@ const forceRecheck = function(el,msg,inf=false){
 		id:'frcel',
 		style:`
 			position:absolute;
-			background:black;
+			background:red;
 			color:white;
 			padding:15px;
 			z-index:1;
-			right:0;
+			left:0;
 			font-size:16px;
 			margin-top: ${50*allfrc.length+1}px;
+			bottom:0;
 		`,
 		innerHTML:msg,
 		onadded(){
