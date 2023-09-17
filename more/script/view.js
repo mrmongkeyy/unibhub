@@ -188,7 +188,7 @@ const view = {
 					overflow-y:hidden;
 				" id=ourmenu class=innerBox>
 					<div id=newPost style=padding-left:30px;>
-						<img src=./more/media/pen.png class=navimg>
+						<img src=./more/media/addnew.png class=navimg>
 						Post
 					</div>
 					<div id=displayList>
@@ -196,15 +196,15 @@ const view = {
 						Beranda
 					</div>
 					<div id=openMyproject>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/task.png class=navimg>
 						ProjectKu
 					</div>
 					<div id=openInbox>
-						<img src=./more/media/chat.png class=navimg>
+						<img src=./more/media/message.png class=navimg>
 						Pesan
 					</div>
 					<div id=openGlobalChat>
-						<img src=./more/media/global-communication.png class=navimg>
+						<img src=./more/media/globe.png class=navimg>
 						Global Chat
 					</div>
 					<div id=openNotif>
@@ -212,7 +212,7 @@ const view = {
 						Notif
 					</div>
 					<div id=openProfile style=padding-right:30px;>
-						<img src=./more/media/user.png class=navimg>
+						<img src=./more/media/header.png class=navimg>
 						Profil
 					</div>
 				</div>
@@ -349,7 +349,7 @@ const view = {
 			this.searchWare = this.find('#searchWare');
 			
 			//this.openArticle(app.dataFiktif);
-			this.displayList([],'loadartikel',true);
+			this.displayList([],'loadloker',true);
 			
 			//logoutbutton.
 			this.logoutEvent();
@@ -393,7 +393,7 @@ const view = {
 		openShortStories(){
 			this.clearLinesParent();
 			this.linesParent.addChild(view.openShortStories());
-			this.stateLabel.innerHTML = 'Baca Cerpen';
+			this.stateLabel.innerHTML = 'Baca Berita';
 			this.reactTo.show('flex');
 			this.searchWare.hide();
 		},
@@ -562,7 +562,7 @@ const view = {
 					"
 					id=OnGoing
 					>
-						<img src=./more/media/development.png class=navimg>
+						<img src=./more/media/ongoing.png class=navimg>
 						OnGoing
 					</div>
 					<div style="
@@ -576,7 +576,7 @@ const view = {
 					"
 					id=Finished
 					>
-						<img src=./more/media/verified.png class=navimg>
+						<img src=./more/media/finished.png class=navimg>
 						Finished
 					</div>
 				</div>
@@ -591,7 +591,7 @@ const view = {
 			onadded(){
 				//set the nav.
 				console.log(this.nav);
-				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
@@ -650,7 +650,7 @@ const view = {
 					"
 					id=bid
 					>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/task.png class=navimg>
 						Bid
 					</div>
 					<div style="
@@ -664,7 +664,7 @@ const view = {
 					"
 					id=inbox
 					>
-						<img src=./more/media/chat.png class=navimg>
+						<img src=./more/media/message.png class=navimg>
 						Inbox
 					</div>
 				</div>
@@ -679,7 +679,7 @@ const view = {
 			onadded(){
 				//set the nav.
 				console.log(this.nav);
-				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
@@ -729,41 +729,13 @@ const view = {
 						display: flex;
 						gap: 8px;
 						cursor: pointer;
-						height: 100%;
-						width: 100%;
-						padding: 10px 20px;
-						justify-content: center;
-					"
-					id=loadcerpen
-					>
-						<img src=./more/media/deer-shape.png class=navimg>
-						Cerpen
-					</div>
-					<div style="
-						display: flex;
-						gap: 8px;
-						cursor: pointer;
-						height: 100%;
-						width: 100%;
-						padding: 10px 20px;
-						justify-content: center;
-					"
-					id=loadartikel
-					>
-						<img src=./more/media/papers.png class=navimg>
-						Artikel
-					</div>
-					<div style="
-						display: flex;
-						gap: 8px;
-						cursor: pointer;
 						width: 100%;
 						justify-content: center;
 						padding: 10px 20px;
 					"
 					id=loadloker
 					>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/task.png class=navimg>
 						Project
 					</div>
 					<div style="
@@ -776,8 +748,36 @@ const view = {
 					"
 					id=loadjasa
 					>
-						<img src=./more/media/construction-worker.png class=navimg>
+						<img src=./more/media/servicesicon.png class=navimg>
 						Jasa
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadcerpen
+					>
+						<img src=./more/media/newsicon.png class=navimg>
+						News
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadartikel
+					>
+						<img src=./more/media/articleicon.png class=navimg>
+						Artikel
 					</div>
 				</div>
 			`,
@@ -790,11 +790,11 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
-				if(boot)this.loadartikel();
+				if(boot)this.loadloker();
 			},
 			loadjasa(){
 				view.addLoading();
@@ -958,281 +958,8 @@ const view = {
 				margin:3%;
 				display:flex;
 				flex-direction:column;
+				gap:10px;
 				height:94%;
-				gap:10px;
-			`,
-			innerHTML:`
-				<div style="
-					width: 100%;
-					justify-content: space-around;
-					display: flex;
-					gap:10px;
-				"
-				id=newartilebuttons
-				>
-					<div style=width:100%; id=saveToDraft class=thebutton>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Simpan</div>
-					</div>
-					<div style=width:100%; id=publish class=thebutton>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/save.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>TERBITKAN</div>
-					</div>
-				</div>
-				<div style="
-					height:20%;
-					display:flex;
-					flex-direction:column;
-				">
-					<div style="
-						font-family:montserratbold;
-					">
-						Judul Artikel
-					</div>
-					<div style="
-						height:100%;
-					">
-						<textarea id=title placeholder="Tulis Judul Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
-					</div>
-				</div>
-				<div style="
-					height:80%;
-					display:flex;
-					flex-direction:column;
-				">
-					<div style="
-						font-family:montserratbold;
-					">
-						Konten Artikel
-					</div>
-					<div style="
-						height:100%;
-					">
-						<textarea id=description placeholder="Tulis Konten Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
-					</div>
-				</div>
-			`,
-			collectData(){
-				const Data = {};
-				this.findall('textarea').forEach(input=>{
-					Data[input.id] = input.value;
-				})
-				Object.assign(Data,{
-					time:getFullDate(),
-					owner:app.userData.cleanEmail,
-					type:"Articles",
-					postId:getUniqueID(),
-					username:app.userData.username,
-					profilepicture:app.userData.profilepicture||app.noProfilePng,
-					more:{
-						like:[],
-						share:[],
-						comments:[],
-						view:[]
-					}
-				})
-				return Data;
-			},
-			setupButton(){
-				this.findall('#newartilebuttons .thebutton').forEach(button=>{
-					button.onclick = ()=>{
-						this[button.id]();
-					}
-				})
-			},
-			addFiles(){
-
-			},
-			saveToDraft(){
-
-			},
-			publish(){
-				const data = this.collectData();
-				if(data.description.length<2000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 2000 Huruf.');
-				view.main.addChild(view.loadingPost(data));
-			},
-			onadded(){
-				console.log('called');
-				this.setupButton();
-			}
-		})
-	},
-	jasanew(){
-		return makeElement('div',{
-			style:`
-				margin:3%;
-				display:flex;
-				flex-direction:column;
-				height:94%;
-				overflow:auto;
-				overflow-x:hidden;
-				gap:10px;
-			`,
-			innerHTML:`
-				<div style="
-					width: 100%;
-					justify-content: space-around;
-					display: flex;
-					gap:10px;
-				"
-				id=newartilebuttons
-				>
-					<div style=width:100%; class=thebutton id=addFiles>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Files</div>
-					</div>
-					<div style=width:100%; class=thebutton id=saveToDraft>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Simpan</div>
-					</div>
-					<div style=width:100%; class=thebutton id=publish>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/save.png
-								style="
-									width:16px;
-									height:16px;
-								"
-							>Terbitkan</div>
-					</div>
-				</div>
-				<div style="
-					height:20%;
-					display:flex;
-					flex-direction:column;
-				">
-					<div style="
-						font-family:montserratbold;
-					">
-						Min-Fee
-					</div>
-					<div style="
-						height:100%;
-					">
-						<input placeholder="Misal 200.000.00" type=number style="height:100%;resize:none;border-radius:0;">
-					</div>
-				</div>
-				<div style="
-					height:20%;
-					display:flex;
-					flex-direction:column;
-				">
-					<div style="
-						font-family:montserratbold;
-					">
-						Nama Jasa
-					</div>
-					<div style="
-						height:100%;
-					">
-						<textarea placeholder="Misal Jasa Buat Web Portofolio" style="height:100%;resize:none;border-radius:0;" id=title></textarea>
-					</div>
-				</div>
-				<div style="
-					height:80%;
-					display:flex;
-					flex-direction:column;
-				">
-					<div style="
-						font-family:montserratbold;
-					">
-						Keterangan Jasa
-					</div>
-					<div style="
-						height:100%;
-					">
-						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
-					</div>
-				</div>
-			`,
-			collectData(){
-				const minFee = this.find('input').value;
-				const Data = {minFee};
-				this.findall('textarea').forEach(input=>{
-					Data[input.id] = input.value;
-				})
-				Object.assign(Data,{
-					time:getFullDate(),
-					owner:app.userData.cleanEmail,
-					type:"Services",
-					postId:getUniqueID(),
-					username:app.userData.username,
-					profilepicture:app.userData.profilepicture||app.noProfilePng,
-					more:{
-						like:[],
-						share:[],
-						comments:[],
-						view:[]
-					}
-				})
-				return Data;
-			},
-			setupButton(){
-				this.findall('#newartilebuttons .thebutton').forEach(button=>{
-					button.onclick = ()=>{
-						this[button.id]();
-					}
-				})
-			},
-			addFiles(){
-
-			},
-			saveToDraft(){
-
-			},
-			publish(){
-				const data = this.collectData();
-				view.main.addChild(view.loadingPost(data));
-			},
-			onadded(){
-				this.setupButton();
-			}
-		})
-	},
-	lokernew(){
-		return makeElement('div',{
-			style:`
-				margin:3%;
-				display:flex;
-				flex-direction:column;
-				gap:10px;
 			`,
 			innerHTML:`
 				<div style="
@@ -1314,11 +1041,380 @@ const view = {
 					<div style="
 						font-family:montserratbold;
 					">
-						Max-Fee
+						Judul Artikel
 					</div>
 					<div style="
 						height:100%;
 					">
+						<textarea placeholder="Tulis Judul Artikel Disini..." style="height:100%;resize:none;border-radius:0;" id=title></textarea>
+					</div>
+				</div>
+				<div style="
+					height:80%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Isi<span class=star>* <span class=sosmall>min 2000 characters</span></span>
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Isi Artikel..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
+					</div>
+				</div>
+			`,
+			choosePreview(){
+				const showPreview = (file)=>{
+					this.filepreview = file;
+					const fs = new FileReader();
+					fs.onload = ()=>{
+						this.find('#preview').src = fs.result;
+						this.find('#preview').show('block');
+					}
+					fs.readAsDataURL(file);
+				}
+				if(!this.preview)this.preview = makeElement('input',{
+					type:'file',
+					accept:'image/*',
+					onchange(){
+						const file = this.files[0];
+						showPreview(file);
+					}
+				})
+				this.preview.click();
+			},
+			collectData(){
+				const Data = {};
+				if(this.filepreview)Data.preview = this.filepreview;
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"Articles",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
+					more:{
+						like:[],
+						share:[],
+						comments:[],
+						view:[]
+					}
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('.thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				if(data.description.length<2000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 2000 Huruf.');
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				console.log('called');
+				this.setupButton();
+			}
+		})
+	},
+	jasanew(){
+		return makeElement('div',{
+			style:`
+				margin:3%;
+				display:flex;
+				flex-direction:column;
+				gap:10px;
+				height:94%;
+			`,
+			innerHTML:`
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Preview
+					</div>
+					<div style="
+						height:100px;
+						width:100%;
+						background:whitesmoke;
+						border:1px solid #e0e0e0;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						position:relative;
+					">
+						<div style="
+							width:100%;
+							height:100%;
+						">
+							<img id=preview style="
+								width:100%;
+								height:100%;
+								object-fit:cover;
+								display:none;
+							">
+						</div>
+						<div style="
+							background: white;
+							padding: 5px;
+							border-radius: 50%;
+							border: 1px solid #e0e0e0;
+							cursor: pointer;
+							position:absolute;
+							z-index:1;
+						" id=choosePreview class=thebutton>
+							<img src=./more/media/plus.png style="
+								width:32px;
+								height:32px;
+							">
+						</div>
+					</div>
+				</div>
+				<div style="
+					width: 100%;
+					justify-content: space-around;
+					display: flex;
+					gap:10px;
+					position:sticky;
+					top:0;
+					background:white;
+				"
+				id=newartilebuttons
+				>
+					<div style=width:100%; class=thebutton id=publish>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/whiteupload.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Terbitkan</div>
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Min-Fee
+					</div>
+					<div>
+						<input placeholder="Misal 200.000.00" type=number style="height:100%;border-radius:0;">
+					</div>
+				</div>
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Nama Jasa
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Nama Pekerjaan Disini..." style="height:100%;resize:none;border-radius:0;" id=title></textarea>
+					</div>
+				</div>
+				<div style="
+					height:80%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Deskripsi Dan Persyaratan
+					</div>
+					<div style="
+						height:100%;
+					">
+						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
+					</div>
+				</div>
+			`,
+			choosePreview(){
+				const showPreview = (file)=>{
+					this.filepreview = file;
+					const fs = new FileReader();
+					fs.onload = ()=>{
+						this.find('#preview').src = fs.result;
+						this.find('#preview').show('block');
+					}
+					fs.readAsDataURL(file);
+				}
+				if(!this.preview)this.preview = makeElement('input',{
+					type:'file',
+					accept:'image/*',
+					onchange(){
+						const file = this.files[0];
+						showPreview(file);
+					}
+				})
+				this.preview.click();
+			},
+			collectData(){
+				const minFee = this.find('input').value;
+				const Data = {minFee};
+				if(this.filepreview)Data.preview = this.filepreview;
+				this.findall('textarea').forEach(input=>{
+					Data[input.id] = input.value;
+				})
+				Object.assign(Data,{
+					time:getFullDate(),
+					owner:app.userData.cleanEmail,
+					type:"Services",
+					postId:getUniqueID(),
+					username:app.userData.username,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
+					more:{
+						like:[],
+						share:[],
+						comments:[],
+						view:[]
+					}
+				})
+				return Data;
+			},
+			setupButton(){
+				this.findall('.thebutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			addFiles(){
+
+			},
+			saveToDraft(){
+
+			},
+			publish(){
+				const data = this.collectData();
+				view.main.addChild(view.loadingPost(data));
+			},
+			onadded(){
+				this.setupButton();
+			}
+		})
+	},
+	lokernew(){
+		return makeElement('div',{
+			style:`
+				margin:3%;
+				display:flex;
+				flex-direction:column;
+				gap:10px;
+				height:94%;
+			`,
+			innerHTML:`
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Preview
+					</div>
+					<div style="
+						height:100px;
+						width:100%;
+						background:whitesmoke;
+						border:1px solid #e0e0e0;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						position:relative;
+					">
+						<div style="
+							width:100%;
+							height:100%;
+						">
+							<img id=preview style="
+								width:100%;
+								height:100%;
+								object-fit:cover;
+								display:none;
+							">
+						</div>
+						<div style="
+							background: white;
+							padding: 5px;
+							border-radius: 50%;
+							border: 1px solid #e0e0e0;
+							cursor: pointer;
+							position:absolute;
+							z-index:1;
+						" id=choosePreview class=thebutton>
+							<img src=./more/media/plus.png style="
+								width:32px;
+								height:32px;
+							">
+						</div>
+					</div>
+				</div>
+				<div style="
+					width: 100%;
+					justify-content: space-around;
+					display: flex;
+					gap:10px;
+					position:sticky;
+					top:0;
+					background:white;
+				"
+				id=newartilebuttons
+				>
+					<div style=width:100%; class=thebutton id=publish>
+						<div class="button buttonstyled" style="
+							justify-content:center;display:flex;
+							align-items:center;gap:10px;
+						">
+							<img src=./more/media/whiteupload.png
+								style="
+									width:16px;
+									height:16px;
+								"
+							>Terbitkan</div>
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Max-Fee
+					</div>
+					<div>
 						<input placeholder="Misal 200.000.00" type=number style="height:100%;border-radius:0;">
 					</div>
 				</div>
@@ -1349,7 +1445,7 @@ const view = {
 						Deskripsi Dan Persyaratan
 					</div>
 					<div style="
-						height:200px;
+						height:100%;
 					">
 						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
@@ -1449,6 +1545,16 @@ const view = {
 					margin:10px 0;
 				">${data.title}</div>
 				<div style="
+					width:100%;
+					margin-bottom:10px;
+				">
+					<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+						width:100%;
+						height:100%;
+						object-fit:cover;
+					">
+				</div>
+				<div style="
 					height:100%;
 				">
 					${data.description.replaceAll('\n','<br>')}
@@ -1483,6 +1589,11 @@ const view = {
 			`,
 			onadded(){
 				//this.generateComment('randomid');
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
+				}
 			},
 			generateComment(articleId){
 				this.addChild(makeElement('div',{
@@ -1499,11 +1610,21 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
 				display:flex;
 				flex-direction:column;
+				overflow:auto;
 			`,
 			innerHTML:`
+				<div style="
+					width:100%;
+					height:200px;
+				">
+					<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+						width:100%;
+						height:100%;
+						object-fit:cover;
+					">
+				</div>
 				<div style="
 					display:flex;
 					align-items:center;
@@ -1511,7 +1632,7 @@ const view = {
 					margin:10px 0;
 				">
 					<div>
-						<img class=profileimg src=./more/media/gemaprofile.png>
+						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
 					</div>
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
@@ -1524,9 +1645,7 @@ const view = {
 						font-family:montserratbold;
 						margin:10px 0;
 					">${data.title}</div>
-					<div>
-						${data.description.replaceAll('\n','<br>')}
-					</div>
+					<div>${data.description.replaceAll('\n','<br>')}</div>
 				</div>
 				<div style="
 					position:sticky;
@@ -1542,16 +1661,30 @@ const view = {
 						padding-bottom:10px;
 						background:#15244e;
 						color:white;
-						border:1px solid black;
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:flex;
+						display:${app.userData?data.owner===app.userData.cleanEmail?'none':'flex':'flex'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=dooffers>
 						Buat Penawaran
+					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-bottom:none;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:${app.userData?data.owner===app.userData.cleanEmail?'flex':'none':'none'};
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=delete>
+						Hapus Penawaran
 					</div>
 				</div>
 			`,
@@ -1559,12 +1692,20 @@ const view = {
 				this.find('#dooffers').onclick = ()=>{
 					this.doOffers();
 				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
+				}
 			},
 			doOffers(){
-				if(!app.getInfoLogin())return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
-				//handling owner bid owner.
-				if(data.owner === app.userData.cleanEmail)return forceRecheck(view.main,'Tidak diperbolehkan untuk melakukan bid ke project sendiri!');
-				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openJobs();
+					});
+					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
+				}
+				aaaaaaview.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
 			}
 		})
 	},
@@ -1596,7 +1737,7 @@ const view = {
 					margin:10px 0;
 				">
 					<div>
-						<img class=profileimg src=./more/media/gemaprofile.png>
+						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
 					</div>
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
@@ -1655,6 +1796,11 @@ const view = {
 			onadded(){
 				this.find('#dooffers').onclick = ()=>{this.doOffers()};
 				this.find('#delete').onclick = ()=>{this.deletePost()};
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
+				}
 			},
 			deletePost(){
 				view.main.addChild(view.userRemovePost(data));
@@ -1776,6 +1922,16 @@ const view = {
 					margin:10px 0;
 				">${data.title}</div>
 				<div style="
+					width:100%;
+					margin-bottom:10px;
+				">
+					<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+						width:100%;
+						height:100%;
+						object-fit:cover;
+					">
+				</div>
+				<div style="
 					height:100%;
 				">
 					${data.description.replaceAll('\n','<br>')}
@@ -1809,6 +1965,11 @@ const view = {
 			`,
 			onadded(){
 				//this.generateComment('randomid');
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
+				}
 			},
 			generateComment(articleId){
 				this.addChild(makeElement('div',{
@@ -2228,28 +2389,28 @@ const view = {
 				</div>
 				<div class=newpostmenu>
 					<div id=newCerpen class=child>
-						<img src=./more/media/deer-shape.png>
+						<img src=./more/media/newsicon.png>
 						<div>
-							<div>Cerpen</div>
-							<div style="font-family:montserratregular">Posting Cerita Pendek, Dan Bagikan Imaginasimu!</div>
+							<div>News</div>
+							<div style="font-family:montserratregular">Posting Berita terbaru, bagikan informasi!</div>
 						</div>
 					</div>
 					<div id=newArticle class=child>
-						<img src=./more/media/papers.png>
+						<img src=./more/media/articleicon.png>
 						<div>
 							<div>Artikel</div>
 							<div style="font-family:montserratregular">Posting Artikel, Dan Bagikan Pemikiranmu!</div>
 						</div>
 					</div>
 					<div id=newJasa class=child>
-						<img src=./more/media/construction-worker.png>
+						<img src=./more/media/servicesicon.png>
 						<div>
 							<div>Jasa</div>
 							<div style="font-family:montserratregular">Posting Jasa, Dan Temukan Klienmu!</div>
 						</div>
 					</div>
 					<div id=newLoker class=child>
-						<img src=./more/media/worker.png>
+						<img src=./more/media/task.png>
 						<div>
 							<div>Loker</div>
 							<div style="font-family:montserratregular">Posting Tugasmu, Dan Biarkan Mereka Yang Nyelesain!</div>
@@ -2392,7 +2553,9 @@ const view = {
 					data[input.id] = input.value;
 				})
 				if(data.userEmail){
-					data.cleanEmail = data.userEmail.slice(0,data.userEmail.indexOf('@'));
+					if(data.userEmail.indexOf('@')!=-1)
+						data.cleanEmail = data.userEmail.slice(0,data.userEmail.indexOf('@'));
+					else data.cleanEmail = data.userEmail;
 				}
 				return data;
 			},
@@ -2677,15 +2840,65 @@ const view = {
 				margin:3%;
 				display:flex;
 				flex-direction:column;
-				height:94%;
 				gap:10px;
+				height:94%;
 			`,
 			innerHTML:`
+				<div style="
+					height:20%;
+					display:flex;
+					flex-direction:column;
+				">
+					<div style="
+						font-family:montserratbold;
+					">
+						Preview
+					</div>
+					<div style="
+						height:100px;
+						width:100%;
+						background:whitesmoke;
+						border:1px solid #e0e0e0;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						position:relative;
+					">
+						<div style="
+							width:100%;
+							height:100%;
+						">
+							<img id=preview style="
+								width:100%;
+								height:100%;
+								object-fit:cover;
+								display:none;
+							">
+						</div>
+						<div style="
+							background: white;
+							padding: 5px;
+							border-radius: 50%;
+							border: 1px solid #e0e0e0;
+							cursor: pointer;
+							position:absolute;
+							z-index:1;
+						" id=choosePreview class=thebutton>
+							<img src=./more/media/plus.png style="
+								width:32px;
+								height:32px;
+							">
+						</div>
+					</div>
+				</div>
 				<div style="
 					width: 100%;
 					justify-content: space-around;
 					display: flex;
 					gap:10px;
+					position:sticky;
+					top:0;
+					background:white;
 				"
 				id=newartilebuttons
 				>
@@ -2694,20 +2907,7 @@ const view = {
 							justify-content:center;display:flex;
 							align-items:center;gap:10px;
 						">
-							<img src=./more/media/upload.png
-							style="
-								width:14px;
-								height:14px;
-							"
-							>
-						Simpan</div>
-					</div>
-					<div style=width:100%; class=thebutton id=publish>
-						<div class="button buttonstyled" style="
-							justify-content:center;display:flex;
-							align-items:center;gap:10px;
-						">
-							<img src=./more/media/save.png
+							<img src=./more/media/whiteupload.png
 								style="
 									width:16px;
 									height:16px;
@@ -2723,12 +2923,12 @@ const view = {
 					<div style="
 						font-family:montserratbold;
 					">
-						Judul Cerpen
+						Judul Berita
 					</div>
 					<div style="
 						height:100%;
 					">
-						<textarea id=title placeholder="Tulis Judul Cerpen Disini..." style="height:100%;resize:none;border-radius:0;"></textarea>
+						<textarea placeholder="Tulis Judul Berita Disini..." style="height:100%;resize:none;border-radius:0;" id=title></textarea>
 					</div>
 				</div>
 				<div style="
@@ -2739,17 +2939,38 @@ const view = {
 					<div style="
 						font-family:montserratbold;
 					">
-						Isi Cerpen
+						Isi<span class=star>* <span class=sosmall>min 1000 characters</span></span>
 					</div>
 					<div style="
 						height:100%;
 					">
-						<textarea id=description placeholder="Tulis Isi Cerpen Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;"></textarea>
+						<textarea placeholder="Tulis Berita..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
 				</div>
 			`,
+			choosePreview(){
+				const showPreview = (file)=>{
+					this.filepreview = file;
+					const fs = new FileReader();
+					fs.onload = ()=>{
+						this.find('#preview').src = fs.result;
+						this.find('#preview').show('block');
+					}
+					fs.readAsDataURL(file);
+				}
+				if(!this.preview)this.preview = makeElement('input',{
+					type:'file',
+					accept:'image/*',
+					onchange(){
+						const file = this.files[0];
+						showPreview(file);
+					}
+				})
+				this.preview.click();
+			},
 			collectData(){
 				const Data = {};
+				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
 					Data[input.id] = input.value;
 				})
@@ -2764,7 +2985,7 @@ const view = {
 				return Data;
 			},
 			setupButton(){
-				this.findall('#newartilebuttons .thebutton').forEach(button=>{
+				this.findall('.thebutton').forEach(button=>{
 					button.onclick = ()=>{
 						this[button.id]();
 					}
@@ -2778,7 +2999,7 @@ const view = {
 			},
 			publish(){
 				const data = this.collectData();
-				if(data.description.length<2000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 2000 Huruf.');
+				if(data.description.length<1000)return forceRecheck(view.main,'Maaf Konten Terlalu Sedikit, Dibutuhkan Minimal 1000 Huruf.');
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
@@ -2910,7 +3131,7 @@ const view = {
 				console.log(x);
 				if(!x){
 					this.text.innerHTML = 'Data berhasil diupload, menunggu persetujuan dari admin untuk dipublish';
-					view.content.newPost();
+					view.content.displayList([],'loadloker',true);
 				}else{
 					this.text.innerHTML = 'Terjadi Masalah Saat Mengupload, coba lagi nanti.';
 					this.remove();
@@ -4113,6 +4334,7 @@ const view = {
 						justify-content: space-between;
 						padding: 3%;
 						background: white;
+						gap:5px;
 					">
 						<div style="
 							width: 80%;
@@ -4149,6 +4371,52 @@ const view = {
 								border-radius:10px;
 							" id=sendbutton>
 								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:black;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -4652,7 +4920,6 @@ const view = {
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
-							width: 20%;
 							height: 100%;
 							display: flex;
 							align-items: center;
@@ -4668,6 +4935,29 @@ const view = {
 								border-radius:10px;
 							" id=sendbutton>
 								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -4776,7 +5066,7 @@ const view = {
 				let role = '';
 				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
 				else if(item.from===data.username)role='Owner';
-				else if(item.from===data.bidder)role='Worker';
+				else if(item.from===data.bidder)role='task';
 				return role;
 			},
 			inboxItem(item){
@@ -5147,7 +5437,6 @@ const view = {
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
-							width: 20%;
 							height: 100%;
 							display: flex;
 							align-items: center;
@@ -5163,6 +5452,29 @@ const view = {
 								border-radius:10px;
 							" id=sendbutton>
 								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -5467,7 +5779,6 @@ const view = {
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
-							width: 20%;
 							height: 100%;
 							display: flex;
 							align-items: center;
@@ -5483,6 +5794,29 @@ const view = {
 								border-radius:10px;
 							" id=sendbutton>
 								<img src=./more/media/whitesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -5827,7 +6161,7 @@ const view = {
 					"
 					id=article
 					>
-						<img src=./more/media/papers.png class=navimg>
+						<img src=./more/media/articleicon.png class=navimg>
 						Artikel
 					</div>
 					<div style="
@@ -5841,7 +6175,7 @@ const view = {
 					"
 					id=jobs
 					>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/task.png class=navimg>
 						Loker
 					</div>
 					<div style="
@@ -5855,7 +6189,7 @@ const view = {
 					"
 					id=services
 					>
-						<img src=./more/media/construction-worker.png class=navimg>
+						<img src=./more/media/servicesicon.png class=navimg>
 						Jasa
 					</div>
 					<div style="
@@ -5869,7 +6203,7 @@ const view = {
 					"
 					id=statistic
 					>
-						<img src=./more/media/development.png class=navimg>
+						<img src=./more/media/report.png class=navimg>
 						Statistik
 					</div>
 					<div style="
@@ -5883,7 +6217,7 @@ const view = {
 					"
 					id=bidderSay
 					>
-						<img src=./more/media/rating.png class=navimg>
+						<img src=./more/media/review.png class=navimg>
 						Testimoni
 					</div>
 				</div>
@@ -5898,7 +6232,7 @@ const view = {
 			onadded(){
 				//set the nav.
 				console.log(this.nav);
-				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();

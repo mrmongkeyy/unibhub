@@ -147,17 +147,17 @@ input,textarea{
 	border-radius: 10px;
 }
 .newpostmenu div img{
-	width:48;
-	height:48;
+	width:24;
+	height:24;
 	background:white;
 	padding:10px;
 	border-radius:10px;
 }
 #berandadivmenu div{
-	border-bottom:1px solid whitesmoke;
+	border-bottom:3px solid whitesmoke;
 }
 #berandadivmenu div:hover{
-	border-bottom:1px solid black;
+	border-bottom:3px solid black;
 }
 
 .fitborder{
@@ -255,6 +255,12 @@ input,textarea{
 	width:20px;
 	height:20px;
 	border-radius:50%;
+}
+.username{
+	cursor:pointer;
+}
+.username:hover{
+	text-decoration:underline;
 }
 @media screen and (max-width:900px){
 	.innerBox{

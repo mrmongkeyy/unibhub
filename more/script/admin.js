@@ -1244,16 +1244,16 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
 				display:flex;
 				flex-direction:column;
+				overflow:auto;
 			`,
 			innerHTML:`
 				<div style="
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin-top:10px;
+					margin:10px 0;
 				">
 					<div>
 						<img class=profileimg src=./more/media/gemaprofile.png>
@@ -1261,52 +1261,77 @@ const view = {
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
 				</div>
-				<div style="
-					font-family:montserratbold;
-					margin:10px 0;
-				">${data.title}</div>
+				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
 					height:100%;
 				">
-					${data.description.replaceAll('\n','<br>')}
 					<div style="
-						position:sticky;
-						bottom:0;
-						width:100%;
-						height:50px;
-						left:0;
+						font-family:montserratbold;
+						margin:10px 0;
+					">${data.title}</div>
+					<div>${data.description.replaceAll('\n','<br>')}</div>
+				</div>
+				<div style="
+					position:sticky;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
+					gap:10px;
+				">
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:green;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
 						display:flex;
 						justify-content:center;
-					">
-						<div style="
-							padding:20px;
-							padding-bottom:10px;
-							background:black;
-							color:white;
-							border:1px solid black;
-							border-bottom:none;
-							border-radius:20px 20px 0 0;
-							gap:10px;
-							display:flex;
-							justify-content:center;
-							align-items:center;
-							cursor:pointer;
-						">
-							Lihat Komentar
-						</div>
+						align-items:center;
+						cursor:pointer;
+					" id=publish>
+						Publish Penawaran
+					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=cancel>
+						Hapus Penawaran
 					</div>
 				</div>
-				
 			`,
 			onadded(){
-				//this.generateComment('randomid');
+				this.find('#publish').onclick = ()=>{
+					this.publish();
+				}
+				this.find('#cancel').onclick = ()=>{
+					this.cancel();
+				}
 			},
-			generateComment(articleId){
-				this.addChild(makeElement('div',{
-					onadded(){
-						this.addChild(view.comment(userData.content[articleId].more.comment));
-					}
-				}))
+			cancel(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.removePost(data));
+			},
+			publish(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.loadingPost(data));
 			}
 		})
 	},
@@ -1511,68 +1536,93 @@ const view = {
 			style:`
 				padding:0 3%;
 				height:100%;
-				overflow:auto;
 				display:flex;
 				flex-direction:column;
+				overflow:auto;
 			`,
 			innerHTML:`
 				<div style="
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin-top:10px;
+					margin:10px 0;
 				">
 					<div>
-						<img class=profileimg src=./more/media/gemaprofile.png>
+						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
 					</div>
 					<div class=username>${data.username},</div>
 					<div class=date>${data.time}</div>
 				</div>
 				<div style="
-					font-family:montserratbold;
-					margin:10px 0;
-				">${data.title}</div>
-				<div style="
 					height:100%;
 				">
-					${data.description.replaceAll('\n','<br>')}
 					<div style="
-						position:sticky;
-						bottom:0;
-						width:100%;
-						height:50px;
-						left:0;
+						font-family:montserratbold;
+						margin:10px 0;
+					">${data.title}</div>
+					<div>${data.description.replaceAll('\n','<br>')}</div>
+				</div>
+				<div style="
+					position:sticky;
+					bottom:0;
+					width:100%;
+					height:50px;
+					left:0;
+					display:flex;
+					justify-content:center;
+					gap:10px;
+				">
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:green;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
 						display:flex;
 						justify-content:center;
-					">
-						<div style="
-							padding:20px;
-							padding-bottom:10px;
-							background:black;
-							color:white;
-							border:1px solid black;
-							border-bottom:none;
-							border-radius:20px 20px 0 0;
-							gap:10px;
-							display:flex;
-							justify-content:center;
-							align-items:center;
-							cursor:pointer;
-						">
-							Lihat Komentar
-						</div>
+						align-items:center;
+						cursor:pointer;
+					" id=publish>
+						Publish Berita
+					</div>
+					<div style="
+						padding:20px;
+						padding-bottom:10px;
+						background:red;
+						color:white;
+						border-radius:20px 20px 0 0;
+						gap:10px;
+						display:flex;
+						justify-content:center;
+						align-items:center;
+						cursor:pointer;
+					" id=cancel>
+						Hapus Berita
 					</div>
 				</div>
 			`,
 			onadded(){
-				//this.generateComment('randomid');
+				this.find('#publish').onclick = ()=>{
+					this.publish();
+				}
+				this.find('#cancel').onclick = ()=>{
+					this.cancel();
+				}
 			},
-			generateComment(articleId){
-				this.addChild(makeElement('div',{
-					onadded(){
-						this.addChild(view.comment(userData.content[articleId].more.comment));
-					}
-				}))
+			cancel(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.removePost(data));
+			},
+			publish(){
+				if(!app.getInfoLogin()){
+					view.content.getIn();
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				view.main.addChild(view.loadingPost(data));
 			}
 		})
 	},
