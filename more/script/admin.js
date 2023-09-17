@@ -174,7 +174,7 @@ const view = {
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">openskill<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
+					">circletask<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -2129,7 +2129,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Login Admin openskill
+							Login Admin circletask
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -2237,7 +2237,7 @@ const view = {
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Akun Admin Baru openskill
+							Akun Admin Baru circletask
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>

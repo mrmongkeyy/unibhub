@@ -4345,6 +4345,7 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
@@ -4352,6 +4353,7 @@ const view = {
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
 								min-width:100%;
+								max-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
@@ -4776,7 +4778,6 @@ const view = {
 							<div style="
 								padding:8px;
 								border-radius:50%;
-								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
 								<img src=${item.profilepicture||app.noProfilePng} style="
@@ -4787,9 +4788,10 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
+								background:${item.from===app.userData.username?'white':'#15244e'};
 								color:${item.from===app.userData.username?'black':'white'};
 								padding:10px;
+								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">${item.msg.replaceAll('\n','<br>')}</div>
 							<div style="
@@ -4900,6 +4902,7 @@ const view = {
 						justify-content: space-between;
 						padding: 3%;
 						background: white;
+						gap:5px;
 					">
 						<div style="
 							width: 80%;
@@ -4910,6 +4913,7 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
@@ -4917,6 +4921,7 @@ const view = {
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
 								min-width:100%;
+								max-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
@@ -5098,9 +5103,10 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
+								background:${item.from===app.userData.username?'white':'#15244e'};
 								color:${item.from===app.userData.username?'black':'white'};
 								padding:10px;
+								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">${item.msg.replaceAll('\n','<br>')}</div>
 							<div style="
@@ -5410,6 +5416,58 @@ const view = {
 					</div>
 					<div style="
 						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							min-height:100px;
+							max-height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
 						/* height: 69px; */
 						border-top: 1px solid whitesmoke;
 						display: flex;
@@ -5417,6 +5475,7 @@ const view = {
 						justify-content: space-between;
 						padding: 3%;
 						background: white;
+						gap:5px;
 					">
 						<div style="
 							width: 80%;
@@ -5427,12 +5486,14 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
 								border: none;
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
+								max-width:100%;
 								min-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
@@ -5473,7 +5534,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
-							" id=sendbutton>
+							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
@@ -5485,8 +5546,107 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/images.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/documents.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			collectData(){
 				const msg = {
+					id:app.userData.cleanEmail,
 					from:app.userData.username,
 					date:getFullDate(),
 					msg:this.msgbox.value,
@@ -5504,10 +5664,35 @@ const view = {
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				if(this.file){
+					console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				let inbox = (await app.doglas.do(['database','globalGroupChat',``,'get'])).val()||[];
@@ -5518,6 +5703,8 @@ const view = {
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','globalGroupChat',``,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
 			},
@@ -5558,7 +5745,7 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				//if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
 				this.puttedMsg = msg;
 			},
@@ -5576,9 +5763,13 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
 				this.init();
 			},
 			inboxItem(item){
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -5586,9 +5777,10 @@ const view = {
 						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
 						<div style="
 							display:flex;
 						">
@@ -5606,11 +5798,63 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
+								background:${item.from===app.userData.username?'white':'#15244e'};
 								color:${item.from===app.userData.username?'black':'white'};
 								padding:10px;
+								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									">
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
 							<div style="
 								padding:8px;
 								border-radius:50%;
@@ -5625,10 +5869,23 @@ const view = {
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
 					}
 				})
 			}
@@ -5759,6 +6016,7 @@ const view = {
 						justify-content: space-between;
 						padding: 3%;
 						background: white;
+						gap:5px;
 					">
 						<div style="
 							width: 80%;
@@ -5769,12 +6027,14 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
 								border: none;
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
+								max-width:100%;
 								min-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
@@ -5964,9 +6224,10 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
+								background:${item.from===app.userData.username?'white':'#15244e'};
 								color:${item.from===app.userData.username?'black':'white'};
 								padding:10px;
+								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">${item.msg.replaceAll('\n','<br>')}</div>
 							<div style="
