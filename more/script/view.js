@@ -406,7 +406,7 @@ const view = {
 		},
 		openMyproject(data=[],nav='OnGoing',boot){
 			if(!app.getInfoLogin()){
-				view.content.getIn(()=>{view.content.openMyproject()});
+				view.content.getIn(()=>{view.content.openMyproject([],'OnGoing',true)});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -457,9 +457,7 @@ const view = {
 				return this.getIn(()=>{view.content.openProfile([],'home',false,null)});
 			}
 			this.clearLinesParent();
-			if(userId){
-				userData = (await app.doglas.do(['database','users',userId,'get'])).val();
-			}
+			userData = (await app.doglas.do(['database','users',userId||app.userData.cleanEmail,'get'])).val();
 			if(nav==='loadartikel')nav='home';
 			this.linesParent.addChild(view.profileDiv(nav,boot,userId));
 			if(nav==='home')this.linesParent.addChild(view.profilePage(userData));
@@ -511,7 +509,7 @@ const view = {
 		},
 		openInbox(data=[],nav='bid',boot){
 			if(!app.getInfoLogin()){
-				view.content.getIn(()=>{view.content.openInbox()});
+				view.content.getIn(()=>{view.content.openInbox([],'bid',true)});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -1705,7 +1703,7 @@ const view = {
 					});
 					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
 				}
-				aaaaaaview.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username}));
 			}
 		})
 	},
@@ -1812,7 +1810,7 @@ const view = {
 					});
 					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
 				}
-				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture}));
+				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username,preview:data.preview}));
 			}
 		})
 	},
@@ -1982,13 +1980,7 @@ const view = {
 	},
 	profilePage(userData){
 		if(!userData)userData = app.userData;
-		if(!userData.peoples){
-			userData.peoples = {
-				followers:[],
-				following:[],
-				projects:[]
-			}
-		}
+		console.log(userData);
 		return makeElement('div',{
 			style:`
 				border-radius:0 0 20px 20px;
@@ -2117,13 +2109,13 @@ const view = {
 							margin-top:10px;
 						">
 							<div>
-								<div>${userData.peoples.followers.length} followers</div>
+								<div id=followers>[loading...] followers</div>
 							</div>
 							<div>
-								<div>${userData.peoples.following.length} following</div>
+								<div id=following>[loading...] following</div>
 							</div>
 							<div>
-								<div>${userData.peoples.projects.length} Projects</div>
+								<div id=projects>[loading...] Projects</div>
 							</div>
 						</div>
 					</div>
@@ -2158,11 +2150,13 @@ const view = {
 									"
 								>CHAT</div>
 						</div>
-						<div>
+						<div id=follow style="
+							display:none;
+						">
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							" id=follow>
+							">
 								<img src=./more/media/followwhite.png
 								style="
 									width:16px;
@@ -2170,9 +2164,52 @@ const view = {
 								"
 								>FOLLOW</div>
 						</div>
+						<div id=unfollow style="
+							display:none;
+						">
+							<div class="button buttonstyled" style="
+								border-radius:20px;display:flex;
+								align-items:center;gap:5px;font-size:10px;
+							">
+								<img src=./more/media/unfollow.png
+								style="
+									width:16px;
+									height:16px;
+								"
+								>UNFOLLOW</div>
+						</div>
 					</div>
 				</div>
 			`,
+			showDataFollowAndProject(){
+				console.log(userData);
+				const following = userData.following?userData.following.length:0;
+				const followers = userData.followers?userData.followers.length:0;
+				const projects = userData.projects?userData.projects.length:0;
+
+				this.find('#followers').innerText = followers+' followers';
+				this.find('#following').innerText = following+' following';
+				this.find('#projects').innerText = projects+' projects';
+			},
+			followOnFollow(){
+				if(userData.followers && app.getInfoLogin()){
+					let following;
+					userData.followers.forEach(user=>{
+						if(user.id===app.userData.cleanEmail){
+							following = true;
+							return;
+						}
+					})
+					if(following){
+						this.unfollowButton.show('flex');
+						this.followButton.hide()
+					}else{
+						this.followButton.show('flex');
+					}
+				}else{
+					this.followButton.show('flex');
+				}
+			},
 			onadded(){
 				this.generateMore();
 				//this.generateContent();
@@ -2190,10 +2227,20 @@ const view = {
 				this.find('#chat').onclick = ()=>{
 					this.sendmemsg();
 				}
-
+				this.followButton = this.find('#follow');
+				this.unfollowButton = this.find('#unfollow');
+				this.followButton.onclick = ()=>{
+					this.followme();
+				}
+				this.unfollowButton.onclick = ()=>{
+					this.unfollow();
+				}
+				this.showDataFollowAndProject();
+				this.followOnFollow();
 				//if loading.
 				view.unloading();
 			},
+			unfollow(){},
 			generateMore(){
 				for(let i in userData.more){
 					this.find('#info').addChild(makeElement('div',{
@@ -2243,7 +2290,46 @@ const view = {
 			editPicture(){
 				view.main.addChild(view.editPic(this));
 			},
-			followme(){},
+			async followme(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openProfile([],'home',false,userData.cleanEmail);	
+					});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				//get target follow list.
+				const followers = (await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'get'])).val()||[];
+				followers.push({
+					username:app.userData.username,
+					id:app.userData.cleanEmail,
+					date:getFullDate(),
+					time:getTime()
+				})
+				//push the data.
+				await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'set',followers]);
+				//get this user following list.
+				const following = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'get'])).val()||[];
+				following.push({
+					username:userData.username,
+					id:userData.cleanEmail,
+					date:getFullDate(),
+					time:getTime()
+				})
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'set',following]);
+
+				//notif handling.
+				//for him.
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'set',himnotiflist]);
+
+				//forme.
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.cleanEmail);
+				console.log(userData,app.userData);
+			},
 			async sendmemsg(){
 				if(!app.getInfoLogin()){
 					view.content.getIn(()=>{this.sendmemsg()});
@@ -3815,7 +3901,7 @@ const view = {
 					owner:data.owner,
 					reject:'unset',
 					profilepicture:data.profilepicture,
-					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+					inbox:[{time:getTime(),profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
 				}
 				return xdata;
 			},
@@ -3986,7 +4072,7 @@ const view = {
 					status:'unset',
 					profilepicture:data.profilepicture,
 					bidderProfileIdPic:app.userData.profilepicture,
-					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
 				}
 				return xdata;
 			},
@@ -4017,6 +4103,7 @@ const view = {
 			async save(){
 				
 				Object.assign(data,this.collectData());
+				console.log(data);
 				//adding bid data to the project.
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
@@ -4061,17 +4148,14 @@ const view = {
 			style:`
 				width:100%;
 				height:100%;
+				margin-top:10px;
 			`,
-			generateChat(){
-				if(!app.userData.bid)app.userData.bid = [];
-				app.userData[nav].forEach(async (bid,i)=>{
-					let msgs = null;
-					if(nav==='inbox'){
-						//getting the latest msg from chat.
-						msgs = (await app.doglas.do(['database','privateChat',`${bid.roomId}/inbox`,'get'])).val()||[];
-					}
-					this.addChild(view[`${nav}Item`](i,bid,(i!==app.userData.bid.length-1)?true:false,msgs));
-				})
+			async generateChat(){
+				if(!app.userData[nav])app.userData[nav] = [];
+				if(nav==='inbox'){
+					//getting the latest msg from chat.
+					app.userData.inbox = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+				}
 				if(app.userData[nav].length===0){
 					this.addChild(makeElement('div',{
 						innerHTML:`${nav==='bid'?'Anda Belum Melakukan Aktifitas Penawaran!':'Tidak Ada Pesan!'}`,
@@ -4084,6 +4168,11 @@ const view = {
 							text-align:center;
 						`
 					}))
+				}else{
+					app.userData[nav].forEach(async (bid,i)=>{
+						const msgs = (await app.doglas.do(['database','privateChat',`${bid.roomId}/inbox`,'get'])).val()||[];	
+						this.addChild(view[`${nav}Item`](i,bid,(i!==app.userData[nav].length-1)?false:true,msgs));
+					})	
 				}
 			},
 			onadded(){
@@ -4092,23 +4181,28 @@ const view = {
 		});
 	},
 	inboxItem(i,data,bt,msgs){
+		console.log(msgs);
 		const Dot = '...';
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
 				<div class=item style=${!bt?'':'border-bottom:1px solid whitesmoke'}>
-					<div class=thumbnail>
-						<div>#${i+1}</div>
+					<div class=thumbnail style="
+						background:white;
+						margin-left:2%;
+					">
+						<img class=username src=${data.toProfile} style="
+							width:32px;
+							height:32px;
+							object-fit:cover;
+							border-radius:50%;
+						">
 					</div>
 					<div class=moreinfo>
 						<div class=title>
 							${msgs[msgs.length-1].msg.slice(0,20)+Dot}
 						</div>
 						<div class=addressinfo>
-							<div>
-								<img class=profileimg src=${data.toProfile}>
-							</div>
-							<div class=username>${data.toUsername},</div>
 							<div class=date>${msgs[msgs.length-1].date}</div>
 						</div>
 					</div>
@@ -4327,6 +4421,58 @@ const view = {
 					</div>
 					<div style="
 						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							min-height:100px;
+							max-height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
 						/* height: 69px; */
 						border-top: 1px solid whitesmoke;
 						display: flex;
@@ -4335,7 +4481,24 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						position:relative;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -4355,30 +4518,6 @@ const view = {
 								min-width:100%;
 								max-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
-						</div>
-						<div style="
-							width: 20%;
-							height: 100%;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-							/* background: whitesmoke; */
-							/* border: 1px solid whitesmoke; */
-							background: white;
-							border-radius: 0 20px 20px 0;
-						">
-							<div style="cursor:pointer;
-								padding:10px;
-								background:black;
-								border-radius:10px;
-							" id=sendbutton>
-								<img src=./more/media/whitesend.png
-								style="
-									width:32px;
-									height:32px;
-								"
-								>
-							</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -4417,7 +4556,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
-							" id=sendbutton>
+							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
@@ -4429,12 +4568,112 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/images.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/documents.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			collectData(){
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime()
 				}
 				return msg;
 			},
@@ -4652,18 +4891,61 @@ const view = {
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
+				if(this.file){
+					//hiding the close button on file preview.
+					console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
+					console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				const inbox = (await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'get'])).val();
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}/inbox`,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -4731,8 +5013,9 @@ const view = {
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
 				this.msgbox = this.find('#msgbox');
+				this.sendingIndicator = this.find('#sendingIndicator');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
 				this.moreMenuInit();
@@ -4745,9 +5028,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg;
+				this.puttedMsg = msg.time;
 			},
 			onCloseClickded(){
 				this.removeListen();
@@ -4759,9 +5042,13 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
 				this.init();
 			},
 			inboxItem(item){
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -4769,18 +5056,20 @@ const view = {
 						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
 								border-radius:50%;
+								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
-								<img src=${item.profilepicture||app.noProfilePng} style="
+								<img src=${item.profilepicture} style="
 									width:32px;
 									height:32px;
 									border-radius:50%;
@@ -4788,19 +5077,70 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'#15244e'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
 								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									">
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
-								<img src=${item.profilepicture||app.noProfilePng} style="
+								<img src=${item.profilepicture} style="
 									width:32px;
 									height:32px;
 									border-radius:50%;
@@ -4808,10 +5148,23 @@ const view = {
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
 					}
 				})
 			}
@@ -4893,6 +5246,59 @@ const view = {
 					" id=boxinbox>
 						
 					</div>
+
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							min-height:100px;
+							max-height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
 					<div style="
 						width: 94%;
 						/* height: 69px; */
@@ -4903,7 +5309,24 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						position:relative;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -4961,7 +5384,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
-							" id=sendbutton>
+							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
@@ -4973,12 +5396,112 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/images.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/documents.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			collectData(){
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime()
 				}
 				return msg;
 			},
@@ -4999,18 +5522,62 @@ const view = {
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
+
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
+				if(this.file){
+					//hiding the close button on file preview.
+					console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
+					console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				const inbox = (await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}/inbox`,'get'])).val()||[];
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}/inbox`,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -5038,8 +5605,9 @@ const view = {
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
 				this.msgbox = this.find('#msgbox');
+				this.sendingIndicator = this.find('#sendingIndicator');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
 				this.moreMenuInit();
@@ -5052,9 +5620,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg;
+				this.puttedMsg = msg.time;
 			},
 			onCloseClickded(){
 				if(customCloseThis){
@@ -5065,6 +5633,9 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
 				this.init();
 			},
 			getRole(item){
@@ -5076,6 +5647,7 @@ const view = {
 			},
 			inboxItem(item){
 				const role = this.getRole(item);
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -5083,9 +5655,10 @@ const view = {
 						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}: ${role}</div>
+						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
 						<div style="
 							display:flex;
 						">
@@ -5103,12 +5676,63 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'#15244e'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
 								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									">
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
 							<div style="
 								padding:8px;
 								border-radius:50%;
@@ -5123,10 +5747,23 @@ const view = {
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
 					}
 				})
 			}
@@ -5389,7 +6026,7 @@ const view = {
 						<div style="
 							width:80%;
 						">
-							<div style=font-family:montserratbold>The Simpsons Group</div>
+							<div style=font-family:montserratbold>Global Chat</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -5476,7 +6113,24 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						position:relative;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -5595,6 +6249,7 @@ const view = {
 					`,
 					onadded(){
 						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
 							div.onclick = ()=>{this[div.id]()};
 						})
 						button.hide();
@@ -5650,7 +6305,8 @@ const view = {
 					from:app.userData.username,
 					date:getFullDate(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime()
 				}
 				return msg;
 			},
@@ -5681,10 +6337,23 @@ const view = {
 				const msgData = this.collectData();
 				if(msgData.msg.length===0 && !this.file)return;
 				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
 				if(this.file){
+					//hiding the close button on file preview.
+					console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
 					console.log('uploading file', this.file);
 					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
 					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
 					msgData.file = {
 						url,type:this.file.type,
 						name:this.file.name,size:this.file.size
@@ -5707,6 +6376,9 @@ const view = {
 				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -5731,8 +6403,9 @@ const view = {
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
 				this.msgbox = this.find('#msgbox');
+				this.sendingIndicator = this.find('#sendingIndicator');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
 				this.moreMenuInit();
@@ -5745,9 +6418,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				//if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg;
+				this.puttedMsg = msg.time;
 			},
 			removeListen(){
 				app.doglas.get(`globalGroupChat`).off('value');
@@ -5798,8 +6471,8 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'#15244e'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
 								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
@@ -5981,8 +6654,17 @@ const view = {
 						</div>
 						<div style="
 							width:80%;
+							display:flex;
+							align-items:center;
+							gap:5px;
 						">
-							<div>Kirim pesan ke ${room.toUsername}</div>
+							<img src=${room.toProfile} style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
+							">
+							<div>${room.toUsername}</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -6009,6 +6691,58 @@ const view = {
 					</div>
 					<div style="
 						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							min-height:100px;
+							max-height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
 						/* height: 69px; */
 						border-top: 1px solid whitesmoke;
 						display: flex;
@@ -6017,7 +6751,24 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						position:relative;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -6075,7 +6826,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
-							" id=sendbutton>
+							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
@@ -6087,6 +6838,105 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/images.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/documents.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			async fixRoom(){
 				//case is only checking for user, not with opponent.
 				//have to check the opponent.
@@ -6113,7 +6963,9 @@ const view = {
 					from:app.userData.username,
 					date:getFullDate(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime(),
+					id:app.userData.cleanEmail
 				}
 				return msg;
 			},
@@ -6126,21 +6978,65 @@ const view = {
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
 
 				this.fixRoom();
 
+
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
+				if(this.file){
+					//hiding the close button on file preview.
+					console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
+					console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				const inbox = (await app.doglas.do(['database','privateChat',`${room.roomId}/inbox`,'get'])).val()||[];
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','privateChat',`${room.roomId}/inbox`,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -6168,8 +7064,9 @@ const view = {
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
+				this.sendingIndicator = this.find('#sendingIndicator');
 				this.msgbox = this.find('#msgbox');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
 				this.moreMenuInit();
@@ -6182,9 +7079,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg;
+				this.puttedMsg = msg.time;
 			},
 			onCloseClickded(){
 				this.removeListen();
@@ -6194,9 +7091,14 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
 				this.init();
 			},
 			inboxItem(item){
+				console.log(item);
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
@@ -6204,9 +7106,10 @@ const view = {
 						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
 						<div style="
 							display:flex;
 						">
@@ -6216,7 +7119,7 @@ const view = {
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
-								<img src=${item.profilepicture||app.noProfilePng} style="
+								<img src=${item.profilepicture} style="
 									width:32px;
 									height:32px;
 									border-radius:50%;
@@ -6224,19 +7127,70 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'#15244e'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
 								font-weight:bold;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									">
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
-								<img src=${item.profilepicture||app.noProfilePng} style="
+								<img src=${item.profilepicture} style="
 									width:32px;
 									height:32px;
 									border-radius:50%;
@@ -6244,10 +7198,23 @@ const view = {
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
 					}
 				})
 			}
