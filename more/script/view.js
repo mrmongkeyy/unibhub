@@ -389,6 +389,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Baca Artikel';
 			this.reactTo.show('flex');
 			this.searchWare.hide();
+			this.logout.hide();
 		},
 		openShortStories(){
 			this.clearLinesParent();
@@ -396,6 +397,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Baca Berita';
 			this.reactTo.show('flex');
 			this.searchWare.hide();
+			this.logout.hide();
 		},
 		openJobs(){
 			this.clearLinesParent();
@@ -403,6 +405,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Info Loker';
 			this.reactTo.show('flex');
 			this.searchWare.hide();
+			this.logout.hide();
 		},
 		openMyproject(data=[],nav='OnGoing',boot){
 			if(!app.getInfoLogin()){
@@ -439,6 +442,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Info Jasa';
 			this.reactTo.show('flex');
 			this.searchWare.hide();
+			this.logout.hide();
 		},
 		isInProfile(){
 			let result = false;
@@ -462,10 +466,21 @@ const view = {
 			this.linesParent.addChild(view.profileDiv(nav,boot,userId));
 			if(nav==='home')this.linesParent.addChild(view.profilePage(userData));
 			else if(nav==='statistic')this.linesParent.addChild(view.statistic(userId));
+			else if(nav==='followers'||nav==='following'){
+				data.forEach((item,i)=>{
+					this.find('#linesparent').addChild(view.lineFollow(item,i+1,(i===data.length-1)?false:true));
+				})
+				if(data.length===0){
+					this.find('#linesparent').addChild(view.nodata());
+				}
+			}
 			else {
 				data.forEach((item,i)=>{
 					this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
 				})
+				if(data.length===0){
+					this.find('#linesparent').addChild(view.nodata());
+				}
 			}
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
@@ -828,6 +843,33 @@ const view = {
 			}
 		})
 	},
+	lineFollow(data,i,bt=true){
+		return makeElement('div',{
+			className:'lines',
+			innerHTML:`
+				<div class=item style=${!bt?'border-bottom:0;':''}>
+					<div class=thumbnail>
+						<div>#${i}</div>
+					</div>
+					<div class=moreinfo>
+						<div class=addressinfo style=margin-bottom:8px;>
+							<div>
+								<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
+							</div>
+						</div>
+						<div class="username title">@${data.username}</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.id);
+				}
+			}
+		})
+	},
 	line(data,i,bt=true){
 		const Dot = (data.title.length>100)?'...':'';
 		return makeElement('div',{
@@ -935,7 +977,7 @@ const view = {
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
 					view.addLoading();
-					view.content.openProfile([],'home',true,data.bidderProfileId);
+					view.content.openProfile([],'home',false,data.owner===app.userData.cleanEmail?data.bidderProfileId:data.owner);
 				}
 			},
 			openChat(){
@@ -1272,7 +1314,9 @@ const view = {
 				this.preview.click();
 			},
 			collectData(){
-				const minFee = Number(this.find('input').value.replaceAll('.',''));
+				this.feeInput.value = this.feeInput.value.replaceAll('Rp ','');
+				this.feeInput.value = this.feeInput.value.replaceAll('.','');
+				const minFee = Number(this.find('input').value);
 				const Data = {minFee};
 				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
@@ -1495,7 +1539,9 @@ const view = {
 				}
 			},
 			collectData(){
-				const maxFee = Number(this.find('input').value.replaceAll('.',''));
+				this.feeInput.value = this.feeInput.value.replaceAll('Rp ','');
+				this.feeInput.value = this.feeInput.value.replaceAll('.','');
+				const maxFee = Number(this.find('input').value);
 				const Data = {maxFee};
 				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
@@ -2147,9 +2193,6 @@ const view = {
 							<div>
 								<div id=following>[loading...] following</div>
 							</div>
-							<div>
-								<div id=projects>[loading...] Projects</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -2218,11 +2261,9 @@ const view = {
 				console.log(userData);
 				const following = userData.following?userData.following.length:0;
 				const followers = userData.followers?userData.followers.length:0;
-				const projects = userData.projects?userData.projects.length:0;
 
 				this.find('#followers').innerText = followers+' followers';
 				this.find('#following').innerText = following+' following';
-				this.find('#projects').innerText = projects+' projects';
 			},
 			followOnFollow(){
 				if(userData.followers && app.getInfoLogin()){
@@ -2378,7 +2419,8 @@ const view = {
 					username:app.userData.username,
 					id:app.userData.cleanEmail,
 					date:getFullDate(),
-					time:getTime()
+					time:getTime(),
+					profilepicture:app.userData.profilepicture
 				})
 				//push the data.
 				await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'set',followers]);
@@ -2388,7 +2430,8 @@ const view = {
 					username:userData.username,
 					id:userData.cleanEmail,
 					date:getFullDate(),
-					time:getTime()
+					time:getTime(),
+					profilepicture:userData.profilepicture
 				})
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'set',following]);
 
@@ -3987,7 +4030,8 @@ const view = {
 					owner:data.owner,
 					reject:'unset',
 					profilepicture:data.profilepicture,
-					inbox:[{time:getTime(),profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value}]
+					bidderProfileIdPic:app.userData.profilepicture,
+					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
 				}
 				return xdata;
 			},
@@ -4026,6 +4070,12 @@ const view = {
 					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
 					biddatauser.push(data);
 					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					
+					//update bid data statistic
+					let bidcount = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'get'])).val()||0;
+					bidcount += 1;
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'set',bidcount]);
+					
 					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
@@ -4197,7 +4247,13 @@ const view = {
 					//get the data first.
 					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
 					biddatauser.push(data);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',biddatauser]);
+					
+					//update bid data statistic
+					let bidcount = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'get'])).val()||0;
+					bidcount += 1;
+					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'set',bidcount]);
+					
 					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
@@ -4827,11 +4883,20 @@ const view = {
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
 
 				//set room for the winner
-				console.log('winner is',winner);
 				const winnerOnGoingProjects = (await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'get'])).val()||[];
 				console.log(winnerOnGoingProjects);
 				winnerOnGoingProjects.push(project);
 				await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'set',winnerOnGoingProjects]);
+				
+				//set statistic win project.
+				let projectWon = (await app.doglas.do(['database','users',`${winner}/statistics/projectwon`,'get'])).val()||0;
+				projectWon += 1;
+				await app.doglas.do(['database','users',`${winner}/statistics/projectwon`,'set',projectWon]);
+				
+				//set statistic ongoing project.
+				let ongoingproject = (await app.doglas.do(['database','users',`${winner}/statistics/ongoingproject`,'get'])).val()||0;
+				ongoingproject += 1;
+				await app.doglas.do(['database','users',`${winner}/statistics/ongoingproject`,'set',ongoingproject]);
 				
 				//set room for the admin
 				console.log('winner is',winner);
@@ -4867,7 +4932,7 @@ const view = {
 				actionIndicator.find('#text').innerHTML = `Memperoses Rekrutmen Kepada ${data.bidder} sebesar Rp. ${getPrice(data.fee)}`;
 
 				//getting peoples id.
-				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val();
+				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
 				//adding owner id also, we need owner bid also updated.
 				bidders.push(app.userData.cleanEmail);
 				console.log(bidders);
@@ -7436,6 +7501,7 @@ const view = {
 				    padding: 10px;
 				    border-radius: 20px;
 				    cursor: pointer;
+						border:1px solid gainsboro;
 					" id=removeChat>
 						<div style="
 							display: flex;
@@ -7458,6 +7524,7 @@ const view = {
 				    padding: 10px;
 				    border-radius: 20px;
 				    cursor: pointer;
+						border:1px solid gainsboro;
 					" id=reportChat>
 						<div style="
 							display: flex;
@@ -7589,10 +7656,52 @@ const view = {
 						padding: 10px;
 						justify-content: center;
 					"
+					id=news
+					>
+						<img src=./more/media/newsicon.png class=navimg>
+						news
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
 					id=statistic
 					>
 						<img src=./more/media/report.png class=navimg>
 						Statistik
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=followers
+					>
+						<img src=./more/media/follow.png class=navimg>
+						Followers
+					</div>
+					<div style="
+						display: flex;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						gap:8px;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=following
+					>
+						<img src=./more/media/follow.png class=navimg>
+						Following
 					</div>
 					<div style="
 						display: flex;
@@ -7631,33 +7740,48 @@ const view = {
 			},
 			article(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/article`,'get','']).then(data=>{
+				app.doglas.do(['database','post','Articles','get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
-					view.content.openProfile(datacb,'article',false,userId);
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'article',false,userId);
 				})
 			},
 			jobs(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/jobs`,'get','']).then(data=>{
+				app.doglas.do(['database','post','Jobs','get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
-					view.content.openProfile(datacb,'jobs',false,userId);
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'jobs',false,userId);
 				})
 			},
 			services(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/services`,'get','']).then(data=>{
+				app.doglas.do(['database','post','Services','get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
-					view.content.openProfile(datacb,'services',false,userId);
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'services',false,userId);
 				})
 			},
 			statistic(){
 				view.addLoading();
 				app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistic`,'get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
+					let datacb = objToArray(data.val()||{});
 					view.content.openProfile(datacb,'statistic',false,userId);
 				})
 			},
@@ -7665,8 +7789,127 @@ const view = {
 				view.addLoading();
 				app.doglas.do(['database','users',`${app.userData.cleanEmail}/bidderSay`,'get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
+					let datacb = objToArray(data.val()||{});
 					view.content.openProfile(datacb,'bidderSay',false,userId);
+				})
+			},
+			followers(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/followers`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'followers',false,userId);
+				})
+			},
+			following(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/following`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'following',false,userId);
+				})
+			},
+			news(){
+				view.addLoading();
+				app.doglas.do(['database','post','ShortStories','get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'news',false,userId);
+				})
+			}
+		})
+	},
+	statistic(userId){
+		return makeElement('div',{
+			style:`
+				overflow:auto;
+				font-weight:bold;
+				padding:2%;
+				border-radius: 10px;
+			`,
+			className:'smartBorder',
+			innerHTML:`
+				<div style="
+					display:flex;
+					justify-content:space-between;
+					align-items:center;
+					border-bottom:1px solid whitesmoke;
+					gap:10px;
+					padding:10px 0;
+				">
+					<div>Total Bid</div>
+					<div style=display:flex;gap:8px;>
+						<div id=bidcount class=divitem>-</div>
+						Kali
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					justify-content:space-between;
+					align-items:center;
+					border-bottom:1px solid whitesmoke;
+					gap:10px;
+					padding:10px 0;
+				">
+					<div>Menang Bid</div>
+					<div style=display:flex;gap:8px;>
+						<div id=projectwon class=divitem>-</div>
+						Kali
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					justify-content:space-between;
+					align-items:center;
+					border-bottom:1px solid whitesmoke;
+					gap:10px;
+					padding:10px 0;
+				">
+					<div>Selesai</div>
+					<div style=display:flex;gap:8px;>
+						<div id=projectfinished class=divitem>-</div>
+						Kali
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					justify-content:space-between;
+					align-items:center;
+					gap:10px;
+					padding:10px 0;
+				">
+					<div>Batal</div>
+					<div style=display:flex;gap:8px;>
+						<div id=projectcancelled class=divitem>-</div>
+						Kali
+					</div>
+				</div>
+				<div style="
+					display:flex;
+					justify-content:space-between;
+					align-items:center;
+					gap:10px;
+					padding:10px 0;
+				">
+					<div>Sedang Berjalan</div>
+					<div style=display:flex;gap:8px;>
+						<div id=ongoingproject class=divitem>-</div>
+						Projek
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.fillData();
+			},
+			async fillData(){
+				const userStatistic = (await app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/statistics`,'get'])).val()||{};
+				this.findall('.divitem').forEach(div=>{
+					div.innerHTML = userStatistic[div.id]||0;
 				})
 			}
 		})

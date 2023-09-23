@@ -25,6 +25,9 @@ div{
   scrollbar-color: white white;
   scrollbar-width: thin;
 }
+.smartBorder{
+	border: 2px solid whitesmoke;
+}
 body{
 	padding:0;
   margin:0;
@@ -278,5 +281,8 @@ input,textarea{
 	}
 	.smartHeight{
 		height:100%;
+	}
+	.smartBorder{
+		border:none;
 	}
 }
