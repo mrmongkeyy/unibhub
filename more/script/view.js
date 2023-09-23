@@ -1091,7 +1091,8 @@ const view = {
 					Data[input.id] = input.value;
 				})
 				Object.assign(Data,{
-					time:getFullDate(),
+					date:getFullDate(),
+					time:getTime(),
 					owner:app.userData.cleanEmail,
 					type:"Articles",
 					postId:getUniqueID(),
@@ -1285,7 +1286,8 @@ const view = {
 					Data[input.id] = input.value;
 				})
 				Object.assign(Data,{
-					time:getFullDate(),
+					date:getFullDate(),
+					time:getTime(),
 					owner:app.userData.cleanEmail,
 					type:"Services",
 					postId:getUniqueID(),
@@ -1477,7 +1479,8 @@ const view = {
 					Data[input.id] = input.value;
 				})
 				Object.assign(Data,{
-					time:getFullDate(),
+					date:getFullDate(),
+					time:getTime(),
 					owner:app.userData.cleanEmail,
 					type:"Jobs",
 					postId:getUniqueID(),
@@ -2240,7 +2243,49 @@ const view = {
 				//if loading.
 				view.unloading();
 			},
-			unfollow(){},
+			async unfollow(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openProfile([],'home',false,userData.cleanEmail);
+					});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				//get target follow list.
+				const followers = (await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'get'])).val()||[];
+				
+				//time to filter.
+				const newFollowers = [];
+				followers.forEach(item=>{
+					if(item.id!==app.userData.cleanEmail){
+						newFollowers.push(item);
+					}
+				})
+				await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'set',newFollowers]);
+				
+				//get this user following list.
+				const following = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'get'])).val()||[];
+				
+				//time to filter.
+				const newFollowing = [];
+				following.forEach(item=>{
+					if(item.id!==userData.cleanEmail){
+						newFollowing.push(item);
+					}
+				})
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'set',newFollowing]);
+
+				//notif handling.
+				//for him.
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'set',himnotiflist]);
+
+				//forme.
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.cleanEmail);
+			},
 			generateMore(){
 				for(let i in userData.more){
 					this.find('#info').addChild(makeElement('div',{
@@ -3061,7 +3106,8 @@ const view = {
 					Data[input.id] = input.value;
 				})
 				Object.assign(Data,{
-					time:getFullDate(),
+					date:getFullDate(),
+					time:getTime(),
 					owner:app.userData.cleanEmail,
 					type:"ShortStories",
 					postId:getUniqueID(),
@@ -3898,6 +3944,7 @@ const view = {
 					bidder:app.userData.username,
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
+					time:getTime(),
 					owner:data.owner,
 					reject:'unset',
 					profilepicture:data.profilepicture,
@@ -4067,6 +4114,7 @@ const view = {
 					bidder:app.userData.username,
 					bidderProfileId:app.userData.cleanEmail,
 					date:getFullDate(),
+					time:getTime(),
 					owner:data.owner,
 					ownerUsername:data.username,
 					status:'unset',
@@ -4209,7 +4257,7 @@ const view = {
 					<div style="
 						display:flex;
 						justify-content:center;
-						width:20%;
+						margin-right:2%;
 					">
 						<div style="
 							padding: 5px;
@@ -4671,6 +4719,7 @@ const view = {
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
 					profilepicture:app.userData.profilepicture,
 					time:getTime()
@@ -5028,9 +5077,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg === msg.time)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg.time;
+				this.puttedMsg = msg;
 			},
 			onCloseClickded(){
 				this.removeListen();
@@ -5059,21 +5108,24 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -5134,20 +5186,27 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
+								width:32px;
+								height:32px;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 						</div>
+						<div style="
+							margin-${item.from===app.userData.username?'right':'left'}:48px;
+						"><span style=font-size:10px;>${item.date}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
@@ -5499,9 +5558,11 @@ const view = {
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
 					profilepicture:app.userData.profilepicture,
-					time:getTime()
+					time:getTime(),
+					id:app.userData.cleanEmail
 				}
 				return msg;
 			},
@@ -5658,21 +5719,24 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -5733,20 +5797,27 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
+								width:32px;
+								height:32px;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 						</div>
+						<div style="
+							margin-${item.from===app.userData.username?'right':'left'}:48px;
+						"><span style=font-size:10px;>${item.date}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
@@ -6304,6 +6375,7 @@ const view = {
 					id:app.userData.cleanEmail,
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
 					profilepicture:app.userData.profilepicture,
 					time:getTime()
@@ -6418,9 +6490,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg === msg.time)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg.time;
+				this.puttedMsg = msg;
 			},
 			removeListen(){
 				app.doglas.get(`globalGroupChat`).off('value');
@@ -6453,21 +6525,24 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -6528,20 +6603,27 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
+								width:32px;
+								height:32px;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 						</div>
+						<div style="
+							margin-${item.from===app.userData.username?'right':'left'}:48px;
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
@@ -6656,7 +6738,7 @@ const view = {
 							width:80%;
 							display:flex;
 							align-items:center;
-							gap:5px;
+							gap:10px;
 						">
 							<img src=${room.toProfile} style="
 								width:32px;
@@ -6962,6 +7044,7 @@ const view = {
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
 					profilepicture:app.userData.profilepicture,
 					time:getTime(),
@@ -7079,9 +7162,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg === msg.time)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg.time;
+				this.puttedMsg = msg;
 			},
 			onCloseClickded(){
 				this.removeListen();
@@ -7097,7 +7180,6 @@ const view = {
 				this.init();
 			},
 			inboxItem(item){
-				console.log(item);
 				const parent = this;
 				return makeElement('div',{
 					style:`
@@ -7109,21 +7191,24 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;"><span class=username>@${item.from}</span>, <span style=font-size:10px;>${item.date}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
 								display:${item.from===app.userData.username?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -7184,20 +7269,27 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
+								width:32px;
+								height:32px;
 								display:${item.from===app.userData.username?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
 						</div>
+						<div style="
+							margin-${item.from===app.userData.username?'right':'left'}:48px;
+						"><span style=font-size:10px;>${item.date}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();

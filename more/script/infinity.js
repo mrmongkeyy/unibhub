@@ -462,3 +462,52 @@ const nonull = function(obj){
 const getFullDate = function(){
 	return new Date().toLocaleDateString();
 }
+
+const ddmmyy = function(){
+	const date = new Date();
+	let day = String(date.getUTCDate());
+	day = day.length===1?`0${day}`:day;
+	let month = String(date.getUTCMonth());
+	month = month.length===1?`0${month}`:month;
+	let year = String(date.getUTCFullYear());
+	year = year.length===1?`0${year}`:year;
+	return `${day}-${month}-${year}`;
+}
+
+const SmartTime = function(msInput){
+	const now = new Date();
+	const ms = now.getTime();
+	const gap = ms-msInput;
+	const stc = ['detik','menit','jam','hari','minggu','bulan','tahun'];
+	//getting the secons first.
+	const stringSecon = String(gap);
+	let secons = Number(stringSecon.slice(0,(stringSecon.length-3)));
+	//getting minutes.
+	const seconModulo = secons%60;
+	let minutes = (secons-(seconModulo))/60;
+	secons=seconModulo;
+	const minuteModulo = minutes%60;
+	let hours = (minutes-(minuteModulo))/60;
+	minutes = minuteModulo;
+	const hoursModulo = hours%24;
+	let day = (hours-hoursModulo)/24;
+	hours = hoursModulo;
+	const dayModulo = day%7;
+	let week = (day-dayModulo)/7;
+	day = dayModulo;
+	const weekModulo = week%4;
+	let month = (week-weekModulo)/4;
+	week = weekModulo;
+	const monthModulo = month%12;
+	let year = (month-monthModulo)/12;
+	month = monthModulo;
+	const data = [secons,minutes,hours,day,week,month,year];
+	let index = -1;
+	for(let i=0;i<data.length;i++){
+		if(data[i]){
+			index = i;
+		}
+	}
+	if(index == -1)return '0 detik lalu';
+	return `${data[index]} ${stc[index]} lalu`;
+}
