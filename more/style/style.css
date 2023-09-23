@@ -91,6 +91,9 @@ input,textarea{
 .innerBox{
 	width:40%;
 }
+.smartHeight{
+	height:60%;
+}
 #newartilebuttons div:hover div{
 	background:gray;
 	color:white;
@@ -272,5 +275,8 @@ input,textarea{
 	}
 	.moreinfo .addressinfo{
 		font-size:smaller;
+	}
+	.smartHeight{
+		height:100%;
 	}
 }

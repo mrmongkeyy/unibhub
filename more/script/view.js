@@ -470,7 +470,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
 			this.searchWare.hide();
-			if(!userId)this.logout.show('flex');
+			if(userId===app.userData.cleanEmail || !userId)this.logout.show('flex');
 		},
 		newPost(){
 			if(!app.getInfoLogin()){
@@ -830,11 +830,6 @@ const view = {
 	},
 	line(data,i,bt=true){
 		const Dot = (data.title.length>100)?'...':'';
-		if(!data.more){
-			data.more = {
-				view:[]
-			}
-		}
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
@@ -854,11 +849,11 @@ const view = {
 								<img class=profileimg src=${data.profilepicture}>
 							</div>
 							<div class=username>${data.username},</div>
-							<div class=date>${data.time}</div>
+							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 						<div class=vshareinfo>
 							<div>
-								<span>${data.more.view.length} Kali Dibaca.</span>
+								<span style=font-size:11px>${data.view||0} kali dibaca</span>
 							</div>
 						</div>
 					</div>
@@ -914,7 +909,7 @@ const view = {
 								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
 							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.username},</div>
-							<div class=date>${data.time}</div>
+							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 					</div>
 					<div style="
@@ -961,7 +956,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					height:20%;
 					display:flex;
 					flex-direction:column;
 				">
@@ -1142,7 +1136,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					height:20%;
 					display:flex;
 					flex-direction:column;
 				">
@@ -1222,7 +1215,7 @@ const view = {
 						Min-Fee
 					</div>
 					<div>
-						<input placeholder="Misal 200.000.00" type=number style="height:100%;border-radius:0;">
+						<input placeholder="Misal 200.000.00" style="height:100%;border-radius:0;">
 					</div>
 				</div>
 				<div style="
@@ -1279,7 +1272,7 @@ const view = {
 				this.preview.click();
 			},
 			collectData(){
-				const minFee = this.find('input').value;
+				const minFee = Number(this.find('input').value.replaceAll('.',''));
 				const Data = {minFee};
 				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
@@ -1302,6 +1295,21 @@ const view = {
 				})
 				return Data;
 			},
+			clearFeeInput(){
+				this.feeInput = this.find('input');
+				this.feeInput.oninput = (e)=>{
+					const prev = this.feeInput.value.replaceAll(e.data,'');
+					if(isNaN(e.data) || !e.data){
+						if(this.feeInput.value.length===2){
+							this.feeInput.value = 'Rp ';
+						}else this.feeInput.value = prev;
+						return;
+					}
+					this.feeInput.value = this.feeInput.value.replaceAll('Rp ','');
+					this.feeInput.value = this.feeInput.value.replaceAll('.','');
+					this.feeInput.value = 'Rp '+getPrice(this.feeInput.value);
+				}
+			},
 			setupButton(){
 				this.findall('.thebutton').forEach(button=>{
 					button.onclick = ()=>{
@@ -1320,6 +1328,7 @@ const view = {
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
+				this.clearFeeInput();
 				this.setupButton();
 			}
 		})
@@ -1335,7 +1344,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					height:20%;
 					display:flex;
 					flex-direction:column;
 				">
@@ -1415,7 +1423,7 @@ const view = {
 						Max-Fee
 					</div>
 					<div>
-						<input placeholder="Misal 200.000.00" type=number style="height:100%;border-radius:0;">
+						<input placeholder="Misal 200.000.00" style="height:100%;border-radius:0;">
 					</div>
 				</div>
 				<div style="
@@ -1471,8 +1479,23 @@ const view = {
 				})
 				this.preview.click();
 			},
+			clearFeeInput(){
+				this.feeInput = this.find('input');
+				this.feeInput.oninput = (e)=>{
+					const prev = this.feeInput.value.replaceAll(e.data,'');
+					if(isNaN(e.data) || !e.data){
+						if(this.feeInput.value.length===2){
+							this.feeInput.value = 'Rp ';
+						}else this.feeInput.value = prev;
+						return;
+					}
+					this.feeInput.value = this.feeInput.value.replaceAll('Rp ','');
+					this.feeInput.value = this.feeInput.value.replaceAll('.','');
+					this.feeInput.value = 'Rp '+getPrice(this.feeInput.value);
+				}
+			},
 			collectData(){
-				const maxFee = this.find('input').value;
+				const maxFee = Number(this.find('input').value.replaceAll('.',''));
 				const Data = {maxFee};
 				if(this.filepreview)Data.preview = this.filepreview;
 				this.findall('textarea').forEach(input=>{
@@ -1514,6 +1537,7 @@ const view = {
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
+				this.clearFeeInput();
 				this.setupButton();
 			}
 		})
@@ -1539,7 +1563,7 @@ const view = {
 						<img class=profileimg src=./more/media/gemaprofile.png>
 					</div>
 					<div class=username>${data.username},</div>
-					<div class=date>${data.time}</div>
+					<div class=date>${SmartTime(data.time)}</div>
 				</div>
 				<div style="
 					font-family:montserratbold;
@@ -1595,6 +1619,12 @@ const view = {
 					view.addLoading();
 					view.content.openProfile([],'home',false,data.owner);
 				}
+				this.updateView();
+			},
+			async updateView(){
+				let view = (await app.doglas.do(['database','post',`${data.type}/${data.postId}/view`,'get'])).val()||0;
+				view += 1;
+				await app.doglas.do(['database','post',`${data.type}/${data.postId}/view`,'set',view]);
 			},
 			generateComment(articleId){
 				this.addChild(makeElement('div',{
@@ -1636,7 +1666,7 @@ const view = {
 						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
 					</div>
 					<div class=username>${data.username},</div>
-					<div class=date>${data.time}</div>
+					<div class=date>${SmartTime(data.time)}</div>
 				</div>
 				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
@@ -1741,7 +1771,7 @@ const view = {
 						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
 					</div>
 					<div class=username>${data.username},</div>
-					<div class=date>${data.time}</div>
+					<div class=date>${SmartTime(data.time)}</div>
 				</div>
 				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
@@ -1916,7 +1946,7 @@ const view = {
 						<img class=profileimg src=./more/media/gemaprofile.png>
 					</div>
 					<div class=username>${data.username},</div>
-					<div class=date>${data.time}</div>
+					<div class=date>${SmartTime(data.time)}</div>
 				</div>
 				<div style="
 					font-family:montserratbold;
@@ -2976,7 +3006,6 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					height:20%;
 					display:flex;
 					flex-direction:column;
 				">
@@ -3402,11 +3431,21 @@ const view = {
 						innerHTML:`
 							<div>
 								<div>${i}</div>
-								<div>
-									<input placeholder="Masukan Nama Anda" id="${i}" value="${app.userData.more[i]}">
+								<div style=display:flex;gap:10px;justify-content:space-between;align-items:center;>
+									<input id="${i}" value="${app.userData.more[i]}">
+									<div style=cursor:pointer; id=removeitem>
+										<img src=./more/media/deleteicon.png style="
+											width:24;
+											height:24;
+										">
+									</div>
 								</div>
 							</div>
-						`
+						`,
+						onadded(){
+							this.find('#removeitem').onclick = ()=>{this.remove()};
+						}
+						
 					}),this.find('#datasparent').children[this.find('#datasparent').children.length-1]);
 				}
 			},
@@ -4251,7 +4290,7 @@ const view = {
 							${msgs[msgs.length-1].msg.slice(0,20)+Dot}
 						</div>
 						<div class=addressinfo>
-							<div class=date>${msgs[msgs.length-1].date}</div>
+							<div class=date>${SmartTime(msgs[msgs.length-1].time)}</div>
 						</div>
 					</div>
 					<div style="
@@ -4312,7 +4351,7 @@ const view = {
 								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
 							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.owner},</div>
-							<div class=date>${data.date}</div>
+							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 					</div>
 					<div style="
@@ -4499,8 +4538,7 @@ const view = {
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
-							min-height:100px;
-							max-height:150px;
+							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
 						">
@@ -4722,7 +4760,8 @@ const view = {
 					time:getTime(),
 					msg:this.msgbox.value,
 					profilepicture:app.userData.profilepicture,
-					time:getTime()
+					time:getTime(),
+					id:app.userData.cleanEmail
 				}
 				return msg;
 			},
@@ -5177,12 +5216,13 @@ const view = {
 									border-radius:20px;
 									background:whitesmoke;
 									overflow:hidden;
+									cursor:pointer;
 								">
 									<img src="${item.file?item.file.url:''}" style="
 										width:100%;
 										height:100%;
 										object-fit:contain;
-									">
+									" id=imgpreviewbutton>
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
@@ -5206,11 +5246,12 @@ const view = {
 						</div>
 						<div style="
 							margin-${item.from===app.userData.username?'right':'left'}:48px;
-						"><span style=font-size:10px;>${item.date}</span></div>
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
 						this.find('.username').onclick = ()=>{
 							view.addLoading();
 							view.content.openProfile([],'home',false,item.id);
@@ -5224,6 +5265,9 @@ const view = {
 					},
 					setupDownload(){
 						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -5290,7 +5334,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
+								<img src=./more/media/info.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -5338,8 +5382,7 @@ const view = {
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
-							min-height:100px;
-							max-height:150px;
+							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
 						">
@@ -5681,9 +5724,9 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg === msg.time)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
-				this.puttedMsg = msg.time;
+				this.puttedMsg = msg;
 			},
 			onCloseClickded(){
 				if(customCloseThis){
@@ -5703,7 +5746,7 @@ const view = {
 				let role = '';
 				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
 				else if(item.from===data.username)role='Owner';
-				else if(item.from===data.bidder)role='task';
+				else if(item.from===data.bidder)role='Worker';
 				return role;
 			},
 			inboxItem(item){
@@ -5719,7 +5762,7 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}: ${role}</span></div>
 						<div style="
 							display:flex;
 						">
@@ -5788,12 +5831,13 @@ const view = {
 									border-radius:20px;
 									background:whitesmoke;
 									overflow:hidden;
+									cursor:pointer;
 								">
 									<img src="${item.file?item.file.url:''}" style="
 										width:100%;
 										height:100%;
 										object-fit:contain;
-									">
+									" id=imgpreviewbutton>
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
@@ -5817,11 +5861,12 @@ const view = {
 						</div>
 						<div style="
 							margin-${item.from===app.userData.username?'right':'left'}:48px;
-						"><span style=font-size:10px;>${item.date}</span></div>
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
 						this.find('.username').onclick = ()=>{
 							view.addLoading();
 							view.content.openProfile([],'home',false,item.id);
@@ -5835,6 +5880,9 @@ const view = {
 					},
 					setupDownload(){
 						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -5854,8 +5902,8 @@ const view = {
 			`,
 			innerHTML:`
 				<div style="
-					border-radius:0 0 20px 20px;
 					background:white;
+					padding-bottom:10px;
 				" class=innerBox>
 					<div style="
 						width:94%;
@@ -5903,6 +5951,14 @@ const view = {
 						<div><b>Fee</b></div>
 						<div>
 							<input value="Rp. ${getPrice(data.fee)}" readonly>
+						</div>
+						<div><b>Status</b></div>
+						<div>
+							<input value="${data.finished?'Selesai':'Sedang Berlangsung'}" readonly>
+						</div>
+						<div><b>Status Pembayaran</b></div>
+						<div>
+							<input value="${data.paidStatus?'Dibayar':'Belum Dibayar'}" readonly>
 						</div>
 					</div>
 					<div style="
@@ -6154,8 +6210,7 @@ const view = {
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
-							min-height:100px;
-							max-height:150px;
+							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
 						">
@@ -6498,9 +6553,9 @@ const view = {
 				app.doglas.get(`globalGroupChat`).off('value');
 			},
 			onCloseClickded(){
-				if(customCloseThis){
-					customCloseThis();
-				}else view.content.openInbox();
+				//if(customCloseThis){
+					//customCloseThis();
+				//}else view.content.openInbox();
 				//delete the event
 				this.removeListen();
 				this.remove();
@@ -6594,12 +6649,13 @@ const view = {
 									border-radius:20px;
 									background:whitesmoke;
 									overflow:hidden;
+									cursor:pointer;
 								">
 									<img src="${item.file?item.file.url:''}" style="
 										width:100%;
 										height:100%;
 										object-fit:contain;
-									">
+									" id=imgpreviewbutton>
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
@@ -6628,6 +6684,7 @@ const view = {
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
 						this.find('.username').onclick = ()=>{
 							view.addLoading();
 							view.content.openProfile([],'home',false,item.id);
@@ -6641,6 +6698,9 @@ const view = {
 					},
 					setupDownload(){
 						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -6803,8 +6863,7 @@ const view = {
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
-							min-height:100px;
-							max-height:150px;
+							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
 						">
@@ -7260,12 +7319,13 @@ const view = {
 									border-radius:20px;
 									background:whitesmoke;
 									overflow:hidden;
+									cursor:pointer;
 								">
 									<img src="${item.file?item.file.url:''}" style="
 										width:100%;
 										height:100%;
 										object-fit:contain;
-									">
+									" id=imgpreviewbutton>
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
@@ -7289,11 +7349,12 @@ const view = {
 						</div>
 						<div style="
 							margin-${item.from===app.userData.username?'right':'left'}:48px;
-						"><span style=font-size:10px;>${item.date}</span></div>
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
 						this.find('.username').onclick = ()=>{
 							view.addLoading();
 							view.content.openProfile([],'home',false,item.id);
@@ -7307,6 +7368,9 @@ const view = {
 					},
 					setupDownload(){
 						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -7331,7 +7395,7 @@ const view = {
 					background: white;
 			    width: 200px;
 			    height: 200px;
-			    border-radius: 20px;
+			    border-radius: 10px;
 			    padding: 20px;
 			    padding-top: 10px;
 			    overflow:auto;
@@ -7343,8 +7407,12 @@ const view = {
 						position:absolute;
 						left:0;top:0;
 						padding:10px;
-					">
-						<div style="cursor:pointer;" id=closethis>
+						background:red;
+						border-radius:10px;
+						z-index:1;
+						cursor:pointer;
+					" id=closethis>
+						<div>
 							<img src=./more/media/close.png
 							style="
 								width:16px;
@@ -7397,7 +7465,7 @@ const view = {
 					    justify-content: center;
 					    align-items: center;
 						">
-							<img src=./more/media/deleteicon.png style="
+							<img src=./more/media/megaphone.png style="
 								width:24px;
 								height:24px;
 							">
@@ -7556,22 +7624,14 @@ const view = {
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
-				if(boot){
-					console.log('boot is true');
-					this.home();
-				}
 			},
 			home(){
-				view.addLoading()
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
-					view.unloading();
-					let datacb = data.val()||[];
-					view.content.openProfile(datacb,'home',false,userId);
-				})
+				view.addLoading();
+				view.content.openProfile([],'home',false,userId);
 			},
 			article(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/article`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openProfile(datacb,'article',false,userId);
@@ -7579,7 +7639,7 @@ const view = {
 			},
 			jobs(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/jobs`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openProfile(datacb,'jobs',false,userId);
@@ -7587,7 +7647,7 @@ const view = {
 			},
 			services(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/services`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openProfile(datacb,'services',false,userId);
@@ -7595,7 +7655,7 @@ const view = {
 			},
 			statistic(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistic`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openProfile(datacb,'statistic',false,userId);
@@ -7603,11 +7663,90 @@ const view = {
 			},
 			bidderSay(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.cleanEmail}/bidderSay`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openProfile(datacb,'bidderSay',false,userId);
 				})
+			}
+		})
+	},
+	bigImgPreview(url){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				background:rgba(0, 0, 0, 0.4);
+				position:absolute;
+				top:0;left:0;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				z-index:1;
+			`,
+			innerHTML:`
+				<div class="innerBox smartHeight" style="
+					background:white;
+					display:flex;
+					flex-direction:column;
+					position:relative;
+				">
+					<div style="
+						display:flex;
+						padding:10px;
+						justify-content:space-between;
+						border-bottom:3px solid whitesmoke;
+						align-items:center;
+						font-weight:bold;
+					">
+						<div>Preview File</div>
+						<div style=cursor:pointer; id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					</div>
+					<div style="
+						padding:10px;
+						display:flex;
+						height:100%;
+						overflow:auto;
+					">
+						<img src=${url} style="
+							width:100%;
+							height:100%;
+							object-fit:cover;
+						" id=theimgcontent>
+					</div>
+					<div id=resizebutton style="
+						padding:10px;
+						border-radius:50%;
+						background:white;
+						position:absolute;
+						bottom:20px;
+						right:20px;
+						cursor:pointer;
+						border:2px solid whitesmoke;
+					">
+						<img src=./more/media/resize.png style="
+							width:24;
+							height:24;
+						">
+					</div>
+				</div>
+			`,
+			imgState:0,
+			stateList:['cover','contain','fill'],
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.find('#resizebutton').onclick = ()=>{this.resize()};
+				this.img = this.find('#theimgcontent');
+			},
+			resize(){
+				this.imgState += 1;
+				if(this.imgState == this.stateList.length)this.imgState=0;
+				this.img.style.objectFit = this.stateList[this.imgState];
 			}
 		})
 	}
