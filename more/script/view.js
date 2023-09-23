@@ -476,13 +476,13 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				console.log(this.nav);
+				//console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
-					console.log('boot is true');
+					//console.log('boot is true');
 					this.OnGoing();
 				}
 			},
@@ -564,7 +564,7 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				console.log(this.nav);
+				//console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
@@ -1035,7 +1035,7 @@ const view = {
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
-				console.log('called');
+				//console.log('called');
 				this.setupButton();
 			}
 		})
@@ -1932,7 +1932,7 @@ const view = {
 	},
 	profilePage(userData){
 		if(!userData)userData = app.userData;
-		console.log(userData);
+		//console.log(userData);
 		return makeElement('div',{
 			style:`
 				border-radius:0 0 20px 20px;
@@ -2131,7 +2131,7 @@ const view = {
 				</div>
 			`,
 			showDataFollowAndProject(){
-				console.log(userData);
+				//console.log(userData);
 				const following = userData.following?userData.following.length:0;
 				const followers = userData.followers?userData.followers.length:0;
 
@@ -2319,7 +2319,7 @@ const view = {
 				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti ${userData.username}`});
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',menotiflist]);				
 				view.content.openProfile([],'home',false,userData.cleanEmail);
-				console.log(userData,app.userData);
+				//console.log(userData,app.userData);
 			},
 			async sendmemsg(){
 				if(!app.getInfoLogin()){
@@ -2343,7 +2343,7 @@ const view = {
 				//finding the userId. If One, this mean i dont have to create new room
 				let room = null;
 				chatList.forEach((item)=>{
-					console.log(item.to,userData.cleanEmail);
+					//console.log(item.to,userData.cleanEmail);
 					if(item.to===userData.cleanEmail){
 						room = item;
 						return
@@ -2366,7 +2366,7 @@ const view = {
 				}
 
 				if(!ourRoom){
-					console.log('Opps, theres no room at this db, so i build one');
+					//console.log('Opps, theres no room at this db, so i build one');
 					//for reciever.
 					if(!roomId)roomId=room.roomId;
 					const recieverChatList = (await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'get'])).val()||[];
@@ -2375,7 +2375,7 @@ const view = {
 				}
 				
 				view.main.addChild(view.openPrivateChat(room));
-				console.log(userData);
+				//console.log(userData);
 			}
 		})
 	},
@@ -3080,7 +3080,7 @@ const view = {
 				view.main.addChild(view.loadingPost(data));
 			},
 			onadded(){
-				console.log('called');
+				//console.log('called');
 				this.setupButton();
 			}
 		})
@@ -3205,7 +3205,7 @@ const view = {
 				</div>
 			`,
 			handleResponse(x){
-				console.log(x);
+				//console.log(x);
 				if(!x){
 					this.text.innerHTML = 'Data berhasil diupload, menunggu persetujuan dari admin untuk dipublish';
 					view.content.displayList([],'loadloker',true);
@@ -3215,7 +3215,7 @@ const view = {
 				}
 			},
 			async DoRequest(){
-				console.log(this.datatoupload);
+				//console.log(this.datatoupload);
 				if(this.datatoupload.preview){
 					//upload preview file.first.
 					const file = await app.doglas.save([getUniqueID(),this.datatoupload.preview,this.datatoupload.preview.contentType]);
@@ -3935,7 +3935,7 @@ const view = {
 			save(){
 				
 				Object.assign(data,this.collectData());
-				console.log(data);
+				//console.log(data);
 				//adding bid data to the project.
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
@@ -4113,7 +4113,7 @@ const view = {
 			async save(){
 				
 				Object.assign(data,this.collectData());
-				console.log(data);
+				//console.log(data);
 				//adding bid data to the project.
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
@@ -4150,7 +4150,7 @@ const view = {
 
 				//get Data bidder first.
 				let biddata = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
-				console.log(biddata);
+				//console.log(biddata);
 				biddata.push(app.userData.cleanEmail);
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'set',biddata]);
 				const biddingList =  (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
@@ -4197,7 +4197,7 @@ const view = {
 		});
 	},
 	inboxItem(i,data,bt,msgs){
-		console.log(msgs);
+		//console.log(msgs);
 		const Dot = '...';
 		return makeElement('div',{
 			className:'lines',
@@ -4702,7 +4702,7 @@ const view = {
 				})
 			},
 			hire(){
-				console.log('To Hire ',data);
+				//console.log('To Hire ',data);
 
 				//1. add admin.
 				//2. set status.
@@ -4714,7 +4714,7 @@ const view = {
 				this.handleNotifToOthers();
 			},
 			async handleContinueRoom(winner,project){
-				console.log('the project is',project);
+				//console.log('the project is',project);
 				//remove ineficience data.
 				delete project.biddingList;
 				delete project.bidder;
@@ -4722,9 +4722,9 @@ const view = {
 				
 				//getting admin data.
 				const admins = (await app.doglas.do(['database','admin','','get'])).val()||{};
-				console.log('admins data',admins);
+				//console.log('admins data',admins);
 				project.admin = objToArray(admins).getRandom().cleanEmail;
-				console.log(project.admin);
+				//console.log(project.admin);
 				
 				//updating admin notif.
 				const adminNotifs = (await app.doglas.do(['database','admin',`${project.admin}/notif`,'get'])).val()||[];
@@ -4738,26 +4738,26 @@ const view = {
 				
 				//set global room //onGoingRoom
 				const roomId = getUniqueID();
-				console.log(roomId, 'is room id');
+				//console.log(roomId, 'is room id');
 				project.OnGoingRoomId = roomId;
 				
 				await app.doglas.do(['database','OnGoingRooms',roomId,'set',project]);
-				console.log('global room updateed');
+				//console.log('global room updateed');
 				
 				//sign the value of data to project.
 				Object.assign(project,data);
-				console.log('the project is',project);
+				//console.log('the project is',project);
 				
 				
 				//set room for owner.
 				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
-				console.log(ownerOnGoingProjects);
+				//console.log(ownerOnGoingProjects);
 				ownerOnGoingProjects.push(project);
 				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
 
 				//set room for the winner
 				const winnerOnGoingProjects = (await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'get'])).val()||[];
-				console.log(winnerOnGoingProjects);
+				//console.log(winnerOnGoingProjects);
 				winnerOnGoingProjects.push(project);
 				await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'set',winnerOnGoingProjects]);
 				
@@ -4772,9 +4772,9 @@ const view = {
 				await app.doglas.do(['database','users',`${winner}/statistics/ongoingproject`,'set',ongoingproject]);
 				
 				//set room for the admin
-				console.log('winner is',winner);
+				//console.log('winner is',winner);
 				const adminOnGoingProjects = (await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'get'])).val()||[];
-				console.log(adminOnGoingProjects);
+				//console.log(adminOnGoingProjects);
 				adminOnGoingProjects.push(project);
 				await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'set',adminOnGoingProjects]);
 			},
@@ -4782,14 +4782,14 @@ const view = {
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/winner`,'set',param]);
 				//delete bid history.
 				const biddingList = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
-				console.log('the list of bid ',biddingList);
+				//console.log('the list of bid ',biddingList);
 				biddingList.forEach(async (bidId)=>{
-					console.log('removing bid data', bidId);
+					//console.log('removing bid data', bidId);
 					await app.doglas.get(`bid/${data.type}/${bidId}`).remove();
 				})
 				const project = (await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'get'])).val();
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'remove']);
-				console.log('project deleted, post');
+				//console.log('project deleted, post');
 
 
 				//so far its ok.
@@ -4808,7 +4808,7 @@ const view = {
 				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
 				//adding owner id also, we need owner bid also updated.
 				bidders.push(app.userData.cleanEmail);
-				console.log(bidders);
+				//console.log(bidders);
 
 				bidders.forEach(async bidder=>{
 						
@@ -4820,7 +4820,7 @@ const view = {
 							userNewBidList.push(bid);
 						}
 					})
-					console.log('User new bid ',userNewBidList);
+					//console.log('User new bid ',userNewBidList);
 					await app.doglas.do(['database','users',`${bidder}/bid`,'set',userNewBidList]);
 					
 					//get people notif list.
@@ -4830,7 +4830,7 @@ const view = {
 					});
 					//adding notification to user notif list.
 					await app.doglas.do(['database','users',`${bidder}/notif`,'set',notifs]);
-					console.log('Adding new notif');
+					//console.log('Adding new notif');
 
 				})
 
@@ -4939,13 +4939,13 @@ const view = {
 
 				if(this.file){
 					//hiding the close button on file preview.
-					console.log(this.closethispreview);
+					//console.log(this.closethispreview);
 					if(this.closethispreview){
 						this.closethispreview.hide();
 					}
 					//setting the indicator.
 					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
-					console.log('uploading file', this.file);
+					//console.log('uploading file', this.file);
 					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
 					const url = await file.ref.getDownloadURL();
 					if(url){
@@ -4999,7 +4999,7 @@ const view = {
 			},
 			async removeMyBid(){
 				await app.doglas.get(`bid/${data.type}/${data.bidId}`).remove();
-				console.log('Lose, deleting my own bid data');
+				//console.log('Lose, deleting my own bid data');
 			},
 			listen(){
 				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
@@ -5012,7 +5012,7 @@ const view = {
 				if(data.bidderProfileId===app.userData.cleanEmail){
 					app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).on('value',(x)=>{
 						const rejected = x.val();
-						console.log(rejected);
+						//console.log(rejected);
 						if(rejected==='unset' || !rejected)return;
 						this.handleRejectMsg();
 						app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).off('value');
@@ -5021,7 +5021,7 @@ const view = {
 					})
 					app.doglas.get(`post/${data.type}/${data.postid}/winner`).on('value',(x)=>{
 						const winner = x.val();
-						console.log(winner);
+						//console.log(winner);
 						if(winner==='unset' || !winner)return;
 						if(winner===app.userData.cleanEmail){
 							this.handleWinMsg('Anda');
@@ -5198,7 +5198,7 @@ const view = {
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
-							console.log(spliteditem);
+							//console.log(spliteditem);
 						}
 					},
 					setupDownload(){
@@ -5587,13 +5587,13 @@ const view = {
 
 				if(this.file){
 					//hiding the close button on file preview.
-					console.log(this.closethispreview);
+					//console.log(this.closethispreview);
 					if(this.closethispreview){
 						this.closethispreview.hide();
 					}
 					//setting the indicator.
 					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
-					console.log('uploading file', this.file);
+					//console.log('uploading file', this.file);
 					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
 					const url = await file.ref.getDownloadURL();
 					if(url){
@@ -5813,7 +5813,7 @@ const view = {
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
-							console.log(spliteditem);
+							//console.log(spliteditem);
 						}
 					},
 					setupDownload(){
@@ -5959,24 +5959,24 @@ const view = {
 				this.buttonsEvent();
 			},
 			hire(){
-				console.log('To Hire ',data);
+				//console.log('To Hire ',data);
 				this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
 			},
 			async reject(){
-				console.log('To Reject ',data);
+				//console.log('To Reject ',data);
 				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
-				console.log(deleteR);
+				//console.log(deleteR);
 				//for user.
 				this.generateNewUserBidData();
-				console.log(app.userData.bid);
+				//console.log(app.userData.bid);
 				const saveBidUser = await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'update',app.userData.bid]);
-				console.log(saveBidUser);
+				//console.log(saveBidUser);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
 				if(app.userData.bid.length>0){
 					app.userData.bid.forEach(bidId=>{
-						console.log(bidId);
+						//console.log(bidId);
 						if(bidId.bidId!=data.bidId)bidData.push(bidId);
 					})	
 				}
@@ -6407,13 +6407,13 @@ const view = {
 
 				if(this.file){
 					//hiding the close button on file preview.
-					console.log(this.closethispreview);
+					//console.log(this.closethispreview);
 					if(this.closethispreview){
 						this.closethispreview.hide();
 					}
 					//setting the indicator.
 					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
-					console.log('uploading file', this.file);
+					//console.log('uploading file', this.file);
 					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
 					const url = await file.ref.getDownloadURL();
 					if(url){
@@ -6631,7 +6631,7 @@ const view = {
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
-							console.log(spliteditem);
+							//console.log(spliteditem);
 						}
 					},
 					setupDownload(){
@@ -7029,7 +7029,7 @@ const view = {
 				})
 				let roomId;
 				if(!ourRoom){
-					console.log('Opps, theres no room at this db, so i build one');
+					//console.log('Opps, theres no room at this db, so i build one');
 					//for reciever.
 					if(!roomId)roomId=room.roomId;
 					const recieverChatList = (await app.doglas.do(['database','users',`${room.to}/inbox`,'get'])).val()||[];
@@ -7084,13 +7084,13 @@ const view = {
 
 				if(this.file){
 					//hiding the close button on file preview.
-					console.log(this.closethispreview);
+					//console.log(this.closethispreview);
 					if(this.closethispreview){
 						this.closethispreview.hide();
 					}
 					//setting the indicator.
 					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
-					console.log('uploading file', this.file);
+					//console.log('uploading file', this.file);
 					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
 					const url = await file.ref.getDownloadURL();
 					if(url){
@@ -7301,7 +7301,7 @@ const view = {
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
-							console.log(spliteditem);
+							//console.log(spliteditem);
 						}
 					},
 					setupDownload(){
@@ -7424,7 +7424,7 @@ const view = {
 			},
 			async removeChat(){
 				//remove that chat from user db.
-				console.log(toRemove);
+				//console.log(toRemove);
 				const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
 				//filtering chat list.
 				const newChatList = [];
@@ -7601,7 +7601,7 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				console.log(this.nav);
+				//console.log(this.nav);
 				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
