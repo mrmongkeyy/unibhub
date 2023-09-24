@@ -73,6 +73,8 @@ const app = {
 			}
 			this.saveDataLogin(data);
 			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			//handle callback if theres one.
+			if(toRemove.after)toRemove.after();
 			toRemove.remove();
 		})
 	},
@@ -91,7 +93,6 @@ const app = {
 			this.saveDataLogin(data);
 			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
 			//handle callback if theres one.
-			console.log(toRemove.after);
 			if(toRemove.after)toRemove.after();
 			toRemove.remove();
 		})

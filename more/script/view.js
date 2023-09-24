@@ -754,7 +754,7 @@ const view = {
 					</div>
 					<div class=moreinfo>
 						<div id=fee>
-							${data.type==='Jobs'?'Maks':'Min'} Bid Rp. ${getPrice(data.maxFee||data.minFee)}
+							${data.type==='Jobs'?'Maks':'Min'} Bid Rp ${getPrice(data.maxFee||data.minFee)}
 						</div>
 						<div class=title>
 							${data.title.slice(0,100) + Dot}
@@ -814,7 +814,7 @@ const view = {
 					</div>
 					<div class=moreinfo>
 						<div id=fee>
-							Fee Rp. ${getPrice(data.fee)}
+							Fee Rp ${getPrice(data.fee)}
 						</div>
 						<div class=title>
 							${data.title.slice(0,100) + Dot}
@@ -1587,7 +1587,7 @@ const view = {
 					<div class=username>${data.username},</div>
 					<div class=date>${SmartTime(data.time)}</div>
 				</div>
-				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
+				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
 					height:100%;
 				">
@@ -1692,7 +1692,7 @@ const view = {
 					<div class=username>${data.username},</div>
 					<div class=date>${SmartTime(data.time)}</div>
 				</div>
-				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
+				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
 					height:100%;
 				">
@@ -3910,7 +3910,7 @@ const view = {
 			},
 			async handleNotifOwner(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -3922,7 +3922,7 @@ const view = {
 			},
 			async handleNotifUser(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4088,7 +4088,7 @@ const view = {
 			},
 			async handleNotifOwner(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4100,7 +4100,7 @@ const view = {
 			},
 			async handleNotifUser(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4270,7 +4270,7 @@ const view = {
 					</div>
 					<div class=moreinfo>
 						<div id=fee>
-							${data.type} - ${data.type==='Jobs'?'Maks':'Min'} Bid Rp. ${getPrice(data.fee)}
+							${data.type} - ${data.type==='Jobs'?'Maks':'Min'} Bid Rp ${getPrice(data.fee)}
 						</div>
 						<div class=title>
 							${data.subject.slice(0,100) + Dot}
@@ -4341,45 +4341,43 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:#15244e;
-						color:white;
+						background:white;
+						color:black;
+						border-bottom:1px solid gainsboro;
 					">
 						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
+							width:80%;
+							display:flex;
+							align-items:center;
+							gap:10px;
+							padding-left:5%;
 						">
-							<div id=closethis style="cursor:pointer;
-								padding:5px;
-								background:white;
-								border-radius:10px;
+							<img src=./more/media/task.png style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
 							">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<div>
+								<div>${data.subject.slice(0,30)+'...'}</div>
+								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
 							</div>
 						</div>
 						<div style="
-							width:80%;
-						">
-							<div>${data.subject.slice(0,30)+'...'}</div>
-							<div>Rp. ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
-						</div>
-						<div style="
 							height: 100%;
 							width: 64px;
 							display: flex;
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
+							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
+								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
 							</div>
 						</div>
 					</div>
 					<div id=userActionBidder style="
 				    padding: 2% 0;
-				    background: white;
+				    background: whitesmoke;
 				    display: ${data.owner===app.userData.cleanEmail?'flex':'none'};
 				    gap: 8px;
 				    justify-content: space-around;
@@ -4444,6 +4442,7 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						border-top:1px solid gainsboro;
 					" id=embedfile>
 						<div id=filename></div>
 						<div>
@@ -4464,12 +4463,14 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:10px;
+						border-top:1px solid gainsboro;
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
 							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
+							border:1px solid gainsboro;
 						">
 							<img src=./more/media/gemaprofile.png style="
 								width:100%;
@@ -4497,6 +4498,7 @@ const view = {
 						background: white;
 						gap:5px;
 						position:relative;
+						border-top:1px solid gainsboro;
 					">
 						<div style="
 							background:white;
@@ -4571,6 +4573,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
+								border:1px solid gainsboro;
 							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
@@ -4600,6 +4603,7 @@ const view = {
 						padding: 15px 10px;
 						gap: 10px;
 						border-radius: 30px;
+						border:1px solid gainsboro;
 					`,
 					innerHTML:`
 						<div style="
@@ -4802,7 +4806,7 @@ const view = {
 				//give the indicator.
 				const actionIndicator = view.actionIndicator(this);
 				view.main.addChild(actionIndicator);
-				actionIndicator.find('#text').innerHTML = `Memperoses Rekrutmen Kepada ${data.bidder} sebesar Rp. ${getPrice(data.fee)}`;
+				actionIndicator.find('#text').innerHTML = `Memperoses Rekrutmen Kepada ${data.bidder} sebesar Rp ${getPrice(data.fee)}`;
 
 				//getting peoples id.
 				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
@@ -4826,7 +4830,7 @@ const view = {
 					//get people notif list.
 					const notifs = (await app.doglas.do(['database','users',`${bidder}/notif`,'get'])).val()||[];
 					notifs.push({who:(bidder===app.userData.cleanEmail?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture,when:getFullDate(),
-						what:`Telah menerima penawaran dari ${data.bidderProfileId===bidder?'Kamu':data.bidder} sebesar Rp. ${getPrice(data.fee)}`
+						what:`Telah menerima penawaran dari ${data.bidderProfileId===bidder?'Kamu':data.bidder} sebesar Rp ${getPrice(data.fee)}`
 					});
 					//adding notification to user notif list.
 					await app.doglas.do(['database','users',`${bidder}/notif`,'set',notifs]);
@@ -4868,8 +4872,8 @@ const view = {
 					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'set',bidderNewBid]);
 				}
 				//notif
-				this.handleNotifOwner(`${data.owner} menolak penawaran kamu sebesar Rp. ${getPrice(data.fee)}`);
-				this.handleNotifUser(`Kamu menolak penawaran dari ${data.bidder} sebesar Rp. ${getPrice(data.fee)}`);
+				this.handleNotifOwner(`${data.owner} menolak penawaran kamu sebesar Rp ${getPrice(data.fee)}`);
+				this.handleNotifUser(`Kamu menolak penawaran dari ${data.bidder} sebesar Rp ${getPrice(data.fee)}`);
 				indicator.find('#text').innerHTML = 'Bidder Berhasil Ditolak!';
 			},
 			async handleNotifOwner(what){
@@ -5085,31 +5089,15 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
-							<div style="
-								padding:8px;
-								width:32px;
-								height:32px;
-								border-radius:50%;
-								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
-							">
-								<img src=${item.profilepicture} style="
-									width:100%;
-									height:100%;
-									border-radius:50%;x
-									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
-								">
-							</div>
 							<div style="
 								background:white;
 								color:black;
 								padding:10px;
 								font-weight:bold;
+								border:1px solid gainsboro;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
@@ -5126,6 +5114,7 @@ const view = {
 										background: whitesmoke;
 										border-radius: 10px;
 										color:black;
+										border:1px solid gainsboro;
 									" id=filex>
 									-
 									</div>
@@ -5138,6 +5127,7 @@ const view = {
 											border-radius:10px;
 											cursor:pointer;
 											background:whitesmoke;
+											border:1px solid gainsboro;
 										" id=downloadbutton>
 											<img src=./more/media/downloadmedia.png style="
 												width:24;
@@ -5164,37 +5154,13 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
-
-							<div style="
-								padding:8px;
-								border-radius:50%;
-								background:whitesmoke;
-								width:32px;
-								height:32px;
-								display:${item.from===app.userData.username?'block':'none'};
-							">
-								<img src=${item.profilepicture} style="
-									width:100%;
-									height:100%;
-									border-radius:50%;
-									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
-								">
-							</div>
 						</div>
-						<div style="
-							margin-${item.from===app.userData.username?'right':'left'}:48px;
-						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
+						<div><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
 						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
-						this.find('.username').onclick = ()=>{
-							view.addLoading();
-							view.content.openProfile([],'home',false,item.id);
-							parent.remove();
-						}
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
@@ -5240,9 +5206,41 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:#15244e;
-						color:white;
+						background:white;
+						color:black;
+						border-bottom:1px solid gainsboro;
 					">
+						<div style="
+							width:80%;
+							display:flex;
+							align-items:center;
+							gap:10px;
+							padding-left:5%;
+						">
+							<img src=./more/media/ongoing.png style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
+							">
+							<div>
+								<div>${data.subject.slice(0,30)+'...'}</div>
+								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+						">
+							<div id=moremenu style="cursor:pointer;
+								background:gainsboro;
+								border-radius:50%;
+							">
+								<img src=./more/media/info.png class=navimg style=width:32;height:32;>
+							</div>
+						</div>
 						<div style="
 							height: 100%;
 							width: 64px;
@@ -5256,23 +5254,6 @@ const view = {
 								border-radius:10px;
 							">
 								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
-							</div>
-						</div>
-						<div style="
-							width:80%;
-						">
-							<div>${data.subject.slice(0,30)+'...'}</div>
-							<div>Rp. ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
-						</div>
-						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/info.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -5297,6 +5278,7 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						border-top:1px solid gainsboro;
 					" id=embedfile>
 						<div id=filename></div>
 						<div>
@@ -5317,12 +5299,14 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:10px;
+						border-top:1px solid gainsboro;
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
 							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
+							border:1px solid gainsboro;
 						">
 							<img src=./more/media/gemaprofile.png style="
 								width:100%;
@@ -5350,6 +5334,7 @@ const view = {
 						background: white;
 						gap:5px;
 						position:relative;
+						border-top:1px solid gainsboro;
 					">
 						<div style="
 							background:white;
@@ -5424,6 +5409,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
+								border:1px solid gainsboro;
 							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
@@ -5453,6 +5439,7 @@ const view = {
 						padding: 15px 10px;
 						gap: 10px;
 						border-radius: 30px;
+						border:1px solid gainsboro;
 					`,
 					innerHTML:`
 						<div style="
@@ -5725,6 +5712,7 @@ const view = {
 								color:black;
 								padding:10px;
 								font-weight:bold;
+								border:1px solid gainsboro;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
@@ -5741,6 +5729,7 @@ const view = {
 										background: whitesmoke;
 										border-radius: 10px;
 										color:black;
+										border:1px solid gainsboro;
 									" id=filex>
 									-
 									</div>
@@ -5753,6 +5742,7 @@ const view = {
 											border-radius:10px;
 											cursor:pointer;
 											background:whitesmoke;
+											border:1px solid gainsboro;
 										" id=downloadbutton>
 											<img src=./more/media/downloadmedia.png style="
 												width:24;
@@ -5888,7 +5878,7 @@ const view = {
 						</div>
 						<div><b>Fee</b></div>
 						<div>
-							<input value="Rp. ${getPrice(data.fee)}" readonly>
+							<input value="Rp ${getPrice(data.fee)}" readonly>
 						</div>
 						<div><b>Status</b></div>
 						<div>
@@ -6070,28 +6060,24 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:#15244e;
-						color:white;
+						background:white;
+						color:black;
+						border-bottom:1px solid gainsboro;
 					">
 						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						">
-							<div id=closethis style="cursor:pointer;
-								padding:5px;
-								background:white;
-								border-radius:10px;
-							">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
-							</div>
-						</div>
-						<div style="
 							width:80%;
+							display:flex;
+							align-items:center;
+							gap:10px;
+							padding-left:5%;
 						">
-							<div style=font-family:montserratbold>Global Chat</div>
+							<img src=./more/media/globe.png style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
+							">
+							<div>Global Chat Room</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -6100,8 +6086,8 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
+							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
+								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
 							</div>
 						</div>
 					</div>
@@ -6125,6 +6111,7 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						border-top:1px solid gainsboro;
 					" id=embedfile>
 						<div id=filename></div>
 						<div>
@@ -6145,12 +6132,14 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:10px;
+						border-top:1px solid gainsboro;
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
 							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
+							border:1px solid gainsboro;
 						">
 							<img src=./more/media/gemaprofile.png style="
 								width:100%;
@@ -6178,6 +6167,7 @@ const view = {
 						background: white;
 						gap:5px;
 						position:relative;
+						border-top:1px solid gainsboro;
 					">
 						<div style="
 							background:white;
@@ -6252,6 +6242,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
+								border:1px solid gainsboro;
 							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
@@ -6281,6 +6272,7 @@ const view = {
 						padding: 15px 10px;
 						gap: 10px;
 						border-radius: 30px;
+						border:1px solid gainsboro;
 					`,
 					innerHTML:`
 						<div style="
@@ -6375,12 +6367,6 @@ const view = {
 				}
 				return msg;
 			},
-			moreMenuInit(){
-				//this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
-					view.main.addChild(view.moremenubid(data));
-				}
-			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
@@ -6473,7 +6459,6 @@ const view = {
 				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
-				this.moreMenuInit();
 				setTimeout(()=>{this.listen()},2000);
 			},
 			async showInboxInit(){
@@ -6535,6 +6520,7 @@ const view = {
 									height:100%;
 									border-radius:50%;x
 									object-fit:cover;
+									border:2px solid gainsboro;
 									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
@@ -6543,6 +6529,7 @@ const view = {
 								color:black;
 								padding:10px;
 								font-weight:bold;
+								border:1px solid gainsboro;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
@@ -6559,6 +6546,7 @@ const view = {
 										background: whitesmoke;
 										border-radius: 10px;
 										color:black;
+										border:1px solid gainsboro;
 									" id=filex>
 									-
 									</div>
@@ -6571,6 +6559,7 @@ const view = {
 											border-radius:10px;
 											cursor:pointer;
 											background:whitesmoke;
+											border:1px solid gainsboro;
 										" id=downloadbutton>
 											<img src=./more/media/downloadmedia.png style="
 												width:24;
@@ -6611,6 +6600,7 @@ const view = {
 									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									border:2px solid gainsboro;
 									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
 								">
 							</div>
@@ -6714,30 +6704,17 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:#15244e;
-						color:white;
+						background:white;
+						color:black;
+						border-bottom:1px solid gainsboro;
 					">
-						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						">
-							<div id=closethis style="cursor:pointer;
-								padding:5px;
-								background:white;
-								border-radius:10px;
-							">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
-							</div>
-						</div>
 						<div style="
 							width:80%;
 							display:flex;
 							align-items:center;
 							gap:10px;
-						">
+							padding-left:5%;
+						" class=username>
 							<img src=${room.toProfile} style="
 								width:32px;
 								height:32px;
@@ -6753,8 +6730,8 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/whitemenu.png class=navimg style=width:24px;height:24px;>
+							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
+								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
 							</div>
 						</div>
 					</div>
@@ -6778,6 +6755,7 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:5px;
+						border-top:1px solid gainsboro;
 					" id=embedfile>
 						<div id=filename></div>
 						<div>
@@ -6798,12 +6776,14 @@ const view = {
 						padding: 3%;
 						background: white;
 						gap:10px;
+						border-top:1px solid gainsboro;
 					" id=embedphoto>
 						<div id=preview style="
 							width:100%;
 							height:150px;
 							background:whitesmoke;
 							border-radius:20px;
+							border:1px solid gainsboro;
 						">
 							<img src=./more/media/gemaprofile.png style="
 								width:100%;
@@ -6831,6 +6811,7 @@ const view = {
 						background: white;
 						gap:5px;
 						position:relative;
+						border-top:1px solid gainsboro;
 					">
 						<div style="
 							background:white;
@@ -6905,6 +6886,7 @@ const view = {
 								padding:10px;
 								background:whitesmoke;
 								border-radius:10px;
+								border:1px solid gainsboro;
 							" id=attachfilebutton>
 								<img src=./more/media/attachfile.png
 								style="
@@ -6934,6 +6916,7 @@ const view = {
 						padding: 15px 10px;
 						gap: 10px;
 						border-radius: 30px;
+						border:1px solid gainsboro;
 					`,
 					innerHTML:`
 						<div style="
@@ -7049,11 +7032,6 @@ const view = {
 				}
 				return msg;
 			},
-			moreMenuInit(){
-				this.find('#moremenu').onclick = ()=>{
-					view.main.addChild(view.moremenubid(data));
-				}
-			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
@@ -7149,7 +7127,6 @@ const view = {
 				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
-				this.moreMenuInit();
 				setTimeout(()=>{this.listen()},2000);
 			},
 			async showInboxInit(){
@@ -7174,6 +7151,11 @@ const view = {
 				this.embedphoto = this.find('#embedphoto');
 				this.embedfile = this.find('#embedfile');
 				this.filebutton = this.find('#attachfilebutton');
+				this.find('.username').onclick = ()=>{
+					view.addLoading();
+					view.content.openProfile([],'home',false,room.to);
+					this.remove();
+				}
 				this.init();
 			},
 			inboxItem(item){
@@ -7188,31 +7170,15 @@ const view = {
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
-							<div style="
-								padding:8px;
-								width:32px;
-								height:32px;
-								border-radius:50%;
-								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
-							">
-								<img src=${item.profilepicture} style="
-									width:100%;
-									height:100%;
-									border-radius:50%;x
-									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
-								">
-							</div>
 							<div style="
 								background:white;
 								color:black;
 								padding:10px;
 								font-weight:bold;
+								border:1px solid gainsboro;
 								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
@@ -7229,6 +7195,7 @@ const view = {
 										background: whitesmoke;
 										border-radius: 10px;
 										color:black;
+										border:1px solid gainsboro;
 									" id=filex>
 									-
 									</div>
@@ -7241,6 +7208,7 @@ const view = {
 											border-radius:10px;
 											cursor:pointer;
 											background:whitesmoke;
+											border:1px solid gainsboro;
 										" id=downloadbutton>
 											<img src=./more/media/downloadmedia.png style="
 												width:24;
@@ -7267,37 +7235,13 @@ const view = {
 								</div>
 								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
 							</div>
-
-							<div style="
-								padding:8px;
-								border-radius:50%;
-								background:whitesmoke;
-								width:32px;
-								height:32px;
-								display:${item.from===app.userData.username?'block':'none'};
-							">
-								<img src=${item.profilepicture} style="
-									width:100%;
-									height:100%;
-									border-radius:50%;
-									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
-								">
-							</div>
 						</div>
-						<div style="
-							margin-${item.from===app.userData.username?'right':'left'}:48px;
-						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
+						<div><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
 						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
 						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
-						this.find('.username').onclick = ()=>{
-							view.addLoading();
-							view.content.openProfile([],'home',false,item.id);
-							parent.remove();
-						}
 						if(item.file){
 							const spliteditem = item.file.name.split('.');
 							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
@@ -7602,6 +7546,8 @@ const view = {
 			onadded(){
 				//set the nav.
 				//console.log(this.nav);
+				//fix userIdNullBug
+				if(!userId)userId=app.userData.cleanEmail;
 				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
@@ -7811,7 +7757,7 @@ const view = {
 						display:flex;
 						padding:10px;
 						justify-content:space-between;
-						border-bottom:3px solid whitesmoke;
+						border-bottom:1px solid gainsboro;
 						align-items:center;
 						font-weight:bold;
 					">
@@ -7843,7 +7789,7 @@ const view = {
 						bottom:20px;
 						right:20px;
 						cursor:pointer;
-						border:2px solid whitesmoke;
+						border:1px solid gainsboro;
 					">
 						<img src=./more/media/resize.png style="
 							width:24;
