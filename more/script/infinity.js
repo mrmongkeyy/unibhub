@@ -428,7 +428,7 @@ const forceRecheck = function(el,msg,inf=false){
 			background:red;
 			color:white;
 			padding:15px;
-			z-index:1;
+			z-index:2;
 			left:0;
 			font-size:16px;
 			margin-top: ${50*allfrc.length+1}px;
@@ -508,6 +508,6 @@ const SmartTime = function(msInput){
 			index = i;
 		}
 	}
-	if(index == -1)return '0 detik lalu';
+	if(index == -1)return 'Baru saja';
 	return `${data[index]} ${stc[index]} lalu`;
 }

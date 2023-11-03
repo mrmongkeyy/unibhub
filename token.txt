@@ -1,1 +1,15 @@
 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
+
+//todolist.
+
+1. worker signup sistem, working.
+2. finish ongoing project, ongoing.
+3. update paid status, working.
+4. when the project is cancelled, working.
+5. increase and decrease user saldo, working.
+6. stright give project.
+7. handling services, not deleted when owner get bidder. its still there.
+8. make scure firebase rules, using gpt.
+9. auto reload, on going, bid, finished.
+
+00. awsnap

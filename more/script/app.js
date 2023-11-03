@@ -1,4 +1,18 @@
 const app = {
+	webinfo:{
+		workingway:`
+			Pasarin bekerja dengan cara mempertemukan pekerja dan pemilik pekerjaan melalui platform online yang aman dan terpercaya. Pekerja dapat membuat profil dan mengunggah portofolio mereka, sementara pemilik pekerjaan dapat mempublikasikan proyek dan mencari pekerja yang cocok. Pasarin memungkinkan mereka untuk berinteraksi, bernegosiasi, dan melakukan transaksi secara online, dengan sistem pembayaran yang aman dan terjamin. Dengan demikian, Pasarin memudahkan proses perekrutan pekerjaan dan penawaran jasa secara efisien dan transparan bagi kedua belah pihak.
+		`,
+		motto:`
+			Menghubungkan Bakat, Memberdayakan Kesuksesan
+		`,
+		goal:`
+			Tujuan Pasarin adalah menjadi platform marketplace yang terpercaya dan inovatif bagi pekerja dan pemilik pekerjaan untuk menjalankan transaksi secara online. Kami berkomitmen untuk menyediakan lingkungan yang aman, transparan, dan efisien di mana pekerja dapat menemukan pekerjaan yang sesuai dengan keahlian mereka, sementara pemilik pekerjaan dapat dengan mudah menemukan pekerja yang berkualitas
+		`,
+		what:`
+			Pasarin adalah sebuah web marketplace yang inovatif, mirip dengan platform freelancer atau Fiverr, yang bertindak sebagai perantara antara pekerja dan pemilik pekerjaan untuk melakukan transaksi secara online. Dengan Pasarin, Anda dapat dengan mudah menemukan pekerja yang sesuai dengan kebutuhan Anda atau menawarkan jasa Anda kepada pemilik pekerjaan yang membutuhkannya. Selain itu, Pasarin juga menyediakan fitur "sell product" yang memungkinkan pengguna untuk menjual produk digital mereka. Ini memberikan kesempatan bagi individu untuk memonetisasi keterampilan dan pengetahuan mereka dengan menjual produk digital seperti e-book, template, kursus online, dan banyak lagi. Dengan antarmuka yang intuitif dan sistem pembayaran yang aman, Pasarin memastikan pengalaman transaksi yang lancar dan transparan bagi kedua belah pihak. Apakah Anda mencari pekerjaan atau ingin menjual produk digital Anda, Pasarin adalah tempat yang tepat untuk menjembatani kesenjangan antara pekerja dan pemilik pekerjaan dalam lingkungan daring yang aman dan terpercaya.
+		`
+	},
 	noProfilePng:'./more/media/user.png',
 	init(){
 		this.doglas.init();
@@ -15,7 +29,7 @@ const app = {
 		return true;
 	},
 	getInfoLogin(){
-		if(this.userData.cleanEmail)return true;
+		if(this.userData.uid)return true;
 		return false;
 		const databefore = this.ls.get();
 		if(databefore && this.validDataChecker(databefore)){
@@ -42,7 +56,8 @@ const app = {
 			appId: "1:226743571848:web:51c5c3984409ef5c00163d"
 		},
 		init(){
-			this.doglas.initializeApp(this.data);
+			this.app = this.doglas.initializeApp(this.data);
+			this.auth = this.doglas.auth(this.app);
 		},
 		doglas:firebase,
 		do(args){ //[db/orsomething,parentchild,child,get/orupdate,datapass].
@@ -60,42 +75,37 @@ const app = {
 		forceRecheck(view.main,'Error, Youre OFF! Please Check Back Your Internet Connection!',true);
 	},
 	checkAdminLogin(datauser,toRemove){
-		this.doglas.do(['database','admin',`${datauser.cleanEmail}`,'get']).then((callbackData)=>{
-			const data = callbackData.val();
-			if(!data){
-				forceRecheck(view.main,'Admin Tidak Ditemukan! Periksa Kembali Email Anda!');	
-				return false;
-			}
-			const passed = this.checkPass(datauser,data);
-			if(!passed){
-				forceRecheck(view.main,'Kata Sandi Salah! Periksa Kembali.');
-				return false;
-			}
-			this.saveDataLogin(data);
+		this.doglas.auth.signInWithEmailAndPassword(datauser.userEmail,datauser.userPass).then(async(data)=>{
+			Object.assign(data,(await app.doglas.do(['database','admin',`${data.user.uid}/public`,'get'])).val()||{});
 			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			this.saveDataLogin(data);
 			//handle callback if theres one.
 			if(toRemove.after)toRemove.after();
 			toRemove.remove();
+		}).catch(err=>{
+			forceRecheck(view.main,'Login Gagal! Mohon periksa kembali Email Dan Password Anda!');
 		})
 	},
 	checkLogin(datauser,toRemove){
-		this.doglas.do(['database','users',`${datauser.cleanEmail}`,'get']).then((callbackData)=>{
-			const data = callbackData.val();
-			if(!data){
-				forceRecheck(view.main,'User Tidak Ditemukan! Periksa Kembali Email Anda!');	
-				return false;
-			}
-			const passed = this.checkPass(datauser,data);
-			if(!passed){
-				forceRecheck(view.main,'Kata Sandi Salah! Periksa Kembali.');
-				return false;
-			}
-			this.saveDataLogin(data);
+		this.doglas.auth.signInWithEmailAndPassword(datauser.userEmail,datauser.userPass).then(async(data)=>{
+			Object.assign(data,(await app.doglas.do(['database','users',`${data.user.uid}/public`,'get'])).val()||{});
 			forceRecheck(view.main,`Selamat Datang Kembali! ${data.username}`);
+			this.saveDataLogin(data);
 			//handle callback if theres one.
 			if(toRemove.after)toRemove.after();
+			this.startLoginTimeOut(data.exp);
 			toRemove.remove();
+		}).catch(err=>{
+			forceRecheck(view.main,'Login Gagal! Mohon periksa kembali Email Dan Password Anda!');
 		})
+	},
+	startLoginTimeOut(exptime){
+		const leftTime = exptime - getTime();
+		console.log('The login data will exp on', leftTime);
+
+		setTimeout(()=>{
+			view.main.addChild(view.needMoreLogin());
+		},leftTime);
 	},
 	checkPass(datauser,data){
 		if(datauser.userPass === data.password)return true;
@@ -120,7 +130,27 @@ const app = {
 		remove(){
 			localStorage.removeItem(this.id);
 		}
+	},
+	listener:{
+		listens:{},status:{},
+		add(param,paramagain,callback){
+			//activing the listener.
+			app.doglas.get(param).on('value',callback);
+			this.listens[paramagain] = param;
+			this.status[paramagain] = 'On';
+			this.autoRemove(paramagain);
+		},
+		remove(param){
+			app.doglas.get(this.listens[param]).off('value');
+			this.status[param] = 'Off';
+		},
+		autoRemove(param){
+			for(let i in this.status){
+				if(this.status[i]==='On' && i!==param){
+					this.remove(i);
+				}
+			}
+		}
 	}
 }
-
 app.init();

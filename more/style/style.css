@@ -67,10 +67,17 @@ input,textarea{
 	scrollbar-color: white white;
 	scrollbar-width: thin;
 }
+select{
+	background:whitesmoke;
+	border:1px solid gainsboro;
+	width: 100%;
+	padding:10px;
+	outline:none;
+}
 .button{
 	border: none;
 	border-radius: 20px;
-	background: #15244e;
+	background: deepskyblue;
 	color: #fff;
 	padding: 0 20px;
 	line-height: 40px;
@@ -87,12 +94,12 @@ input,textarea{
 	transition: .3s ease;
 }
 .buttonstyled{
-	background:#15244e;
+	background:deepskyblue;
 	color:white;
 	border-radius: 10px;
 }
 .innerBox{
-	width:40%;
+	width:600px;
 }
 .smartHeight{
 	height:60%;
@@ -147,10 +154,12 @@ input,textarea{
 	cursor: pointer;
 	width: 100%;
 	min-height: 50px;
-	border:2px solid #15244e;
-	padding: 20px;
+	padding: 15px;
 	/* justify-content: center; */
 	border-radius: 10px;
+	color:dimgray;
+	border-bottom:3px solid deepskyblue;
+	border-right:2px solid deepskyblue;
 }
 .newpostmenu div img{
 	width:24;
@@ -159,12 +168,7 @@ input,textarea{
 	padding:10px;
 	border-radius:10px;
 }
-#berandadivmenu div{
-	border-bottom:3px solid whitesmoke;
-}
-#berandadivmenu div:hover{
-	border-bottom:3px solid black;
-}
+
 
 .fitborder{
 	border:border:1px solid rgb(232, 232, 232);
@@ -182,10 +186,10 @@ input,textarea{
 }
 .lines .item{
 	width: 100%;
-	border-bottom: 1px solid lightgray;
 	display: flex;
 	align-items: center;
 	justify-content:space-between;
+	color:dimgray;
 }
 
 .lines .title:hover{
@@ -202,20 +206,21 @@ input,textarea{
 	margin: 2%;
 	/* background: black; */
 	text-align: center;
-	margin-left:0;
 }
 .item .thumbnail div{
 	font-size:20px;
 	font-weight:bold;
 	padding:10px;
-	border-radius:0 50px 50px 0;
-	background:#15244e;
+	border-radius:0 50px 50px;
+	background:deepskyblue;
 	color:white;
-	width: 48px;
-	height: 48px;
+	width: 16;
+	height: 16;
 	display:flex;
 	align-items:center;
 	justify-content:center;
+	border-bottom:2px solid gainsboro;
+	border-right:2px solid gainsboro;
 }
 
 .item .moreinfo{

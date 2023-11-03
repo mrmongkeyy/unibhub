@@ -25,8 +25,10 @@ const view = {
 			height:200px;
 			display:flex;
 			justify-content:center;
-			border-bottom:5px solid whitesmoke;
-			background:white;
+			border-bottom:5px solid gainsboro;
+			background:deepskyblue;
+			color:white;
+			border-radius:0 0 20px 20px;
 		`,
 		innerHTML:`
 			<div style="
@@ -44,12 +46,26 @@ const view = {
 					align-items: center;
 					justify-content:center;
 					/*background:#15244e;color:white;*/
+					border-bottom:1px solid white;
+					gap:2px;
 				">
+					<div style="
+						width:32;
+						height:32;
+						background:white;
+						border-radius:0 50% 50%;
+						color:deepskyblue;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						font-weight:bold;
+						font-size:11;
+					">$p</div>
 					<div style="
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">circletask<span style=font-size:12px;font-family:montserratregular>.com</span></div>
+					">pasarin<span style=font-size:12px;font-family:montserratregular>.id</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -61,32 +77,36 @@ const view = {
 					overflow-y:hidden;
 				" id=ourmenu class=innerBox>
 					<div id=newPost style=padding-left:30px;>
-						<img src=./more/media/addnew.png class=navimg>
+						<img src=./more/media/whiteadd.png class=navimg>
 						Post
 					</div>
 					<div id=displayList>
-						<img src=./more/media/home.png class=navimg>
+						<img src=./more/media/whitehome.png class=navimg>
 						Beranda
 					</div>
 					<div id=openMyproject>
-						<img src=./more/media/task.png class=navimg>
-						ProjectKu
+						<img src=./more/media/whitetask.png class=navimg>
+						Projek
 					</div>
 					<div id=openInbox>
-						<img src=./more/media/message.png class=navimg>
+						<img src=./more/media/whitemsg.png class=navimg>
 						Pesan
 					</div>
 					<div id=openGlobalChat>
-						<img src=./more/media/globe.png class=navimg>
-						Global Chat
+						<img src=./more/media/whiteglobe.png class=navimg>
+						Forum
 					</div>
 					<div id=openNotif>
-						<img src=./more/media/bell.png class=navimg>
+						<img src=./more/media/whitebell.png class=navimg>
 						Notif
 					</div>
-					<div id=openProfile style=padding-right:30px;>
-						<img src=./more/media/header.png class=navimg>
+					<div id=openProfile>
+						<img src=./more/media/whiteprofile.png class=navimg>
 						Profil
+					</div>
+					<div id=openInfo style=padding-right:30px;>
+						<img src=./more/media/whiteinfo.png class=navimg>
+						Info
 					</div>
 				</div>
 			</div>
@@ -132,6 +152,8 @@ const view = {
 				style="
 					margin-left:3%;
 					width:100%;
+					font-weight:bold;
+					color:dimgray;
 				"
 				>
 					Beranda
@@ -181,9 +203,9 @@ const view = {
 							font-size: 12px;
 							font-weight: bold;
 							cursor: pointer;
-							color:black;
+							color:dimgray;
 						">
-							<img src=./more/media/exit.png
+							<img src=./more/media/blueexit.png
 							style="
 								width:18px;
 								height:18px;
@@ -231,7 +253,9 @@ const view = {
 			this.clearLinesParent();
 			this.find('#linesparent').addChild(view.searchDiv(nav,boot));
 			data.forEach((item,i)=>{
-				this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
+				if(nav==='loadworkers'){
+					this.find('#linesparent').addChild(view.lineWorker(item,i+1,(i===data.length-1)?false:true));
+				}else this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
 			})
 			//zerodata handler.
 			if(data.length===0){
@@ -252,7 +276,7 @@ const view = {
 		newCerpen(){
 			this.clearLinesParent();
 			this.linesParent.addChild(view.cerpennew());
-			this.stateLabel.innerHTML = 'Cerpen Baru';
+			this.stateLabel.innerHTML = 'Berita Baru';
 			this.reactTo.hide();
 			this.searchWare.hide();
 		},
@@ -289,13 +313,13 @@ const view = {
 			if(nav==='loadartikel')nav='OnGoing';
 			this.find('#linesparent').addChild(view.myProjectDiv(nav,boot));
 			data.forEach((item,i)=>{
-				this.find('#linesparent').addChild(view.projectList(item,i+1,(i===data.length-1)?false:true));
+				this.find('#linesparent').addChild(view.projectList(item,i+1,(i===data.length-1)?false:true,nav));
 			})
 			//zerodata handler.
 			if(data.length===0){
 				this.find('#linesparent').addChild(view.nodata());
 			}
-			this.stateLabel.innerHTML = 'My Projects';
+			this.stateLabel.innerHTML = 'Projek Kamu';
 			this.reactTo.hide();
 			this.searchWare.hide();
 			this.logout.hide();
@@ -324,8 +348,8 @@ const view = {
 			}
 			return result;
 		},
-		getIn(after){
-			view.main.addChild(view.loginBox(after));
+		getIn(after,cancel,update){
+			view.main.addChild(view.loginBox(after,cancel,update));
 		},
 		async openProfile(data=[],nav='home',boot,userId){
 			if(typeof userId==='object')userId = null;
@@ -334,7 +358,8 @@ const view = {
 				return this.getIn(()=>{view.content.openProfile([],'home',false,null)});
 			}
 			this.clearLinesParent();
-			userData = (await app.doglas.do(['database','users',userId||app.userData.cleanEmail,'get'])).val();
+			userData = (await app.doglas.do(['database','users',`${userId||app.userData.uid}/public`,'get'])).val();
+			console.log(userData);
 			if(nav==='loadartikel')nav='home';
 			this.linesParent.addChild(view.profileDiv(nav,boot,userId));
 			if(nav==='home')this.linesParent.addChild(view.profilePage(userData));
@@ -347,6 +372,9 @@ const view = {
 					this.find('#linesparent').addChild(view.nodata());
 				}
 			}
+			else if(nav==='saldo'){
+				this.linesParent.addChild(view.saldoPage(data));
+			}
 			else {
 				data.forEach((item,i)=>{
 					this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
@@ -358,7 +386,7 @@ const view = {
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
 			this.searchWare.hide();
-			if(userId===app.userData.cleanEmail || !userId)this.logout.show('flex');
+			if(userId===app.userData.uid || !userId)this.logout.show('flex');
 		},
 		newPost(){
 			if(!app.getInfoLogin()){
@@ -404,13 +432,16 @@ const view = {
 			if(nav==='loadartikel')nav='bid';
 			this.find('#linesparent').addChild(view.myInboxDiv(nav,boot));
 			//update the user bid data.
-			//app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val();
+			//app.userData.bid = (await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'get'])).val();
 			app.userData[nav] = data;
 			this.linesParent.addChild(view.inbox(nav));
 			this.stateLabel.innerHTML = 'Inbox';
 			this.reactTo.hide();
 			this.searchWare.hide();
 			this.logout.hide();
+		},
+		openInfo(){
+			view.main.addChild(view.webInfo());
 		}
 	}),
 	footer:makeElement('footer',{
@@ -424,10 +455,11 @@ const view = {
 				display: flex;
 				overflow: auto;
 				background: white;
-				border-bottom: 1px solid whitesmoke;
 				align-items: center;
 				position:sticky;
 				top:0;
+				border-radius:10px;
+				color:deepskyblue;
 			`,
 			innerHTML:`
 				<div style="
@@ -448,8 +480,8 @@ const view = {
 					"
 					id=OnGoing
 					>
-						<img src=./more/media/ongoing.png class=navimg>
-						OnGoing
+						<img src=./more/media/blueongoing.png class=navimg>
+						Berlajalan
 					</div>
 					<div style="
 						display: flex;
@@ -462,8 +494,8 @@ const view = {
 					"
 					id=Finished
 					>
-						<img src=./more/media/finished.png class=navimg>
-						Finished
+						<img src=./more/media/bluefinish.png class=navimg>
+						Selesai
 					</div>
 				</div>
 			`,
@@ -477,18 +509,18 @@ const view = {
 			onadded(){
 				//set the nav.
 				//console.log(this.nav);
-				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
+				this.find('#'+this.nav).style.color = 'dimgray';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot){
 					//console.log('boot is true');
-					this.OnGoing();
+					this[nav]();
 				}
 			},
 			OnGoing(){
 				view.addLoading()
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/onGoingProjects`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'OnGoing');
@@ -496,9 +528,9 @@ const view = {
 			},
 			Finished(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/onFinishedProjects`,'get','']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
+					let datacb = objToArray(data.val()||{});
 					view.content.openMyproject(datacb,'Finished');
 				})
 			}
@@ -512,10 +544,11 @@ const view = {
 				display: flex;
 				overflow: auto;
 				background: white;
-				border-bottom: 1px solid whitesmoke;
 				align-items: center;
 				position:sticky;
 				top:0;
+				border-radius:10px;
+				color:dimgray;
 			`,
 			innerHTML:`
 				<div style="
@@ -536,7 +569,7 @@ const view = {
 					"
 					id=bid
 					>
-						<img src=./more/media/task.png class=navimg>
+						<img src=./more/media/bluetask.png class=navimg>
 						Bid
 					</div>
 					<div style="
@@ -550,7 +583,7 @@ const view = {
 					"
 					id=inbox
 					>
-						<img src=./more/media/message.png class=navimg>
+						<img src=./more/media/bluemsg.png class=navimg>
 						Inbox
 					</div>
 				</div>
@@ -565,7 +598,6 @@ const view = {
 			onadded(){
 				//set the nav.
 				//console.log(this.nav);
-				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
@@ -575,18 +607,38 @@ const view = {
 			},
 			bid(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/bid`,'get']).then(data=>{
 					view.unloading();
-					let datacb = data.val()||[];
+					let datacb = objToArray(data.val()||{});
 					view.content.openInbox(datacb,'bid');
+					setTimeout(()=>{this.listenerBid(datacb)},2000);
 				})
 			},
 			inbox(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openInbox(datacb,'inbox');
+					setTimeout(()=>{this.listenerInbox(datacb)},2000);
+				})
+			},
+			listenerBid(databefore){
+				//working auto reload for bidding.
+				app.listener.add(`users/${app.userData.uid}/bid`,'biddingList',(snap)=>{
+					const datasnap = objToArray(snap.val()||{});
+					if(datasnap.length !== databefore.length){
+						this.bid();	
+					}
+				})
+			},
+			listenerInbox(databefore){
+				//working auto reload for inboxList.
+				app.listener.add(`users/${app.userData.uid}/inbox`,'inboxList',(snap)=>{
+					const datasnap = objToArray(snap.val()||{});
+					if(datasnap.length !== databefore.length){
+						this.bid();	
+					}
 				})
 			}
 		})
@@ -603,6 +655,8 @@ const view = {
 				align-items: center;
 				position:sticky;
 				top:0;
+				color:deepskyblue;
+				border-radius:10px;
 			`,
 			innerHTML:`
 				<div style="
@@ -621,8 +675,8 @@ const view = {
 					"
 					id=loadloker
 					>
-						<img src=./more/media/task.png class=navimg>
-						Project
+						<img src=./more/media/bluetask.png class=navimg>
+						Projek
 					</div>
 					<div style="
 						display: flex;
@@ -634,8 +688,35 @@ const view = {
 					"
 					id=loadjasa
 					>
-						<img src=./more/media/servicesicon.png class=navimg>
+						<img src=./more/media/blueservices.png class=navimg>
 						Jasa
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadworkers
+					>
+						<img src=./more/media/blueworkers.png class=navimg>
+						Pekerja
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						width: 100%;
+						justify-content: center;
+						padding: 10px 20px;
+					"
+					id=loadproduct
+					>
+						<img src=./more/media/bluethings.png class=navimg>
+						Produk
 					</div>
 					<div style="
 						display: flex;
@@ -648,8 +729,8 @@ const view = {
 					"
 					id=loadcerpen
 					>
-						<img src=./more/media/newsicon.png class=navimg>
-						News
+						<img src=./more/media/bluenews.png class=navimg>
+						Berita
 					</div>
 					<div style="
 						display: flex;
@@ -662,7 +743,7 @@ const view = {
 					"
 					id=loadartikel
 					>
-						<img src=./more/media/articleicon.png class=navimg>
+						<img src=./more/media/bluewiki.png class=navimg>
 						Artikel
 					</div>
 				</div>
@@ -676,8 +757,8 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				this.find('#'+this.nav).style.borderBottom = '3px solid black';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
+				this.find('#'+this.nav).style.color = 'dimgray';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
 				if(boot)this.loadloker();
@@ -713,6 +794,22 @@ const view = {
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadloker');
 				})
+			},
+			loadproduct(){
+				view.addLoading();
+				app.doglas.do(['database','post','Products','get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadproduct');
+				})
+			},
+			loadworkers(){
+				view.addLoading();
+				app.doglas.do(['database','workers','','get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadworkers');
+				})
 			}
 		})
 	},
@@ -720,7 +817,7 @@ const view = {
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
-				<div class=item style=${!bt?'border-bottom:0;':''}>
+				<div class=item>
 					<div class=thumbnail>
 						<div>#${i}</div>
 					</div>
@@ -748,7 +845,7 @@ const view = {
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
-				<div class=item style=${!bt?'border-bottom:0;':''}>
+				<div class=item>
 					<div class=thumbnail>
 						<div>#${i}</div>
 					</div>
@@ -777,6 +874,8 @@ const view = {
 						width:30%;
 						border-radius:10px;
 						margin-right:5px;
+						border-right:5px solid whitesmoke;
+						border-bottom:5px solid whitesmoke;
 					">
 						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
 							height:100%;
@@ -803,7 +902,34 @@ const view = {
 			},
 		})
 	},
-	projectList(data,i,bt=true){
+	lineWorker(data,i,bt=true){
+		return makeElement('div',{
+			className:'lines',
+			innerHTML:`
+				<div class=item style=${!bt?'border-bottom:0;':''}>
+					<div class=thumbnail>
+						<div>#${i}</div>
+					</div>
+					<div class=moreinfo>
+						<div class=addressinfo style=margin-bottom:8px;>
+							<div>
+								<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
+							</div>
+						</div>
+						<div class="username title">@${data.username}</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.uid);
+				}
+			}
+		})
+	},
+	projectList(data,i,bt=true,nav='OnGoing'){
 		const Dot = (data.title.length>100)?'...':'';
 		return makeElement('div',{
 			className:'lines',
@@ -821,9 +947,9 @@ const view = {
 						</div>
 						<div class=addressinfo>
 							<div>
-								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
+								<img class=profileimg src=${data.owner===app.userData.uid?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
-							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.username},</div>
+							<div class=username>${data.owner===app.userData.uid?data.bidder:data.username},</div>
 							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 					</div>
@@ -832,6 +958,8 @@ const view = {
 						width:30%;
 						border-radius:10px;
 						margin-right:5px;
+						border-right: 5px solid whitesmoke;
+						border-bottom: 5px solid whitesmoke;
 					">
 						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
 							height:100%;
@@ -845,13 +973,18 @@ const view = {
 			onadded(){
 				this.find('.title').onclick = ()=>{
 					this.chatData = data;
-					this.openChat();
+					console.log(nav);
+					if(nav==='OnGoing')this.openChat();
+					else this.loadInfo();
 				}
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
 					view.addLoading();
-					view.content.openProfile([],'home',false,data.owner===app.userData.cleanEmail?data.bidderProfileId:data.owner);
+					view.content.openProfile([],'home',false,data.owner===app.userData.uid?data.bidderProfileId:data.owner);
 				}
+			},
+			loadInfo(){
+				view.main.addChild(view.finishedProjectInfo(data));
 			},
 			openChat(){
 				view.main.addChild(view.OnGoingChat(this.chatData,()=>{
@@ -867,7 +1000,6 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				gap:10px;
-				height:94%;
 			`,
 			innerHTML:`
 				<div style="
@@ -880,7 +1012,7 @@ const view = {
 						Preview
 					</div>
 					<div style="
-						height:100px;
+						height:200px;
 						width:100%;
 						background:whitesmoke;
 						border:1px solid #e0e0e0;
@@ -957,7 +1089,7 @@ const view = {
 					</div>
 				</div>
 				<div style="
-					height:80%;
+					height:500px;
 					display:flex;
 					flex-direction:column;
 				">
@@ -1002,7 +1134,7 @@ const view = {
 				Object.assign(Data,{
 					date:getFullDate(),
 					time:getTime(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Articles",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -1047,7 +1179,6 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				gap:10px;
-				height:94%;
 			`,
 			innerHTML:`
 				<div style="
@@ -1060,7 +1191,7 @@ const view = {
 						Preview
 					</div>
 					<div style="
-						height:100px;
+						height:200px;
 						width:100%;
 						background:whitesmoke;
 						border:1px solid #e0e0e0;
@@ -1150,18 +1281,17 @@ const view = {
 					</div>
 				</div>
 				<div style="
-					height:80%;
+					height:500px;
 					display:flex;
 					flex-direction:column;
+					margin-bottom:20px;
 				">
 					<div style="
 						font-family:montserratbold;
 					">
 						Deskripsi Dan Persyaratan
 					</div>
-					<div style="
-						height:100%;
-					">
+					<div style=height:100%;>
 						<textarea placeholder="Tulis Keterangan Disini..." style="height:100%;resize:none;border-radius:0 0 20px 20px;" id=description></textarea>
 					</div>
 				</div>
@@ -1198,7 +1328,7 @@ const view = {
 				Object.assign(Data,{
 					date:getFullDate(),
 					time:getTime(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Services",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -1257,7 +1387,6 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				gap:10px;
-				height:94%;
 			`,
 			innerHTML:`
 				<div style="
@@ -1270,7 +1399,7 @@ const view = {
 						Preview
 					</div>
 					<div style="
-						height:100px;
+						height:200px;
 						width:100%;
 						background:whitesmoke;
 						border:1px solid #e0e0e0;
@@ -1360,7 +1489,7 @@ const view = {
 					</div>
 				</div>
 				<div style="
-					height:80%;
+					height:500px;
 					display:flex;
 					flex-direction:column;
 				">
@@ -1423,7 +1552,7 @@ const view = {
 				Object.assign(Data,{
 					date:getFullDate(),
 					time:getTime(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Jobs",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -1470,6 +1599,7 @@ const view = {
 				overflow:auto;
 				display:flex;
 				flex-direction:column;
+				color:dimgray;
 			`,
 			innerHTML:`
 				<div style="
@@ -1509,14 +1639,14 @@ const view = {
 						height:50px;
 						left:0;
 						display:flex;
+						margin-top:20px;
 						justify-content:center;
 					">
 						<div style="
 							padding:20px;
 							padding-bottom:10px;
-							background:#15244e;
+							background:deepskyblue;
 							color:white;
-							border:1px solid black;
 							border-bottom:none;
 							border-radius:20px 20px 0 0;
 							gap:10px;
@@ -1525,6 +1655,10 @@ const view = {
 							align-items:center;
 							cursor:pointer;
 						">
+							<img src=./more/media/whitecomment.png style="
+								width:24;
+								height:24;
+							">
 							Lihat Komentar
 						</div>
 					</div>
@@ -1563,6 +1697,7 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				overflow:auto;
+				color:dimgray;
 			`,
 			innerHTML:`
 				<div style="
@@ -1579,7 +1714,7 @@ const view = {
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin:10px 0;
+					margin:20px 0 10px 0;
 				">
 					<div>
 						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
@@ -1595,7 +1730,9 @@ const view = {
 						font-family:montserratbold;
 						margin:10px 0;
 					">${data.title}</div>
-					<div>${data.description.replaceAll('\n','<br>')}</div>
+					<div style="
+						margin-bottom:20px;
+					">${data.description.replaceAll('\n','<br>')}</div>
 				</div>
 				<div style="
 					position:sticky;
@@ -1609,16 +1746,20 @@ const view = {
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:#15244e;
+						background:deepskyblue;
 						color:white;
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:${app.userData?data.owner===app.userData.cleanEmail?'none':'flex':'flex'};
+						display:${app.userData?data.owner===app.userData.uid?'none':'flex':'flex'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=dooffers>
+						<img src=./more/media/whitebidding.png style="
+							width:24;
+							height:24;
+						">
 						Buat Penawaran
 					</div>
 					<div style="
@@ -1629,11 +1770,15 @@ const view = {
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:${app.userData?data.owner===app.userData.cleanEmail?'flex':'none':'none'};
+						display:${app.userData?data.owner===app.userData.uid?'flex':'none':'none'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=delete>
+						<img src=./more/media/whitedelete.png style="
+							width:24;
+							height:24;
+						">
 						Hapus Penawaran
 					</div>
 				</div>
@@ -1651,11 +1796,11 @@ const view = {
 			doOffers(){
 				if(!app.getInfoLogin()){
 					view.content.getIn(()=>{
-						view.content.openJobs();
+						view.content.openServices();
 					});
 					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
 				}
-				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username}));
+				view.main.addChild(view.servicesOfferPage({subject:data.title,minFee:data.minFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username,preview:data.preview,postId:data.postId}));
 			}
 		})
 	},
@@ -1668,6 +1813,7 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				overflow:auto;
+				color:dimgray;
 			`,
 			innerHTML:`
 				<div style="
@@ -1684,7 +1830,7 @@ const view = {
 					display:flex;
 					align-items:center;
 					gap:8px;
-					margin:10px 0;
+					margin:20px 0 10px 0;
 				">
 					<div>
 						<img class=profileimg src=${data.profilepicture||app.noProfilePng}>
@@ -1700,7 +1846,9 @@ const view = {
 						font-family:montserratbold;
 						margin:10px 0;
 					">${data.title}</div>
-					<div>${data.description.replaceAll('\n','<br>')}</div>
+					<div style="
+						margin-bottom:20px;
+					">${data.description.replaceAll('\n','<br>')}</div>
 				</div>
 				<div style="
 					position:sticky;
@@ -1714,16 +1862,20 @@ const view = {
 					<div style="
 						padding:20px;
 						padding-bottom:10px;
-						background:#15244e;
+						background:deepskyblue;
 						color:white;
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:${app.userData?data.owner===app.userData.cleanEmail?'none':'flex':'flex'};
+						display:${app.userData?data.owner===app.userData.uid?'none':'flex':'flex'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=dooffers>
+						<img src=./more/media/whitebidding.png style="
+							width:24;
+							height:24;
+						">
 						Buat Penawaran
 					</div>
 					<div style="
@@ -1734,11 +1886,15 @@ const view = {
 						border-bottom:none;
 						border-radius:20px 20px 0 0;
 						gap:10px;
-						display:${app.userData?data.owner===app.userData.cleanEmail?'flex':'none':'none'};
+						display:${app.userData?data.owner===app.userData.uid?'flex':'none':'none'};
 						justify-content:center;
 						align-items:center;
 						cursor:pointer;
 					" id=delete>
+						<img src=./more/media/whitedelete.png style="
+							width:24;
+							height:24;
+						">
 						Hapus Penawaran
 					</div>
 				</div>
@@ -1762,7 +1918,7 @@ const view = {
 					});
 					return forceRecheck(view.main,'Silahkan Login Terlebih Dahulu!');
 				}
-				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username,preview:data.preview}));
+				view.main.addChild(view.jobsOfferPage({subject:data.title,maxFee:data.maxFee,type:data.type,postid:data.postId,owner:data.owner,profilepicture:data.profilepicture,username:data.username,preview:data.preview,postId:data.postId}));
 			}
 		})
 	},
@@ -1825,7 +1981,7 @@ const view = {
 				//send notif to owner.
 				const ownerNotifs = (await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'get'])).val()||[];
 				ownerNotifs.push({
-					profilepicture:app.userData.profilepicture,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
 					who:'Kamu',
 					when:getFullDate(),
 					what:`Menghapus postingan ${this.datatoupload.type} ${this.datatoupload.title}`
@@ -1853,6 +2009,7 @@ const view = {
 				overflow:auto;
 				display:flex;
 				flex-direction:column;
+				color:dimgray;
 			`,
 			innerHTML:`
 				<div style="
@@ -1897,7 +2054,7 @@ const view = {
 						<div style="
 							padding:20px;
 							padding-bottom:10px;
-							background:#15244e;
+							background:deepskyblue;
 							color:white;
 							border:1px solid black;
 							border-bottom:none;
@@ -1942,7 +2099,7 @@ const view = {
 				<div style="
 					height:150px;
 					width:100%;
-					background:#15244e;
+					background:deepskyblue;
 					position:relative;
 				">
 					<img id=bannerimg style="
@@ -1955,15 +2112,16 @@ const view = {
 						top: 0;
 						right: 0;
 						padding: 10px;
-						background: white;
-						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};
+						background: deepskyblue;
+						display: ${userData.uid===app.userData.uid?'flex':'none'};
 						align-items: center;
 						justify-content: center;
 						border-radius: 0 0 0 20px;
 						border: 2px solid whitesmoke;
+						border-right:0;border-top:0;
 						cursor:pointer;
 					" id=editbanner>
-						<img src=./more/media/edit.png style="
+						<img src=./more/media/whiteedit.png style="
 							width:24px;
 							height:24px;
 						">
@@ -1989,6 +2147,7 @@ const view = {
 						width:128px;
 						height:128px;
 						position:relative;
+						border:1px solid gainsboro;
 					">
 						<img src=${userData.profilepicture||app.noProfilePng}
 						style="
@@ -2004,28 +2163,32 @@ const view = {
 							bottom: 0;
 							right: 0;
 							padding: 10px;
-							background: white;
+							background: deepskyblue;
 							border: 2px solid whitesmoke;
+							border-left:0;border-top:0;
 							border-radius: 50%;
 							cursor: pointer;
-							display:${userData.cleanEmail===app.userData.cleanEmail?'':'none'};
+							display:${userData.uid===app.userData.uid?'':'none'};
 						" id=editPicture>
-							<img src=./more/media/edit.png style="
+							<img src=./more/media/whiteedit.png style="
 								width:24px;
 								height:24px;
 							">
 						</div>
 					</div>
 					<div style="
-						padding:8px;
-						background:white;
-						border:2px solid whitesmoke;
+						padding:8px 15px;
+						background:deepskyblue;
+						color:white;
+						border:2px solid gainsboro;
+						border-top:0;
+						border-left:0;
 						border-radius:20px;
-						display: ${userData.cleanEmail===app.userData.cleanEmail?'flex':'none'};
+						display: ${userData.uid===app.userData.uid?'flex':'none'};
 						gap:5px;
 						cursor:pointer;
 					" id=editProfile>
-						<img src=./more/media/edit.png
+						<img src=./more/media/whiteedit.png
 						style="
 							width:24px;
 							height:24px;
@@ -2071,7 +2234,7 @@ const view = {
 				</div>
 				<div style="
 					border-bottom:1px solid whitesmoke;
-					display: ${userData.cleanEmail===app.userData.cleanEmail?'none':'flex'};
+					display: ${userData.uid===app.userData.uid?'none':'flex'};
 					color: white;
 					font-family: 'montserratbold';
 					overflow:auto;
@@ -2142,7 +2305,7 @@ const view = {
 				if(userData.followers && app.getInfoLogin()){
 					let following;
 					userData.followers.forEach(user=>{
-						if(user.id===app.userData.cleanEmail){
+						if(user.id===app.userData.uid){
 							following = true;
 							return;
 						}
@@ -2190,45 +2353,45 @@ const view = {
 			async unfollow(){
 				if(!app.getInfoLogin()){
 					view.content.getIn(()=>{
-						view.content.openProfile([],'home',false,userData.cleanEmail);
+						view.content.openProfile([],'home',false,userData.uid);
 					});
 					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 				}
 				//get target follow list.
-				const followers = (await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'get'])).val()||[];
+				const followers = (await app.doglas.do(['database','users',`${userData.uid}/public/followers`,'get'])).val()||[];
 				
 				//time to filter.
 				const newFollowers = [];
 				followers.forEach(item=>{
-					if(item.id!==app.userData.cleanEmail){
+					if(item.id!==app.userData.uid){
 						newFollowers.push(item);
 					}
 				})
-				await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'set',newFollowers]);
+				await app.doglas.do(['database','users',`${userData.uid}/public/followers`,'set',newFollowers]);
 				
 				//get this user following list.
-				const following = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'get'])).val()||[];
+				const following = (await app.doglas.do(['database','users',`${app.userData.uid}/public/following`,'get'])).val()||[];
 				
 				//time to filter.
 				const newFollowing = [];
 				following.forEach(item=>{
-					if(item.id!==userData.cleanEmail){
+					if(item.id!==userData.uid){
 						newFollowing.push(item);
 					}
 				})
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'set',newFollowing]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/public/following`,'set',newFollowing]);
 
 				//notif handling.
 				//for him.
-				const himnotiflist = (await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'get'])).val()||[];
-				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti anda.`})
-				await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'set',himnotiflist]);
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.uid}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Berhenti mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.uid}/notif`,'set',himnotiflist]);
 
 				//forme.
-				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti ${userData.username}`});
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',menotiflist]);				
-				view.content.openProfile([],'home',false,userData.cleanEmail);
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Berhenti mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.uid);
 			},
 			generateMore(){
 				for(let i in userData.more){
@@ -2282,43 +2445,49 @@ const view = {
 			async followme(){
 				if(!app.getInfoLogin()){
 					view.content.getIn(()=>{
-						view.content.openProfile([],'home',false,userData.cleanEmail);	
+						view.content.openProfile([],'home',false,userData.uid);	
 					});
 					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 				}
 				//get target follow list.
-				const followers = (await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'get'])).val()||[];
-				followers.push({
-					username:app.userData.username,
-					id:app.userData.cleanEmail,
-					date:getFullDate(),
-					time:getTime(),
-					profilepicture:app.userData.profilepicture
+				const followers = (await app.doglas.do(['database','users',`${userData.uid}/public/followers`,'get'])).val()||[];
+				let blyet = false;
+				followers.forEach(item=>{
+					if(item.id===app.userData.uid)blyet=true;
 				})
+				if(!blyet){
+					followers.push({
+						username:app.userData.username,
+						id:app.userData.uid,
+						date:getFullDate(),
+						time:getTime(),
+						profilepicture:app.userData.profilepicture||app.noProfilePng
+					})
+				}
 				//push the data.
-				await app.doglas.do(['database','users',`${userData.cleanEmail}/followers`,'set',followers]);
+				await app.doglas.do(['database','users',`${userData.uid}/public/followers`,'set',followers]);
 				//get this user following list.
-				const following = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'get'])).val()||[];
+				const following = (await app.doglas.do(['database','users',`${app.userData.uid}/public/following`,'get'])).val()||[];
 				following.push({
 					username:userData.username,
-					id:userData.cleanEmail,
+					id:userData.uid,
 					date:getFullDate(),
 					time:getTime(),
-					profilepicture:userData.profilepicture
+					profilepicture:userData.profilepicture||app.noProfilePng
 				})
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/following`,'set',following]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/public/following`,'set',following]);
 
 				//notif handling.
 				//for him.
-				const himnotiflist = (await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'get'])).val()||[];
-				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti anda.`})
-				await app.doglas.do(['database','users',`${userData.cleanEmail}/notif`,'set',himnotiflist]);
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.uid}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Mulai mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.uid}/notif`,'set',himnotiflist]);
 
 				//forme.
-				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti ${userData.username}`});
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',menotiflist]);				
-				view.content.openProfile([],'home',false,userData.cleanEmail);
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Mulai mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.uid);
 				//console.log(userData,app.userData);
 			},
 			async sendmemsg(){
@@ -2326,14 +2495,14 @@ const view = {
 					view.content.getIn(()=>{this.sendmemsg()});
 					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 				}
-				const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+				const chatList = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
 				
 				//case is only checking for user, not with opponent.
 				//have to check the opponent.
 				let ourRoom;
-				const opponentChatList = (await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'get'])).val()||[];
+				const opponentChatList = (await app.doglas.do(['database','users',`${userData.uid}/inbox`,'get'])).val()||[];
 				opponentChatList.forEach((item)=>{
-					if(item.to===app.userData.cleanEmail){
+					if(item.to===app.userData.uid){
 						ourRoom = item;
 						return
 					}
@@ -2343,8 +2512,8 @@ const view = {
 				//finding the userId. If One, this mean i dont have to create new room
 				let room = null;
 				chatList.forEach((item)=>{
-					//console.log(item.to,userData.cleanEmail);
-					if(item.to===userData.cleanEmail){
+					//console.log(item.to,userData.uid);
+					if(item.to===userData.uid){
 						room = item;
 						return
 					}
@@ -2357,21 +2526,21 @@ const view = {
 					if(!ourRoom)roomId = getUniqueID();
 					else roomId = ourRoom.roomId;
 					//get sender chat list.
-					const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
-					room = {roomId,to:userData.cleanEmail,toProfile:userData.profilepicture,date:getFullDate(),toUsername:userData.username};
+					const chatList = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
+					room = {roomId,to:userData.uid,toProfile:userData.profilepicture||app.noProfilePng,date:getFullDate(),toUsername:userData.username};
 					chatList.push(room);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'set',chatList]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'set',chatList]);
 					//set initial data.
-					await app.doglas.do(['database','privateChat',`${roomId}/peoples`,'set',[app.userData.cleanEmail,userData.cleanEmail]]);
+					await app.doglas.do(['database','privateChat',`${roomId}/peoples`,'set',[app.userData.uid,userData.uid]]);
 				}
 
 				if(!ourRoom){
 					//console.log('Opps, theres no room at this db, so i build one');
 					//for reciever.
 					if(!roomId)roomId=room.roomId;
-					const recieverChatList = (await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'get'])).val()||[];
-					recieverChatList.push({roomId,to:app.userData.cleanEmail,toProfile:app.userData.profilepicture,date:getFullDate(),toUsername:app.userData.username});
-					await app.doglas.do(['database','users',`${userData.cleanEmail}/inbox`,'set',recieverChatList]);	
+					const recieverChatList = (await app.doglas.do(['database','users',`${userData.uid}/inbox`,'get'])).val()||[];
+					recieverChatList.push({roomId,to:app.userData.uid,toProfile:app.userData.profilepicture||app.noProfilePng,date:getFullDate(),toUsername:app.userData.username});
+					await app.doglas.do(['database','users',`${userData.uid}/inbox`,'set',recieverChatList]);	
 				}
 				
 				view.main.addChild(view.openPrivateChat(room));
@@ -2396,7 +2565,7 @@ const view = {
 						`,
 						innerHTML:`
 							<div>
-								<img src=${comment.profilepicture}
+								<img src=${comment.profilepicture||app.noProfilePng}
 								style="
 									width:24px;
 									height:24px;
@@ -2456,6 +2625,7 @@ const view = {
 					top:0;
 					padding:20px;
 					background:white;
+					color:dimgray;
 				">
 					Postingan Baru
 					<img src=./more/media/close.png class=navimg style="
@@ -2465,32 +2635,39 @@ const view = {
 					" id=closethis>
 				</div>
 				<div class=newpostmenu>
-					<div id=newCerpen class=child>
-						<img src=./more/media/newsicon.png>
-						<div>
-							<div>News</div>
-							<div style="font-family:montserratregular">Posting Berita terbaru, bagikan informasi!</div>
-						</div>
-					</div>
-					<div id=newArticle class=child>
-						<img src=./more/media/articleicon.png>
-						<div>
-							<div>Artikel</div>
-							<div style="font-family:montserratregular">Posting Artikel, Dan Bagikan Pemikiranmu!</div>
-						</div>
-					</div>
 					<div id=newJasa class=child>
-						<img src=./more/media/servicesicon.png>
+						<img src=./more/media/blueservices.png>
 						<div>
 							<div>Jasa</div>
 							<div style="font-family:montserratregular">Posting Jasa, Dan Temukan Klienmu!</div>
 						</div>
 					</div>
 					<div id=newLoker class=child>
-						<img src=./more/media/task.png>
+						<img src=./more/media/bluetask.png>
 						<div>
-							<div>Loker</div>
+							<div>Projek</div>
 							<div style="font-family:montserratregular">Posting Tugasmu, Dan Biarkan Mereka Yang Nyelesain!</div>
+						</div>
+					</div>
+					<div id=newLoker class=child>
+						<img src=./more/media/bluethings.png>
+						<div>
+							<div>Produk</div>
+							<div style="font-family:montserratregular">Posting Produkmu, Dan Raih Pembeli!</div>
+						</div>
+					</div>
+					<div id=newCerpen class=child>
+						<img src=./more/media/bluenews.png>
+						<div>
+							<div>News</div>
+							<div style="font-family:montserratregular">Posting Berita terbaru, bagikan informasi!</div>
+						</div>
+					</div>
+					<div id=newArticle class=child>
+						<img src=./more/media/bluewiki.png>
+						<div>
+							<div>Artikel</div>
+							<div style="font-family:montserratregular">Posting Artikel, Dan Bagikan Pemikiranmu!</div>
 						</div>
 					</div>
 				</div>
@@ -2524,7 +2701,7 @@ const view = {
 			}
 		})
 	},
-	loginBox(after){
+	loginBox(after,cancel,update=false){
 		return makeElement('div',{
 			after,
 			style:`
@@ -2533,14 +2710,14 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:flex-end;
+				justify-content:center;
 				background:#00000040;
 				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
 					background:white;
-					height:100%;
+					border-radius:0 0 20px 20px;
 				" class=innerBox>
 					<div style="
 						width:94%;
@@ -2549,16 +2726,16 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						color:black;
 					">
 						<div style="
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Login circletask
+							Login Pasarin
 						</div>
-						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						<div id=closethis style="cursor:pointer;background:deepskyblue;border-radius:50%;">
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -2579,6 +2756,9 @@ const view = {
 								<input placeholder="Masukan Password" style=border-radius:0; type=password id=userPass>
 							</div>
 						</div>
+					</div>
+					<div style="padding:0 20px;">
+						<span style=cursor:pointer; id=lupapassword>Lupa password?</span>
 					</div>
 					<div style="
 						padding:20px;
@@ -2603,7 +2783,7 @@ const view = {
 						<div style="
 							width: 100%;
 							text-align: center;
-							display:flex;
+							display:${!update?'flex':'none'};
 							justify-content:center;
 							align-items:center;
 							gap:5px;
@@ -2623,6 +2803,13 @@ const view = {
 						this[button.id]();
 					}
 				})
+				//lupa password.
+				this.find('#lupapassword').onclick = ()=>{
+					this.openPassHelp();
+				}
+			},
+			openPassHelp(){
+				view.main.addChild(view.passwordHelper());
 			},
 			collectData(){
 				const data = {};
@@ -2631,8 +2818,8 @@ const view = {
 				})
 				if(data.userEmail){
 					if(data.userEmail.indexOf('@')!=-1)
-						data.cleanEmail = data.userEmail.slice(0,data.userEmail.indexOf('@'));
-					else data.cleanEmail = data.userEmail;
+						data.uid = data.userEmail.slice(0,data.userEmail.indexOf('@'));
+					else data.uid = data.userEmail;
 				}
 				return data;
 			},
@@ -2647,7 +2834,10 @@ const view = {
 			},
 			onadded(){
 				//close Event.
-				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.find('#closethis').onclick = ()=>{
+					if(cancel)cancel();
+					this.remove()
+				}
 				this.buttonEvent();
 			}
 		})
@@ -2660,13 +2850,13 @@ const view = {
 				position:absolute;z-index:1;
 				display:flex;
 				align-items:flex-start;
-				justify-content:flex-end;
+				justify-content:center;
 				background:#00000040;
 			`,
 			innerHTML:`
 				<div style="
 					background:white;
-					height:100%;
+					border-radius:0 0 20px 20px;
 				" class=innerBox>
 					<div style="
 						width:94%;
@@ -2675,16 +2865,16 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						color:black;
 					">
 						<div style="
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Akun Baru circletask
+							Akun Baru Pasarin
 						</div>
-						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+						<div id=closethis style="cursor:pointer;background:deepskyblue;border-radius:50%;">
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -2717,7 +2907,17 @@ const view = {
 								<input type=password placeholder="Masukan Password" style=border-radius:0;>
 							</div>
 						</div>
+						<div>
+							<div>Daftar Sebagai Pekerja?</div>
+							<div>
+								<select id=workingform>
+									<option selected value=0>Tidak</option>
+									<option value=1>Ya</option>
+								</select>
+							</div>
+						</div>
 					</div>
+					<div style=color:red;padding:20px;>*Dengan mendaftar, anda telah menyetujui semua persyaratan kami.</div>
 					<div id=loading style="
 						padding:20px;
 						display:none;
@@ -2796,6 +2996,8 @@ const view = {
 						});
 					}
 				})
+				//get wanna work data.
+				datauser.asworker = this.find('#workingform').value;
 				return datauser;
 			},
 			getComplete(validLen){
@@ -2808,7 +3010,7 @@ const view = {
 				let result = [];
 				let back;
 				for(let i in data){
-					if(i==='len')continue;
+					if(i==='len' || i==='asworker')continue;
 					result.push(rules[index](data[i],back));
 					back = data[i];
 					index += 1;
@@ -2888,21 +3090,36 @@ const view = {
 			},
 			completeIt(data){
 				this.submitData({
+					asworker:data.asworker,
 					username:data.username.value,
 					password:data.userpassone.value,
 					email:data.emailuser.value,
-					uniqueId:getUniqueID(),
 					date:getFullDate(),
-					cleanEmail:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@'))
+					public:{username:data.username.value},
+					uid:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@'))
 				});
+			},
+			async regisWorker(data){
+				if(data.asworker==='1' || data.asworker){
+					await app.doglas.do(['database','workers',data.uid,'set',data.public]);
+				}
 			},
 			submitData(data){
 				this.hideFormAndButtons();
 				this.find('#loading').show('flex');
-				app.doglas.do(['database','users',data.cleanEmail,'update',data]).then(()=>{
-					this.showTheAnounce('Pendaftaran Berhasil! Silahkan Lakukan Login.');
-					setTimeout(()=>{this.goIn()},1000);
-				});
+				app.doglas.auth.createUserWithEmailAndPassword(data.email,data.password).then(async (retdata)=>{
+					delete data.password;
+					data.uid = retdata.user.uid;
+					data.public.uid = retdata.user.uid;
+					app.doglas.do(['database','users',data.uid,'update',data]).then(()=>{
+						this.regisWorker(data);
+						forceRecheck(view.main,'Berhasil membuat akun, silahkan login!');
+						this.goIn();
+					})
+				}).catch(err=>{
+					forceRecheck(view.main,err.message);
+					this.goIn();
+				})
 			},
 			onadded(){
 				//close Event.
@@ -2918,7 +3135,6 @@ const view = {
 				display:flex;
 				flex-direction:column;
 				gap:10px;
-				height:94%;
 			`,
 			innerHTML:`
 				<div style="
@@ -2931,7 +3147,7 @@ const view = {
 						Preview
 					</div>
 					<div style="
-						height:100px;
+						height:200px;
 						width:100%;
 						background:whitesmoke;
 						border:1px solid #e0e0e0;
@@ -3008,7 +3224,7 @@ const view = {
 					</div>
 				</div>
 				<div style="
-					height:80%;
+					height:500px;
 					display:flex;
 					flex-direction:column;
 				">
@@ -3053,7 +3269,7 @@ const view = {
 				Object.assign(Data,{
 					date:getFullDate(),
 					time:getTime(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"ShortStories",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -3109,6 +3325,7 @@ const view = {
 							padding:2%;
 							align-items:center;
 							border-bottom:${i===0?'':'1px solid whitesmoke'};
+							color:dimgray;
 						`,
 						innerHTML:`
 							<div style="
@@ -3131,18 +3348,7 @@ const view = {
 					}))
 				}
 				if(NotifList.length===0){
-					this.addChild(makeElement('div',{
-						style:`
-							width:96%;
-							display:flex;
-							gap:12px;
-							padding:2%;
-							align-items:center;
-						`,
-						innerHTML:`
-							Belum Ada Notifikasi...
-						`
-					}))
+					this.addChild(view.nodata());
 				}
 			},
 			onadded(){
@@ -3150,7 +3356,7 @@ const view = {
 			},
 			async loadNotifData(){
 				view.addLoading();
-				const data = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				const data = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
 				view.unloading();
 				this.generateNotifList(data);
 			},
@@ -3180,7 +3386,8 @@ const view = {
 						justify-content:space-between;
 						padding:3%;
 						align-items:center;
-						background:whitesmoke;
+						background:deepskyblue;
+						color:white;
 					">
 						<div style="
 							font-family:montserratbold;
@@ -3189,7 +3396,7 @@ const view = {
 							Proses Uploading
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -3258,7 +3465,7 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						background:deepskyblue;color:white;
 					">
 						<div style="
 							font-family:montserratbold;
@@ -3267,7 +3474,7 @@ const view = {
 							Edit Profil
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -3320,14 +3527,20 @@ const view = {
 					<div style="
 						padding:20px;
 						display:flex;
-						justify-content:center;
-						gap:10px;
 					" id=save>
 						<div class=button id=goSignin style="
 							width: 100%;
 							text-align: center;
 							border-radius:20px;
+							display:flex;
+							align-items:center;
+							justify-content:center;
+							gap:10px;
 						">
+							<img src=./more/media/whitesave.png style="
+								width:24px;
+								height:24px;
+							">
 							Simpan
 						</div>
 					</div>
@@ -3366,7 +3579,7 @@ const view = {
 				}
 			},
 			DoRequest(data){
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}`,'update',data]).then((x)=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/public`,'update',data]).then((x)=>{
 					this.handleResponse(x,data);
 				})
 			},
@@ -3413,14 +3626,21 @@ const view = {
 	nodata(){
 		return makeElement('div',{
 			innerHTML:`
-				Belum Ada Data Terbaru.
+				<div>
+					<img src=./more/media/emptyhere.png style="
+						width:200px;
+						height:200px;
+						object-fit:contain;
+					">
+				</div>
 			`,
 			style:`
 				width:100%;
-				height:200px;
+				height:80%;
 				display:flex;
 				align-items:center;
 				justify-content:center;
+				color:dimgray;
 			`
 		})
 	},
@@ -3450,7 +3670,7 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						background:deepskyblue;color:white;
 					">
 						<div style="
 							font-family:montserratbold;
@@ -3459,7 +3679,7 @@ const view = {
 							Data Tambahan
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="padding:10px 20px;">
@@ -3532,7 +3752,8 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						background:deepskyblue;
+						color:white;
 					">
 						<div style="
 							font-family:montserratbold;
@@ -3541,7 +3762,7 @@ const view = {
 							Edit Foto Profil
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -3598,14 +3819,20 @@ const view = {
 					<div style="
 						padding:20px;
 						display:flex;
-						justify-content:center;
-						gap:10px;
 					" id=save>
 						<div class=button id=goSignin style="
 							width: 100%;
 							text-align: center;
 							border-radius:20px;
+							display:flex;
+							align-items:center;
+							justify-content:center;
+							gap:10px;
 						">
+							<img src=./more/media/whitesave.png style="
+								width:24px;
+								height:24px;
+							">
 							Simpan
 						</div>
 					</div>
@@ -3637,7 +3864,7 @@ const view = {
 				this.upnotice.show('block');
 				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
 					const url = await x.ref.getDownloadURL();
-					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{profilepicture:url}]).then(x=>{
+					app.doglas.do(['database','users',`${app.userData.uid}/public`,'update',{profilepicture:url}]).then(x=>{
 						profilePage.find('#profilepicture').src = url;
 						app.userData.profilepicture = url;
 						this.remove();
@@ -3672,7 +3899,8 @@ const view = {
 						padding:0 3%;
 						height:77px;
 						align-items:center;
-						background:whitesmoke;
+						background:deepskyblue;
+						color:white;
 					">
 						<div style="
 							font-family:montserratbold;
@@ -3681,7 +3909,7 @@ const view = {
 							Edit Foto Banner
 						</div>
 						<div id=closethis style="cursor:pointer;">
-							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 						</div>
 					</div>
 					<div style="
@@ -3736,14 +3964,20 @@ const view = {
 					<div style="
 						padding:20px;
 						display:flex;
-						justify-content:center;
-						gap:10px;
 					" id=save>
 						<div class=button id=goSignin style="
 							width: 100%;
 							text-align: center;
 							border-radius:20px;
+							display:flex;
+							align-items:center;
+							justify-content:center;
+							gap:10px;
 						">
+							<img src=./more/media/whitesave.png style="
+								width:24px;
+								height:24px;
+							">
 							Simpan
 						</div>
 					</div>
@@ -3775,14 +4009,12 @@ const view = {
 				this.upnotice.show('block');
 				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
 					const url = await x.ref.getDownloadURL();
-					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
+					app.doglas.do(['database','users',`${app.userData.uid}/public`,'update',{bannerpic:url}]).then(x=>{
 						const banner = profilePage.find('#bannerimg');
 						banner.src = url;
-						if(!app.userData.bannerpic){
-							banner.onload = ()=>{
-								banner.removeAttribute('hidden');
-								app.userData.bannerpic = url;
-							}
+						banner.onload = ()=>{
+							banner.removeAttribute('hidden');
+							app.userData.bannerpic = url;
 						}
 						this.remove();
 					})
@@ -3894,23 +4126,24 @@ const view = {
 			collectData(){
 				const xdata = {
 					fee:this.find('#fee').value,
-					bidId:getUniqueID(),
+					bidId:data.postId,
 					description:this.find('#offerDescription').value,
 					bidder:app.userData.username,
-					bidderProfileId:app.userData.cleanEmail,
+					bidderProfileId:app.userData.uid,
 					date:getFullDate(),
 					time:getTime(),
 					owner:data.owner,
 					reject:'unset',
-					profilepicture:data.profilepicture,
-					bidderProfileIdPic:app.userData.profilepicture,
-					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
+					preview:data.preview||'./more/media/nothumbnailnew.png',
+					profilepicture:data.profilepicture||app.noProfilePng,
+					bidderProfileIdPic:app.userData.profilepicture||app.noProfilePng,
+					inbox:[{id:app.userData.uid,profilepicture:app.userData.profilepicture||app.noProfilePng,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
 				}
 				return xdata;
 			},
 			async handleNotifOwner(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -3921,8 +4154,8 @@ const view = {
 				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -3930,7 +4163,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			save(){
 				
@@ -3940,14 +4173,14 @@ const view = {
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
 					//get the data first.
-					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'get'])).val()||[];
 					biddatauser.push(data);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'update',biddatauser]);
 					
 					//update bid data statistic
-					let bidcount = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'get'])).val()||0;
+					let bidcount = (await app.doglas.do(['database','users',`${app.userData.uid}/statistics/bidcount`,'get'])).val()||0;
 					bidcount += 1;
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'set',bidcount]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/statistics/bidcount`,'set',bidcount]);
 					
 					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
 					biddataowner.push(data);
@@ -4069,26 +4302,29 @@ const view = {
 				}
 			},
 			collectData(){
+				console.log(data);
 				const xdata = {
 					fee:this.find('#fee').value,
 					bidId:getUniqueID(),
 					description:this.find('#offerDescription').value,
 					bidder:app.userData.username,
-					bidderProfileId:app.userData.cleanEmail,
+					bidderProfileId:app.userData.uid,
 					date:getFullDate(),
 					time:getTime(),
 					owner:data.owner,
 					ownerUsername:data.username,
 					status:'unset',
-					profilepicture:data.profilepicture,
-					bidderProfileIdPic:app.userData.profilepicture,
-					inbox:[{profilepicture:app.userData.profilepicture,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
+					preview:data.preview||'./more/media/nothumbnailnew.png',
+					profilepicture:data.profilepicture||app.noProfilePng,
+					bidderProfileIdPic:app.userData.profilepicture||app.noProfilePng,
+					inbox:[{id:app.userData.uid,profilepicture:app.userData.profilepicture||app.noProfilePng,date:getFullDate(),from:app.userData.username,msg:this.find('#offerDescription').value,time:getTime()}]
 				}
+				console.log(xdata);
 				return xdata;
 			},
 			async handleNotifOwner(){
 				let ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4099,8 +4335,8 @@ const view = {
 				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4108,7 +4344,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			async save(){
 				
@@ -4117,20 +4353,23 @@ const view = {
 				//adding bid data to the project.
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
-					//get the data first.
-					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
-					biddatauser.push(data);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',biddatauser]);
+
+					//set bidder bid info.
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid/${data.bidId}`,'set',data]);
+
+					//for the owner also.
+					await app.doglas.do(['database','users',`${data.owner}/bid/${data.bidId}`,'set',data]);
 					
 					//update bid data statistic
-					let bidcount = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'get'])).val()||0;
+					let bidcount = (await app.doglas.do(['database','users',`${app.userData.uid}/public/statistics/bidcount`,'get'])).val()||0;
 					bidcount += 1;
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistics/bidcount`,'set',bidcount]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/public/statistics/bidcount`,'set',bidcount]);
 					
-					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
-					biddataowner.push(data);
-					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
-					app.userData.bid = biddatauser;
+					//for owner also
+					let ownerbidcount = (await app.doglas.do(['database','users',`${data.owner}/public/statistics/bidcount`,'get'])).val()||0;
+					ownerbidcount += 1;
+					await app.doglas.do(['database','users',`${data.owner}/public/statistics/bidcount`,'set',ownerbidcount]);
+
 					//Notif
 					this.handleNotifOwner();
 					this.handleNotifUser();
@@ -4151,7 +4390,7 @@ const view = {
 				//get Data bidder first.
 				let biddata = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
 				//console.log(biddata);
-				biddata.push(app.userData.cleanEmail);
+				biddata.push(app.userData.uid);
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'set',biddata]);
 				const biddingList =  (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
 				biddingList.push(data.bidId);
@@ -4170,7 +4409,7 @@ const view = {
 				if(!app.userData[nav])app.userData[nav] = [];
 				if(nav==='inbox'){
 					//getting the latest msg from chat.
-					app.userData.inbox = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+					app.userData.inbox = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
 				}
 				if(app.userData[nav].length===0){
 					this.addChild(makeElement('div',{
@@ -4202,12 +4441,12 @@ const view = {
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
-				<div class=item style=${!bt?'':'border-bottom:1px solid whitesmoke'}>
+				<div class=item>
 					<div class=thumbnail style="
 						background:white;
 						margin-left:2%;
 					">
-						<img class=username src=${data.toProfile} style="
+						<img class=username src=${data.toProfile||app.noProfilePng} style="
 							width:32px;
 							height:32px;
 							object-fit:cover;
@@ -4232,6 +4471,7 @@ const view = {
 					    background: whitesmoke;
 					    border-radius: 50%;
 					    cursor: pointer;
+					    border:1px solid gainsboro;
 						" id=morebutton>
 							<img src=./more/media/moreicon.png style="
 								width:24px;
@@ -4264,7 +4504,7 @@ const view = {
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
-				<div class=item style=${!bt?'border-bottom:0;':''}>
+				<div class=item>
 					<div class=thumbnail>
 						<div>#${i+1}</div>
 					</div>
@@ -4277,9 +4517,9 @@ const view = {
 						</div>
 						<div class=addressinfo>
 							<div>
-								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
+								<img class=profileimg src=${data.owner===app.userData.uid?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
-							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.owner},</div>
+							<div class=username>${data.owner===app.userData.uid?data.bidder:data.ownerUsername},</div>
 							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 					</div>
@@ -4305,7 +4545,7 @@ const view = {
 				this.find('.username').onclick = ()=>{
 					app.dataContent = data;
 					view.addLoading();
-					view.content.openProfile([],'home',false,data.owner);
+					view.content.openProfile([],'home',false,data.owner===app.userData.uid?data.bidderProfileId:data.owner);
 				}
 			},
 			onclick(){
@@ -4313,7 +4553,7 @@ const view = {
 			}
 		})
 	},
-	openChatBid(data,customCloseThis){
+	openChatBid(data){
 		return makeElement('div',{
 			style:`
 				position:absolute;
@@ -4341,8 +4581,8 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:white;
-						color:black;
+						background:deepskyblue;
+						color:white;
 						border-bottom:1px solid gainsboro;
 					">
 						<div style="
@@ -4352,7 +4592,7 @@ const view = {
 							gap:10px;
 							padding-left:5%;
 						">
-							<img src=./more/media/task.png style="
+							<img src=./more/media/whiteloading.png style="
 								width:32px;
 								height:32px;
 								object-fit:cover;
@@ -4360,7 +4600,7 @@ const view = {
 							">
 							<div>
 								<div>${data.subject.slice(0,30)+'...'}</div>
-								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${SmartTime(data.time)}</div>
 							</div>
 						</div>
 						<div style="
@@ -4371,14 +4611,14 @@ const view = {
 							justify-content: center;
 						">
 							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
-								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
 					<div id=userActionBidder style="
 				    padding: 2% 0;
 				    background: whitesmoke;
-				    display: ${data.owner===app.userData.cleanEmail?'flex':'none'};
+				    display: ${data.owner===app.userData.uid?'flex':'none'};
 				    gap: 8px;
 				    justify-content: space-around;
 					">
@@ -4428,8 +4668,8 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
-						  scrollbar-color: gray whitesmoke;
-						  scrollbar-width: thin;
+						scrollbar-color: gray whitesmoke;
+						scrollbar-width: thin;
 					" id=boxinbox>
 						
 					</div>
@@ -4548,10 +4788,10 @@ const view = {
 						">
 							<div style="cursor:pointer;
 								padding:10px;
-								background:black;
+								background:white;border:1px solid whitesmoke;
 								border-radius:10px;
 							" id=sendbutton>
-								<img src=./more/media/whitesend.png
+								<img src=./more/media/bluesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -4610,7 +4850,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=sendphoto>
-							<img src=./more/media/images.png style="
+							<img src=./more/media/blueimage.png style="
 								width:32;
 								height:32;
 							">
@@ -4619,7 +4859,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=senddocument>
-							<img src=./more/media/documents.png style="
+							<img src=./more/media/bluedocument.png style="
 								width:32;
 								height:32;
 							">
@@ -4692,9 +4932,9 @@ const view = {
 					date:getFullDate(),
 					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
 					time:getTime(),
-					id:app.userData.cleanEmail
+					id:app.userData.uid
 				}
 				return msg;
 			},
@@ -4726,9 +4966,9 @@ const view = {
 				
 				//getting admin data.
 				const admins = (await app.doglas.do(['database','admin','','get'])).val()||{};
-				//console.log('admins data',admins);
-				project.admin = objToArray(admins).getRandom().cleanEmail;
-				//console.log(project.admin);
+				console.log('admins data',admins);
+				project.admin = objToArray(admins).getRandom().uid;
+				console.log("the admin is ",project.admin);
 				
 				//updating admin notif.
 				const adminNotifs = (await app.doglas.do(['database','admin',`${project.admin}/notif`,'get'])).val()||[];
@@ -4738,12 +4978,13 @@ const view = {
 					when:getFullDate(),
 					what:`Anda terpilih sebagai admin ${project.type} ${project.title} dari ${project.owner}`
 				})
-				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				await app.doglas.do(['database','admin',`${project.admin}/notif`,'set',adminNotifs]);
 				
 				//set global room //onGoingRoom
 				const roomId = getUniqueID();
 				//console.log(roomId, 'is room id');
 				project.OnGoingRoomId = roomId;
+				project.bidderProfileId = winner;
 				
 				await app.doglas.do(['database','OnGoingRooms',roomId,'set',project]);
 				//console.log('global room updateed');
@@ -4754,10 +4995,10 @@ const view = {
 				
 				
 				//set room for owner.
-				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
+				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.uid}/onGoingProjects`,'get'])).val()||[];
 				//console.log(ownerOnGoingProjects);
 				ownerOnGoingProjects.push(project);
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/onGoingProjects`,'set',ownerOnGoingProjects]);
 
 				//set room for the winner
 				const winnerOnGoingProjects = (await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'get'])).val()||[];
@@ -4766,21 +5007,21 @@ const view = {
 				await app.doglas.do(['database','users',`${winner}/onGoingProjects`,'set',winnerOnGoingProjects]);
 				
 				//set statistic win project.
-				let projectWon = (await app.doglas.do(['database','users',`${winner}/statistics/projectwon`,'get'])).val()||0;
+				let projectWon = (await app.doglas.do(['database','users',`${winner}/public/statistics/projectwon`,'get'])).val()||0;
 				projectWon += 1;
-				await app.doglas.do(['database','users',`${winner}/statistics/projectwon`,'set',projectWon]);
+				await app.doglas.do(['database','users',`${winner}/public/statistics/projectwon`,'set',projectWon]);
 				
 				//set statistic ongoing project.
-				let ongoingproject = (await app.doglas.do(['database','users',`${winner}/statistics/ongoingproject`,'get'])).val()||0;
+				let ongoingproject = (await app.doglas.do(['database','users',`${winner}/public/statistics/ongoingproject`,'get'])).val()||0;
 				ongoingproject += 1;
-				await app.doglas.do(['database','users',`${winner}/statistics/ongoingproject`,'set',ongoingproject]);
+				await app.doglas.do(['database','users',`${winner}/public/statistics/ongoingproject`,'set',ongoingproject]);
 				
 				//set room for the admin
 				//console.log('winner is',winner);
-				const adminOnGoingProjects = (await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'get'])).val()||[];
+				const adminOnGoingProjects = (await app.doglas.do(['database','admin',`${project.admin}/OnGoingProjects`,'get'])).val()||[];
 				//console.log(adminOnGoingProjects);
 				adminOnGoingProjects.push(project);
-				await app.doglas.do(['database','admin',`${project.admin}/onGoingProjects`,'set',adminOnGoingProjects]);
+				await app.doglas.do(['database','admin',`${project.admin}/OnGoingProjects`,'set',adminOnGoingProjects]);
 			},
 			async setWinner(param){
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/winner`,'set',param]);
@@ -4792,7 +5033,11 @@ const view = {
 					await app.doglas.get(`bid/${data.type}/${bidId}`).remove();
 				})
 				const project = (await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'get'])).val();
-				await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'remove']);
+				
+				//remove the project from post global. if type is jobs.
+				if(data.type==='Jobs'){
+					await app.doglas.do(['database','post',`${data.type}/${data.postid}`,'remove']);
+				}
 				//console.log('project deleted, post');
 
 
@@ -4811,25 +5056,25 @@ const view = {
 				//getting peoples id.
 				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
 				//adding owner id also, we need owner bid also updated.
-				bidders.push(app.userData.cleanEmail);
+				bidders.push(app.userData.uid);
 				//console.log(bidders);
 
 				bidders.forEach(async bidder=>{
 						
 					//deleting the bid list from this user.
-					const userBidList = (await app.doglas.do(['database','users',`${bidder}/bid`,'get'])).val()||[];
-					const userNewBidList = [];
-					userBidList.forEach(bid=>{
-						if(bid.postid!==data.postid){
-							userNewBidList.push(bid);
+					const userBidList = (await app.doglas.do(['database','users',`${bidder}/bid`,'get'])).val()||{};
+					const userNewBidList = {};
+					for(let i in userBidList){
+						if(userBidList[i].postid !== data.postid){
+							userNewBidList[i] = userBidList[i];
 						}
-					})
+					}
 					//console.log('User new bid ',userNewBidList);
 					await app.doglas.do(['database','users',`${bidder}/bid`,'set',userNewBidList]);
 					
 					//get people notif list.
 					const notifs = (await app.doglas.do(['database','users',`${bidder}/notif`,'get'])).val()||[];
-					notifs.push({who:(bidder===app.userData.cleanEmail?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture,when:getFullDate(),
+					notifs.push({who:(bidder===app.userData.uid?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),
 						what:`Telah menerima penawaran dari ${data.bidderProfileId===bidder?'Kamu':data.bidder} sebesar Rp ${getPrice(data.fee)}`
 					});
 					//adding notification to user notif list.
@@ -4841,7 +5086,7 @@ const view = {
 				//remove the projects out from the global db.
 				this.setWinner(data.bidderProfileId);
 				actionIndicator.find('#text').innerHTML = `Berhasil Menerima Bid Dari ${data.bidder} sebesar ${data.fee}`;
-				this.out();
+				//this.out();
 			},
 			async reject(){
 				//give the indicator.
@@ -4852,23 +5097,23 @@ const view = {
 				
 				//for user.
 				this.generateNewUserBidData();
-				if(app.userData.bid.length===0){
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'remove']);
+				if(objlen(app.userData.bid)===0){
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'remove']);
 				}else{
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',app.userData.bid]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'set',app.userData.bid]);
 				}
 				
 				//for bidder
-				const bidderBid = (await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'get'])).val()||[];
-				if(bidderBid.length===0){
+				const bidderBid = (await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'get'])).val()||{};
+				if(objlen(bidderBid)===0){
 					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'remove']);
 				}else{
-					const bidderNewBid = [];
-					bidderBid.forEach(bidId=>{
-						if(bidId.bidId!==data.bidId){
-							bidderNewBid.push(bidId);
+					const bidderNewBid = {};
+					for(let i in bidderBid){
+						if(bidderBid[i].bidId !== data.bidId){
+							bidderNewBid[i] = bidderBid[i];
 						}
-					})
+					}
 					await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'set',bidderNewBid]);
 				}
 				//notif
@@ -4878,7 +5123,7 @@ const view = {
 			},
 			async handleNotifOwner(what){
 				let ownerNotif = (await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what});
+				ownerNotif.push({who:app.userData.username,profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4889,8 +5134,8 @@ const view = {
 				await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(what){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
-				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what});
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture||app.noProfilePng,when:getFullDate(),what});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
 					for(let i=0;i<10;i++){
@@ -4898,7 +5143,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
@@ -4913,9 +5158,6 @@ const view = {
 			},
 			moreMenuInit(){
 				this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
-					view.main.addChild(view.moremenubid(data));
-				}
 			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
@@ -5009,11 +5251,11 @@ const view = {
 				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
-				if(data.bidderProfileId===app.userData.cleanEmail){
+				if(data.bidderProfileId===app.userData.uid){
 					app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).on('value',(x)=>{
 						const rejected = x.val();
 						//console.log(rejected);
@@ -5027,7 +5269,7 @@ const view = {
 						const winner = x.val();
 						//console.log(winner);
 						if(winner==='unset' || !winner)return;
-						if(winner===app.userData.cleanEmail){
+						if(winner===app.userData.uid){
 							this.handleWinMsg('Anda');
 						}else{
 							this.handleWinMsg(winner);
@@ -5064,9 +5306,7 @@ const view = {
 			},
 			onCloseClickded(){
 				this.removeListen();
-				if(customCloseThis){
-					customCloseThis();
-				}else view.content.openInbox([],'bid',true);
+				view.content.openInbox([],'bid',true);
 				this.remove();
 			},
 			onadded(){
@@ -5083,7 +5323,7 @@ const view = {
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
 						margin-bottom:15px;
@@ -5098,7 +5338,7 @@ const view = {
 								padding:10px;
 								font-weight:bold;
 								border:1px solid gainsboro;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
 									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
@@ -5106,7 +5346,7 @@ const view = {
 									align-items:center;
 									justify-content:space-between;
 									margin-bottom:10px;
-									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
 									padding-bottom:10px;
 								">
 									<div style="
@@ -5198,7 +5438,8 @@ const view = {
 					background:white;
 					display:flex;
 					flex-direction:column;
-				"
+					position:relative;
+				" id=parent
 				>
 					<div style="
 						width: 100%;
@@ -5206,8 +5447,8 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:white;
-						color:black;
+						background:deepskyblue;
+						color:white;
 						border-bottom:1px solid gainsboro;
 					">
 						<div style="
@@ -5217,7 +5458,7 @@ const view = {
 							gap:10px;
 							padding-left:5%;
 						">
-							<img src=./more/media/ongoing.png style="
+							<img src=./more/media/whiteloading.png style="
 								width:32px;
 								height:32px;
 								object-fit:cover;
@@ -5225,7 +5466,7 @@ const view = {
 							">
 							<div>
 								<div>${data.subject.slice(0,30)+'...'}</div>
-								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${SmartTime(data.time)}</div>
 							</div>
 						</div>
 						<div style="
@@ -5235,7 +5476,6 @@ const view = {
 							justify-content: center;
 						">
 							<div id=moremenu style="cursor:pointer;
-								background:gainsboro;
 								border-radius:50%;
 							">
 								<img src=./more/media/info.png class=navimg style=width:32;height:32;>
@@ -5248,12 +5488,8 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=closethis style="cursor:pointer;
-								padding:5px;
-								background:white;
-								border-radius:10px;
-							">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<div id=closethis style="cursor:pointer;">
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -5384,10 +5620,10 @@ const view = {
 						">
 							<div style="cursor:pointer;
 								padding:10px;
-								background:black;
+								border:1px solid whitesmoke;
 								border-radius:10px;
 							" id=sendbutton>
-								<img src=./more/media/whitesend.png
+								<img src=./more/media/bluesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -5446,7 +5682,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=sendphoto>
-							<img src=./more/media/images.png style="
+							<img src=./more/media/blueimage.png style="
 								width:32;
 								height:32;
 							">
@@ -5455,7 +5691,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=senddocument>
-							<img src=./more/media/documents.png style="
+							<img src=./more/media/bluedocument.png style="
 								width:32;
 								height:32;
 							">
@@ -5528,9 +5764,9 @@ const view = {
 					date:getFullDate(),
 					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
 					time:getTime(),
-					id:app.userData.cleanEmail
+					id:app.userData.uid
 				}
 				return msg;
 			},
@@ -5543,8 +5779,12 @@ const view = {
 			},
 			moreMenuInit(){
 				//this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
+				this.find('#moremenu').onclick = async ()=>{
+					this.parent.addChild(view.openLoading());
+					//getting the newest data.
+					Object.assign(data,(await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}`,'get'])).val()||{});
 					view.main.addChild(view.moremenubid(data));
+					this.parent.saveRemove('#openloading');
 				}
 			},
 			initSendButton(){
@@ -5627,9 +5867,13 @@ const view = {
 				app.doglas.get(`OnGoingRooms/${data.OnGoingRoomId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
+				})
+				app.doglas.get(`OnGoingRooms`).on('child_removed',(x)=>{
+					const data = x.val();
+					console.log(date);
 				})
 			},
 			init(){
@@ -5665,13 +5909,14 @@ const view = {
 				this.embedphoto = this.find('#embedphoto');
 				this.embedfile = this.find('#embedfile');
 				this.filebutton = this.find('#attachfilebutton');
+				this.parent = this.find('#parent');
 				this.init();
 			},
 			getRole(item){
 				let role = '';
-				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
-				else if(item.from===data.username)role='Owner';
-				else if(item.from===data.bidder)role='Worker';
+				if(item.id===data.admin)role='Admin';
+				else if(item.id===data.owner)role='Owner';
+				else if(item.id===data.bidderProfileId)role='Worker';
 				return role;
 			},
 			inboxItem(item){
@@ -5681,7 +5926,7 @@ const view = {
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
 						margin-bottom:15px;
@@ -5697,14 +5942,14 @@ const view = {
 								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
+								display:${item.id===app.userData.uid?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
 									width:100%;
 									height:100%;
 									border-radius:50%;x
 									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -5713,7 +5958,7 @@ const view = {
 								padding:10px;
 								font-weight:bold;
 								border:1px solid gainsboro;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
 									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
@@ -5721,7 +5966,7 @@ const view = {
 									align-items:center;
 									justify-content:space-between;
 									margin-bottom:10px;
-									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
 									padding-bottom:10px;
 								">
 									<div style="
@@ -5776,19 +6021,19 @@ const view = {
 								background:whitesmoke;
 								width:32px;
 								height:32px;
-								display:${item.from===app.userData.username?'block':'none'};
+								display:${item.id===app.userData.uid?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
 									width:100%;
 									height:100%;
 									border-radius:50%;
 									object-fit:cover;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 						</div>
 						<div style="
-							margin-${item.from===app.userData.username?'right':'left'}:48px;
+							margin-${item.id===app.userData.uid?'right':'left'}:48px;
 						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
@@ -5831,7 +6076,7 @@ const view = {
 			innerHTML:`
 				<div style="
 					background:white;
-					padding-bottom:10px;
+					height:100%;
 				" class=innerBox>
 					<div style="
 						width:94%;
@@ -5886,7 +6131,7 @@ const view = {
 						</div>
 						<div><b>Status Pembayaran</b></div>
 						<div>
-							<input value="${data.paidStatus?'Dibayar':'Belum Dibayar'}" readonly>
+							<input value="${data.paid?'Dibayar':'Belum Dibayar'}" readonly>
 						</div>
 					</div>
 					<div style="
@@ -6025,7 +6270,7 @@ const view = {
 			onadded(){
 				this.find('#closethis').onclick = ()=>{
 					chatpage.remove();
-					view.content.openInbox();
+					view.content.openInbox([],'bid',true);
 					this.remove();
 				}
 			}
@@ -6060,8 +6305,8 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:white;
-						color:black;
+						background:deepskyblue;
+						color:white;
 						border-bottom:1px solid gainsboro;
 					">
 						<div style="
@@ -6071,13 +6316,13 @@ const view = {
 							gap:10px;
 							padding-left:5%;
 						">
-							<img src=./more/media/globe.png style="
+							<img src=./more/media/whiteglobe.png style="
 								width:32px;
 								height:32px;
 								object-fit:cover;
 								border-radius:50%;
 							">
-							<div>Global Chat Room</div>
+							<div>Pasarin Forum</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -6087,7 +6332,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
-								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -6217,10 +6462,11 @@ const view = {
 						">
 							<div style="cursor:pointer;
 								padding:10px;
-								background:black;
+								background:white;
+								border:1px solid whitesmoke;
 								border-radius:10px;
 							" id=sendbutton>
-								<img src=./more/media/whitesend.png
+								<img src=./more/media/bluesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -6279,7 +6525,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=sendphoto>
-							<img src=./more/media/images.png style="
+							<img src=./more/media/blueimage.png style="
 								width:32;
 								height:32;
 							">
@@ -6288,7 +6534,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=senddocument>
-							<img src=./more/media/documents.png style="
+							<img src=./more/media/bluedocument.png style="
 								width:32;
 								height:32;
 							">
@@ -6357,12 +6603,12 @@ const view = {
 			},
 			collectData(){
 				const msg = {
-					id:app.userData.cleanEmail,
+					id:app.userData.uid,
 					from:app.userData.username,
 					date:getFullDate(),
 					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
 					time:getTime()
 				}
 				return msg;
@@ -6447,7 +6693,7 @@ const view = {
 				app.doglas.get(`globalGroupChat`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
@@ -6497,13 +6743,13 @@ const view = {
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
 						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}"><span class=username>@${item.from}</span></div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
@@ -6513,7 +6759,7 @@ const view = {
 								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
+								display:${item.id===app.userData.uid?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
 									width:100%;
@@ -6521,7 +6767,7 @@ const view = {
 									border-radius:50%;x
 									object-fit:cover;
 									border:2px solid gainsboro;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 							<div style="
@@ -6530,7 +6776,7 @@ const view = {
 								padding:10px;
 								font-weight:bold;
 								border:1px solid gainsboro;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
 									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
@@ -6538,7 +6784,7 @@ const view = {
 									align-items:center;
 									justify-content:space-between;
 									margin-bottom:10px;
-									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
 									padding-bottom:10px;
 								">
 									<div style="
@@ -6593,7 +6839,7 @@ const view = {
 								background:whitesmoke;
 								width:32px;
 								height:32px;
-								display:${item.from===app.userData.username?'block':'none'};
+								display:${item.id===app.userData.uid?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
 									width:100%;
@@ -6601,12 +6847,12 @@ const view = {
 									border-radius:50%;
 									object-fit:cover;
 									border:2px solid gainsboro;
-									${!this.puttedMsg?'':this.puttedMsg.from===item.from?'display:none;':''}
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 						</div>
 						<div style="
-							margin-${item.from===app.userData.username?'right':'left'}:48px;
+							margin-${item.id===app.userData.uid?'right':'left'}:48px;
 						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
@@ -6704,8 +6950,8 @@ const view = {
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
-						background:white;
-						color:black;
+						background:deepskyblue;
+						color:white;
 						border-bottom:1px solid gainsboro;
 					">
 						<div style="
@@ -6715,11 +6961,13 @@ const view = {
 							gap:10px;
 							padding-left:5%;
 						" class=username>
-							<img src=${room.toProfile} style="
+							<img src=${room.toProfile||app.noProfilePng} style="
 								width:32px;
 								height:32px;
 								object-fit:cover;
 								border-radius:50%;
+								padding:2px;
+								background:white;
 							">
 							<div>${room.toUsername}</div>
 						</div>
@@ -6731,7 +6979,7 @@ const view = {
 							justify-content: center;
 						">
 							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
-								<img src=./more/media/close.png class=navimg style=width:16;height:16;>
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -6861,10 +7109,10 @@ const view = {
 						">
 							<div style="cursor:pointer;
 								padding:10px;
-								background:black;
+								background:white;border:1px solid whitesmoke;
 								border-radius:10px;
 							" id=sendbutton>
-								<img src=./more/media/whitesend.png
+								<img src=./more/media/bluesend.png
 								style="
 									width:32px;
 									height:32px;
@@ -6923,7 +7171,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=sendphoto>
-							<img src=./more/media/images.png style="
+							<img src=./more/media/blueimage.png style="
 								width:32;
 								height:32;
 							">
@@ -6932,7 +7180,7 @@ const view = {
 							padding:5px;
 							cursor:pointer;
 						" id=senddocument>
-							<img src=./more/media/documents.png style="
+							<img src=./more/media/bluedocument.png style="
 								width:32;
 								height:32;
 							">
@@ -7005,7 +7253,7 @@ const view = {
 				let ourRoom;
 				const opponentChatList = (await app.doglas.do(['database','users',`${room.to}/inbox`,'get'])).val()||[];
 				opponentChatList.forEach((item)=>{
-					if(item.to===app.userData.cleanEmail){
+					if(item.to===app.userData.uid){
 						ourRoom = item;
 						return
 					}
@@ -7016,7 +7264,7 @@ const view = {
 					//for reciever.
 					if(!roomId)roomId=room.roomId;
 					const recieverChatList = (await app.doglas.do(['database','users',`${room.to}/inbox`,'get'])).val()||[];
-					recieverChatList.push({roomId,to:app.userData.cleanEmail,toProfile:app.userData.profilepicture,date:getFullDate(),toUsername:app.userData.username});
+					recieverChatList.push({roomId,to:app.userData.uid,toProfile:app.userData.profilepicture||app.noProfilePng,date:getFullDate(),toUsername:app.userData.username});
 					await app.doglas.do(['database','users',`${room.to}/inbox`,'set',recieverChatList]);	
 				}
 			},
@@ -7026,9 +7274,9 @@ const view = {
 					date:getFullDate(),
 					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture,
+					profilepicture:app.userData.profilepicture||app.noProfilePng,
 					time:getTime(),
-					id:app.userData.cleanEmail
+					id:app.userData.uid
 				}
 				return msg;
 			},
@@ -7112,7 +7360,7 @@ const view = {
 				app.doglas.get(`privateChat/${room.roomId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
@@ -7164,7 +7412,7 @@ const view = {
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
 						margin-bottom:15px;
@@ -7179,7 +7427,7 @@ const view = {
 								padding:10px;
 								font-weight:bold;
 								border:1px solid gainsboro;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">
 								<div id=fileembed style="
 									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
@@ -7187,7 +7435,7 @@ const view = {
 									align-items:center;
 									justify-content:space-between;
 									margin-bottom:10px;
-									border-bottom:2px solid ${item.from===app.userData.username?'whitesmoke':'white'};
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
 									padding-bottom:10px;
 								">
 									<div style="
@@ -7287,18 +7535,17 @@ const view = {
 				">
 					<div style="
 						position:absolute;
-						left:0;top:0;
-						padding:10px;
-						background:red;
+						right:0;top:0;
+						background:deepskyblue;
 						border-radius:10px;
 						z-index:1;
 						cursor:pointer;
 					" id=closethis>
 						<div>
-							<img src=./more/media/close.png
+							<img src=./more/media/whiteclose.png
 							style="
-								width:16px;
-								height:16px;
+								width:32;
+								height:32;
 							"
 							>
 						</div>
@@ -7369,7 +7616,7 @@ const view = {
 			async removeChat(){
 				//remove that chat from user db.
 				//console.log(toRemove);
-				const chatList = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'get'])).val()||[];
+				const chatList = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
 				//filtering chat list.
 				const newChatList = [];
 				chatList.forEach((item)=>{
@@ -7378,7 +7625,7 @@ const view = {
 					}
 				})
 				//now its time to remove.
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/inbox`,'set',newChatList]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'set',newChatList]);
 				view.content.openInbox([],'inbox',true);
 				this.remove();
 			},
@@ -7388,6 +7635,7 @@ const view = {
 		})
 	},
 	profileDiv(nav='home',boot=false,userId){
+		console.log(userId);
 		return makeElement('div',{
 			nav,
 			style:`
@@ -7399,6 +7647,9 @@ const view = {
 				position:sticky;
 				top:0;
 				z-index:1;
+				color:deepskyblue;
+				border-radius:0 0 10px 10px;
+				margin-bottom:10px;
 			`,
 			innerHTML:`
 				<div style="
@@ -7419,7 +7670,7 @@ const view = {
 					"
 					id=home
 					>
-						<img src=./more/media/home.png class=navimg>
+						<img src=./more/media/bluehome.png class=navimg>
 						Beranda
 					</div>
 					<div style="
@@ -7433,7 +7684,7 @@ const view = {
 					"
 					id=article
 					>
-						<img src=./more/media/articleicon.png class=navimg>
+						<img src=./more/media/bluewiki.png class=navimg>
 						Artikel
 					</div>
 					<div style="
@@ -7447,7 +7698,7 @@ const view = {
 					"
 					id=jobs
 					>
-						<img src=./more/media/task.png class=navimg>
+						<img src=./more/media/bluetask.png class=navimg>
 						Loker
 					</div>
 					<div style="
@@ -7461,7 +7712,7 @@ const view = {
 					"
 					id=services
 					>
-						<img src=./more/media/servicesicon.png class=navimg>
+						<img src=./more/media/blueservices.png class=navimg>
 						Jasa
 					</div>
 					<div style="
@@ -7475,7 +7726,7 @@ const view = {
 					"
 					id=news
 					>
-						<img src=./more/media/newsicon.png class=navimg>
+						<img src=./more/media/bluenews.png class=navimg>
 						news
 					</div>
 					<div style="
@@ -7489,7 +7740,7 @@ const view = {
 					"
 					id=statistic
 					>
-						<img src=./more/media/report.png class=navimg>
+						<img src=./more/media/bluestats.png class=navimg>
 						Statistik
 					</div>
 					<div style="
@@ -7503,7 +7754,7 @@ const view = {
 					"
 					id=followers
 					>
-						<img src=./more/media/follow.png class=navimg>
+						<img src=./more/media/bluefollow.png class=navimg>
 						Followers
 					</div>
 					<div style="
@@ -7517,7 +7768,7 @@ const view = {
 					"
 					id=following
 					>
-						<img src=./more/media/follow.png class=navimg>
+						<img src=./more/media/bluefollow.png class=navimg>
 						Following
 					</div>
 					<div style="
@@ -7529,10 +7780,24 @@ const view = {
 						padding: 10px;
 						justify-content: center;
 					"
-					id=bidderSay
+					id=tesmon
 					>
-						<img src=./more/media/review.png class=navimg>
+						<img src=./more/media/bluestar.png class=navimg>
 						Testimoni
+					</div>
+					<div style="
+						display: ${userId===app.userData.uid||!userId?'flex':'none'};
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=saldo
+					>
+						<img src=./more/media/yourmoney.png class=navimg>
+						Saldo
 					</div>
 				</div>
 			`,
@@ -7547,8 +7812,8 @@ const view = {
 				//set the nav.
 				//console.log(this.nav);
 				//fix userIdNullBug
-				if(!userId)userId=app.userData.cleanEmail;
-				this.find('#'+this.nav).style.borderBottom = '3px solid black';
+				if(!userId)userId=app.userData.uid;
+				this.find('#'+this.nav).style.color = 'dimgray';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
@@ -7598,23 +7863,23 @@ const view = {
 			},
 			statistic(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/statistic`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/public/statistic`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = objToArray(data.val()||{});
 					view.content.openProfile(datacb,'statistic',false,userId);
 				})
 			},
-			bidderSay(){
+			tesmon(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}/bidderSay`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${app.userData.uid}/public/tesmon`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = objToArray(data.val()||{});
-					view.content.openProfile(datacb,'bidderSay',false,userId);
+					view.content.openProfile(datacb,'tesmon',false,userId);
 				})
 			},
 			followers(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/followers`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${userId||app.userData.uid}/public/followers`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = objToArray(data.val()||{});
 					view.content.openProfile(datacb,'followers',false,userId);
@@ -7622,7 +7887,7 @@ const view = {
 			},
 			following(){
 				view.addLoading();
-				app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/following`,'get','']).then(data=>{
+				app.doglas.do(['database','users',`${userId||app.userData.uid}/public/following`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = objToArray(data.val()||{});
 					view.content.openProfile(datacb,'following',false,userId);
@@ -7640,6 +7905,14 @@ const view = {
 					})
 					view.content.openProfile(fixdata,'news',false,userId);
 				})
+			},
+			saldo(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.uid}/money`,'get']).then(data=>{
+					view.unloading();
+					let datacb = getPrice(data.val()||0);
+					view.content.openProfile(datacb,'saldo',false,userId);
+				})
 			}
 		})
 	},
@@ -7650,8 +7923,10 @@ const view = {
 				font-weight:bold;
 				padding:2%;
 				border-radius: 10px;
+				background:deepskyblue;
+				color:white;
+				border-bottom:5px solid gainsboro;
 			`,
-			className:'smartBorder',
 			innerHTML:`
 				<div style="
 					display:flex;
@@ -7698,6 +7973,7 @@ const view = {
 				<div style="
 					display:flex;
 					justify-content:space-between;
+					border-bottom:1px solid whitesmoke;
 					align-items:center;
 					gap:10px;
 					padding:10px 0;
@@ -7726,7 +8002,7 @@ const view = {
 				this.fillData();
 			},
 			async fillData(){
-				const userStatistic = (await app.doglas.do(['database','users',`${userId||app.userData.cleanEmail}/statistics`,'get'])).val()||{};
+				const userStatistic = (await app.doglas.do(['database','users',`${userId||app.userData.uid}/public/statistics`,'get'])).val()||{};
 				this.findall('.divitem').forEach(div=>{
 					div.innerHTML = userStatistic[div.id]||0;
 				})
@@ -7809,6 +8085,928 @@ const view = {
 				this.imgState += 1;
 				if(this.imgState == this.stateList.length)this.imgState=0;
 				this.img.style.objectFit = this.stateList[this.imgState];
+			}
+		})
+	},
+	needMoreLogin(){
+		return makeElement('div',{
+			style:`
+				position:absolute;
+				top:0;left:0;
+				width:100%;height:100%;
+				background:rgba(0, 0, 0, 0.25);
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				z-index:1;
+			`,
+			innerHTML:`
+				<div style="
+					background: white;
+					border-radius: 20px;
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					align-items: center;
+					padding: 20px;
+					margin-top:10%;
+				">
+					<div style="
+						text-align: center;
+						height: 200px;
+						display: flex;
+						flex-direction: column;
+						gap: 20px;
+						justify-content: center;
+					">
+						<div style=font-weight:bold;>
+							Error!
+						</div>
+						<div>Oops, Sesi anda telah berakhir. Silahkan login kembali!</div>
+					</div>
+					<div style="
+						padding: 10px;
+						background: deepskyblue;
+						color: white;
+						font-weight: bold;
+						border-radius: 20px;
+						width: 50px;
+						cursor:pointer;
+					" id=loginbutton>
+						Login
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#loginbutton').onclick = ()=>{
+					view.content.getIn(()=>{},()=>{
+						location.reload();
+					},true);
+					this.remove();
+				}
+			}			
+		})
+	},
+	finishedProjectInfo(data){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:100%;
+				position:absolute;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				background:rgba(0, 0, 0, 0.4);
+				z-index:1;
+				top:0;
+				left:0;
+			`,
+			innerHTML:`
+				<div class=innerBox
+				style="
+					background:white;
+					display:flex;
+					height:80%;
+					flex-direction:column;
+					border-radius:10px;
+				"
+				>
+					<div style="
+						display:flex;
+						align-items:center;
+						justify-content:space-between;
+						padding:10px;
+					">
+						<div style=color:black;font-weight:bold;>
+							Informasi Projek ${data.bidId}
+						</div>
+						<div id=closethis style=cursor:pointer;background:deepskyblue;border-radius:50%;>
+							<img src=./more/media/whiteclose.png style=width:32;height:32>
+						</div>
+					</div>
+					<div style="
+						padding:20px;
+						height:100%;
+						overflow:auto;
+					">
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+							align-items:center;
+						">
+							<div>Hapus</div>
+							<div style="
+								padding:10px;
+								background:deepskyblue;
+								color:white;
+								border-radius:10px;
+								cursor:pointer;
+							" id=deleteData class=thisbutton>
+								<img src=./more/media/whitedelete.png style="
+									width:24;
+									height:24;
+								">
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+							align-items:center;
+						">
+							<div>Rating (OwnerOnly)</div>
+							${data.owner===app.userData.uid && !data.rating?`<div style="
+								padding:10px;
+								background:deepskyblue;
+								color:white;
+								border-radius:10px;
+								cursor:pointer;
+							" id=giveRating class=thisbutton>Beri Rating</div>`:`<div>${data.rating||'-'} / 10</div>`}
+						</div>
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+							align-items:center;
+							${data.ownerMessage?`flex-direction:column;gap:10px;align-items:flex-start;`:''}
+						">
+							<div>Pesan Owner</div>
+							${data.owner===app.userData.uid && !data.ownerMessage?`<div style="
+								padding:10px;
+								background:deepskyblue;
+								color:white;
+								border-radius:10px;
+								cursor:pointer;
+							" id=ownerMessage class=thisbutton>Tulis Pesan</div>`:`<div>${data.ownerMessage||'-'}</div>`}
+						</div>
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+							align-items:center;
+							${data.bidderMessage?`flex-direction:column;gap:10px;align-items:flex-start;`:''}
+						">
+							<div>Pesan Bidder</div>
+							${data.bidderProfileId===app.userData.uid && !data.bidderMessage?`<div style="
+								padding:10px;
+								background:deepskyblue;
+								color:white;
+								border-radius:10px;
+								cursor:pointer;
+							" id=bidderMessage class=thisbutton>Tulis Pesan</div>`:`<div>${data.bidderMessage||'-'}</div>`}
+						</div>
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+							align-items:center;
+						">
+							<div>Pesan Admin</div>
+							<div>-</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:space-between;
+							padding:10px 0;
+							border-bottom:1px solid gainsboro;
+							margin-bottom:5px;
+						">
+							<div>Publish</div>
+							<div>${SmartTime(data.time)}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Selesai</div>
+							<div>${SmartTime(data.finishTime)}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Owner</div>
+							<div>${data.ownerUsername}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Bidder</div>
+							<div>${data.bidder}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Admin</div>
+							<div>${data.admin}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Fee</div>
+							<div>Rp ${getPrice(data.fee)}</div>
+						</div>
+						<div style="
+						display:flex;
+						justify-content:space-between;
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						">
+							<div>Tipe</div>
+							<div>${data.type}</div>
+						</div>
+						<div style="
+						padding:10px 0;
+						border-bottom:1px solid gainsboro;
+						display:flex;
+						flex-direction:column;
+						gap:10px;
+						">
+							<div>Judul</div>
+							<div>${data.title}</div>
+						</div>
+						<div style="
+							padding:10px 0;
+							display:flex;
+							flex-direction:column;
+							gap:10px;
+						">
+							<div>Deskripsi</div>
+							<div>${data.description}</div>
+						</div>
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				//adding button event.
+				this.findall('.thisbutton').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			ownerMessage(){
+				view.main.addChild(view.ownerMessage(data,()=>{this.loadnew()}));
+			},
+			bidderMessage(){
+				view.main.addChild(view.bidderMessage(data,()=>{this.loadnew()}));
+			},
+			giveRating(){
+				view.main.addChild(view.ratingProject(data,()=>{this.loadnew()}));
+			},
+			async deleteData(){
+				console.log('wanna delete',data);
+				view.main.addChild(view.openLoading());
+				await app.doglas.do(['database','users',`${app.userData.uid}/onFinishedProjects/${data.OnGoingRoomId}`,'remove']);
+				view.main.saveRemove('#openLoading');
+				this.loadnew();
+			},
+			loadnew(){
+				view.content.openMyproject([],'Finished',true);
+				this.remove();
+			}
+		})
+	},
+	passwordHelper(){
+		return makeElement('div',{
+			style:`
+				background:rgba(0, 0, 0, 0.25);
+				width:100%;
+				height:100%;
+				top:0;left:0;
+				position:absolute;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+				z-index:1;
+			`,
+			innerHTML:`
+				<div class=innerBox style="
+					padding:20px;
+					background:white;
+					border-radius:10px;
+					display:flex;
+					flex-direction:column;
+					gap:15px;z-index:1;
+					position:relative;
+				">
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style=font-weight:bold>Password Helper</div>
+						<div style=padding:8px;background:deepskyblue;border-radius:50%;cursor:pointer; id=closethis>
+							<img src=./more/media/whiteclose.png style="width:16;height:16;">
+						</div>
+					</div>
+					<div>
+						<div>Masukan Email Anda</div>
+						<div>
+							<input id=email placeholder="Masukan Email Anda!">
+						</div>
+					</div>
+					<div id=send style="
+						padding:10px;
+						border-radius:20px;
+						color:white;
+						background:deepskyblue;
+						text-align:center;cursor:pointer;
+					">Kirim</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{this.remove()};
+				this.find('#send').onclick = async()=>{
+					const email = this.find('#email').value;
+					if(email.length===0)return forceRecheck(view.main,'Error! Tolong isi email anda dengan benar!');
+					this.showLoading();
+					await app.doglas.auth.sendPasswordResetEmail(email);
+					this.removeLoading();
+				}
+			},
+			showLoading(){
+				this.find('.innerBox').addChild(makeElement('div',{
+					id:'loadingpanel',
+					style:`
+						position:absolute;
+						width:100%;
+						left:0;top:0;
+						background:white;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						height:100%;z-index:1;
+						border-radius:10px;
+					`,
+					innerHTML:`
+						<img src=./more/media/Loading_icon.gif style="
+							width:100px;height:100px;object-fit:contain;
+						">
+					`
+				}))
+			},
+			removeLoading(){
+				forceRecheck(view.main,'Segera cek email anda untuk info lebih lanjut!');
+				this.remove();
+			}
+		})
+	},
+	saldoPage(data){
+		return makeElement('div',{
+			style:`
+				width:100%;
+				height:80%;
+				display:flex;
+				align-items:center;
+				flex-direction:column;
+				justify-content:center;
+				gap:20px;
+			`,
+		innerHTML:`
+				<div style="font-weight:bold">Total Saldo</div>
+				<div style="font-size:32;">Rp ${data}</div>
+				<div style=margin-top:20px;>
+					<div style="
+						background:deepskyblue;
+						color:white;
+						padding:10px;
+						border-radius:10px;
+						cursor:pointer;font-weight:bold;
+					">
+						Request Pencairan
+					</div>
+				</div>
+			`
+		})
+	},
+	bidderMessage(data,loadnew){
+		return makeElement('div',{
+			style:`
+				background:RGB(0,0,0,.25);
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				z-index:1;
+				position:absolute;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+			`,
+			innerHTML:`
+				<div class=innerBox style="
+					background:white;
+					border-radius:10px;
+					padding:20px;
+					display:flex;
+					flex-direction:column;
+					gap:20px;
+					position:relative;
+				">
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style=font-weight:bold>Buat Pesan Bidder</div>
+						<div style=padding:8px;background:deepskyblue;border-radius:50%;cursor:pointer; id=closethis>
+							<img src=./more/media/whiteclose.png style="width:16;height:16;">
+						</div>
+					</div>
+					<div>
+						<textarea placeholder="Tulis Pesan Disini..." style="width:100%;height:200px;"></textarea>
+					</div>
+					<div style="
+						padding:10px;
+						background:deepskyblue;
+						border-radius:20px;
+						text-align:center;
+						font-weight:bold;
+						color:white;
+						cursor:pointer;
+					" id=save>
+						Simpan
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				this.find('#save').onclick = ()=>{
+					this.save();
+				}
+			},
+			async save(){
+				const msg = this.find('textarea').value;
+				if(msg.length===0)return forceRecheck(view.main,'Tolong isi pesan dengan benar!');
+				this.showLoading();
+				//save for my self.
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onFinishedProjects/${data.OnGoingRoomId}/bidderMessage`,'set',msg]);
+				//save for my owner.
+				await app.doglas.do(['database','users',`${data.owner}/onFinishedProjects/${data.OnGoingRoomId}/bidderMessage`,'set',msg]);
+				//handle owner testimony.
+				await app.doglas.do(['database'])
+				//save for my admin.
+				await app.doglas.do(['database','admin',`${data.admin}/OnFinishedProjects/${data.OnGoingRoomId}/bidderMessage`,'set',msg]);
+				this.unloading();
+			},
+			showLoading(){
+				this.find('.innerBox').addChild(makeElement('div',{
+					id:'loadingpanel',
+					style:`
+						position:absolute;
+						width:100%;
+						left:0;top:0;
+						background:white;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						height:100%;z-index:1;
+						border-radius:10px;
+					`,
+					innerHTML:`
+						<img src=./more/media/Loading_icon.gif style="
+							width:100px;height:100px;object-fit:contain;
+						">
+					`
+				}))
+			},
+			unloading(){
+				forceRecheck(view.main,'Berhasil Menyimpan Pesan Anda!');
+				loadnew();
+				this.remove();
+			}
+		})
+	},
+	ownerMessage(data,loadnew){
+		return makeElement('div',{
+			style:`
+				background:RGB(0,0,0,.25);
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				z-index:1;
+				position:absolute;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+			`,
+			innerHTML:`
+				<div class=innerBox style="
+					background:white;
+					border-radius:10px;
+					padding:20px;
+					display:flex;
+					flex-direction:column;
+					gap:20px;
+					position:relative;
+				">
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style=font-weight:bold>Buat Pesan Owner</div>
+						<div style=padding:8px;background:deepskyblue;border-radius:50%;cursor:pointer; id=closethis>
+							<img src=./more/media/whiteclose.png style="width:16;height:16;">
+						</div>
+					</div>
+					<div>
+						<textarea placeholder="Tulis Pesan Disini..." style="width:100%;height:200px;"></textarea>
+					</div>
+					<div style="
+						padding:10px;
+						background:deepskyblue;
+						border-radius:20px;
+						text-align:center;
+						font-weight:bold;
+						color:white;
+						cursor:pointer;
+					" id=save>
+						Simpan
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				this.find('#save').onclick = ()=>{
+					this.save();
+				}
+			},
+			async save(){
+				const msg = this.find('textarea').value;
+				if(msg.length===0)return forceRecheck(view.main,'Tolong isi pesan dengan benar!');
+				this.showLoading();
+				//save for my self.
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onFinishedProjects/${data.OnGoingRoomId}/ownerMessage`,'set',msg]);
+				//save for my owner.
+				await app.doglas.do(['database','users',`${data.owner}/onFinishedProjects/${data.OnGoingRoomId}/ownerMessage`,'set',msg]);
+				//save for my admin.
+				await app.doglas.do(['database','admin',`${data.admin}/OnFinishedProjects/${data.OnGoingRoomId}/ownerMessage`,'set',msg]);
+				this.unloading();
+			},
+			showLoading(){
+				this.find('.innerBox').addChild(makeElement('div',{
+					id:'loadingpanel',
+					style:`
+						position:absolute;
+						width:100%;
+						left:0;top:0;
+						background:white;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						height:100%;z-index:1;
+						border-radius:10px;
+					`,
+					innerHTML:`
+						<img src=./more/media/Loading_icon.gif style="
+							width:100px;height:100px;object-fit:contain;
+						">
+					`
+				}))
+			},
+			unloading(){
+				forceRecheck(view.main,'Berhasil Menyimpan Pesan Anda!');
+				loadnew();
+				this.remove();
+			}
+		})
+	},
+	ratingProject(data,loadnew){
+		return makeElement('div',{
+			style:`
+				background:RGB(0,0,0,.25);
+				width:100%;
+				height:100%;
+				top:0;
+				left:0;
+				z-index:1;
+				position:absolute;
+				display:flex;
+				align-items:center;
+				justify-content:center;
+			`,
+			innerHTML:`
+				<div class=innerBox style="
+					background:white;
+					border-radius:10px;
+					padding:20px;
+					display:flex;
+					flex-direction:column;
+					gap:20px;
+					position:relative;
+				">
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+					">
+						<div style=font-weight:bold>Rating Projek</div>
+						<div style=padding:8px;background:deepskyblue;border-radius:50%;cursor:pointer; id=closethis>
+							<img src=./more/media/whiteclose.png style="width:16;height:16;">
+						</div>
+					</div>
+					<div>
+						<input type=number value=10 max=10 min=1 style=margin-right:10px;width:64px;> / 10
+					</div>
+					<div style="
+						padding:10px;
+						background:deepskyblue;
+						border-radius:20px;
+						text-align:center;
+						font-weight:bold;
+						color:white;
+						cursor:pointer;
+					" id=save>
+						Simpan
+					</div>
+				</div>
+			`,
+			onadded(){
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				this.find('#save').onclick = ()=>{
+					this.save();
+				}
+			},
+			async save(){
+				const msg = this.find('input').value;
+				if(msg.length===0 || msg < 1 || msg > 10)return forceRecheck(view.main,'Tolong isi nilai dengan benar!');
+				this.showLoading();
+				//save for my self.
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onFinishedProjects/${data.OnGoingRoomId}/rating`,'set',msg]);
+				//save for my owner.
+				await app.doglas.do(['database','users',`${data.owner}/onFinishedProjects/${data.OnGoingRoomId}/rating`,'set',msg]);
+				//save for my admin.
+				await app.doglas.do(['database','admin',`${data.admin}/OnFinishedProjects/${data.OnGoingRoomId}/rating`,'set',msg]);
+				this.unloading();
+			},
+			showLoading(){
+				this.find('.innerBox').addChild(makeElement('div',{
+					id:'loadingpanel',
+					style:`
+						position:absolute;
+						width:100%;
+						left:0;top:0;
+						background:white;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						height:100%;z-index:1;
+						border-radius:10px;
+					`,
+					innerHTML:`
+						<img src=./more/media/Loading_icon.gif style="
+							width:100px;height:100px;object-fit:contain;
+						">
+					`
+				}))
+			},
+			unloading(){
+				forceRecheck(view.main,'Berhasil Menyimpan Rating Anda!');
+				loadnew();
+				this.remove();
+			}
+		})
+	},
+	webInfo(){
+		const height = innerHeight;
+		return makeElement('div',{
+			style:`
+				background:white;
+				width:100%;
+				height:100%;
+				top:0;left:0;
+				display:flex;
+				align-items:flex-start;
+				justify-content:center;
+				position:absolute;
+				z-index:1;
+				overflow:auto;
+			`,
+			innerHTML:`
+				<div style="
+					background:white;
+					padding:20px;
+					position:relative;
+					height:auto;
+					display:flex;
+					flex-direction:column;
+				" class=innerBox>
+					<div style="
+						display:flex;
+						justify-content:space-between;
+						align-items:center;
+						position:sticky;
+						top:0;
+						padding:20px;
+						background:white;
+					">
+						<div style=font-weight:bold>Pasarin.id Info</div>
+						<div style=padding:8px;background:deepskyblue;border-radius:50%;cursor:pointer; id=closethis>
+							<img src=./more/media/whiteclose.png style="width:16;height:16;">
+						</div>
+					</div>
+					<div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:flex-start;
+							gap:20px;
+							flex-direction:column;
+							height:${height*.5};
+							padding-bottom:20px;
+						" class=item>
+							<div style="
+								font-size: 24px;
+    						font-weight: bold;
+							">
+								Apa itu Pasarin?
+							</div>
+							<div style=font-size:13px;>
+								${app.webinfo.what}
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:flex-start;
+							gap:20px;
+							flex-direction:column;
+							height:${height};
+							padding-bottom:30px;
+						" class=item>
+							<div style="
+								font-size: 24px;
+    						font-weight: bold;
+							">
+								Tujuan Utama Pasarin
+							</div>
+							<div style=font-size:13px;>
+								${app.webinfo.goal}	
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:20px;
+							flex-direction:column;
+							height:${height};
+							padding-bottom:30px;
+						" class=item>
+							<div style="
+								font-size: 24px;
+    						font-weight: bold;
+							">
+								Moto Pasarin
+							</div>
+							<div>
+								"${app.webinfo.motto}"
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:flex-start;
+							gap:20px;
+							flex-direction:column;
+							height:${height};
+							padding-bottom:30px;
+						" class=item>
+							<div style="
+								font-size: 24px;
+    						font-weight: bold;
+							">
+								Cara Kerja Pasarin
+							</div>
+							<div style=font-size:13px;>
+								${app.webinfo.workingway}
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:50px;
+							height:${height};
+							padding-bottom:30px;
+						" class=item>
+							<div style:100%;>
+								<div style="
+									width:150px;
+									height:150px;
+									border-radius:50%;
+								"
+								>
+									<img src=./more/media/ceo.jpg style="
+										width:100%;
+										height:100%;
+										object-fit:cover;
+										border-radius:50%;
+									">
+								</div>
+							</div>
+							<div>
+								<div style=font-weight:bold;font-size:24px;>CoFounder and CEO</div>
+								<div>Hafizh Zikrie Hamidi, Hafizh.</div>
+								<div>
+									@hafizh_zh
+								</div>
+							</div>
+						</div>
+						<div style="
+							display:flex;
+							justify-content:center;
+							align-items:center;
+							gap:50px;
+							height:${height};
+							padding-bottom:30px;
+						" class=item>
+							<div style:100%;>
+								<div style="
+									width:150px;
+									height:150px;
+									border-radius:50%;
+								"
+								>
+									<img src=./more/media/gemaprofile.png style="
+										width:100%;
+										height:100%;
+										object-fit:cover;
+										border-radius:50%;
+									">
+								</div>
+							</div>
+							<div>
+								<div style=font-weight:bold;font-size:24px;>Founder and CTO</div>
+								<div>Rahmat Agem Pratama, Gema.</div>
+								<div>
+									@gemasajaa
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			`,
+			view:0,
+			onadded(){
+				this.items = this.findall('.item');
+				this.find('#closethis').onclick = ()=>{
+					this.remove();
+				}
+				//this.viewHandle();
+			},
+			viewHandle(){
+				this.findall('#controller div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			up(){
+				if(this.view===0)return;
+				this.view -= 1;
+				this.items[this.view].scrollIntoView({behavior:"smooth"});
+			},
+			down(){
+				if(this.view===this.items.length-1)return;
+				this.view += 1;
+				this.items[this.view].scrollIntoView({behavior:"smooth"});
 			}
 		})
 	}

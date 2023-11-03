@@ -25,7 +25,10 @@ const view = {
 			height:200px;
 			display:flex;
 			justify-content:center;
-			border-bottom:1px solid whitesmoke;
+			border-bottom:5px solid gainsboro;
+			background:deepskyblue;
+			color:white;
+			border-radius:0 0 20px 20px;
 		`,
 		innerHTML:`
 			<div style="
@@ -42,12 +45,27 @@ const view = {
 					display: flex;
 					align-items: center;
 					justify-content:center;
+					/*background:#15244e;color:white;*/
+					border-bottom:1px solid white;
+					gap:5px;
 				">
+					<div style="
+						width:32;
+						height:32;
+						background:white;
+						border-radius:0 50% 50%;
+						color:deepskyblue;
+						display:flex;
+						align-items:center;
+						justify-content:center;
+						font-weight:bold;
+						font-size:11;
+					">#ct</div>
 					<div style="
 						cursor:pointer;
 						font-size:24px;
 						font-family:montserratbold;
-					">circletask<span style=font-size:12px;font-family:montserratregular> Admin</span></div>
+					">circletask<span style=font-size:12px;font-family:montserratregular> admin</span></div>
 				</div>
 				<div style="
 					display: flex;
@@ -59,27 +77,27 @@ const view = {
 					overflow-y:hidden;
 				" id=ourmenu class=innerBox>
 					<div id=displayList>
-						<img src=./more/media/home.png class=navimg>
+						<img src=./more/media/whitehome.png class=navimg>
 						Beranda
 					</div>
 					<div id=openMyproject>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/whitetask.png class=navimg>
 						ProjectKu
 					</div>
 					<div id=openInbox>
-						<img src=./more/media/chat.png class=navimg>
+						<img src=./more/media/whitemsg.png class=navimg>
 						Pesan
 					</div>
 					<div id=openGlobalChat>
-						<img src=./more/media/global-communication.png class=navimg>
+						<img src=./more/media/whiteglobe.png class=navimg>
 						Global Chat
 					</div>
 					<div id=openNotif>
-						<img src=./more/media/bell.png class=navimg>
+						<img src=./more/media/whitebell.png class=navimg>
 						Notif
 					</div>
 					<div id=openProfile style=padding-right:30px;>
-						<img src=./more/media/user.png class=navimg>
+						<img src=./more/media/whiteprofile.png class=navimg>
 						Profil
 					</div>
 				</div>
@@ -126,6 +144,8 @@ const view = {
 				style="
 					margin-left:3%;
 					width:100%;
+					font-weight:bold;
+					color:dimgray;
 				"
 				>
 					Beranda
@@ -163,6 +183,7 @@ const view = {
 					justify-content: flex-end;
 					margin-right: 3%;
 					gap:8px;
+
 				"
 				id=logout
 				>
@@ -175,8 +196,9 @@ const view = {
 							font-size: 12px;
 							font-weight: bold;
 							cursor: pointer;
+							color:dimgray;
 						">
-							<img src=./more/media/exit.png
+							<img src=./more/media/blueexit.png
 							style="
 								width:18px;
 								height:18px;
@@ -272,7 +294,7 @@ const view = {
 		},
 		openMyproject(data=[],nav='OnGoing',boot){
 			if(!app.getInfoLogin()){
-				view.content.getIn();
+				view.content.getIn(()=>{view.content.openMyproject([],'OnGoing',true)});
 				return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
 			}
 			this.clearLinesParent();
@@ -316,16 +338,38 @@ const view = {
 		getIn(){
 			view.main.addChild(view.loginBox());
 		},
-		openProfile(userId){
-			if(!this.isInProfile()){
-				return this.getIn();
+		async openProfile(data=[],nav='home',boot,userId){
+			if(typeof userId==='object')userId = null;
+			let userData;
+			if(!this.isInProfile() && !userId){
+				return this.getIn(()=>{view.content.openProfile([],'home',false,null)});
 			}
 			this.clearLinesParent();
-			this.linesParent.addChild(view.profilePage(userId));
+			userData = (await app.doglas.do(['database','admin',`${userId||app.userData.uid}/public`,'get'])).val();
+			if(nav==='loadartikel')nav='home';
+			this.linesParent.addChild(view.profileDiv(nav,boot,userId));
+			if(nav==='home')this.linesParent.addChild(view.profilePage(userData));
+			else if(nav==='statistic')this.linesParent.addChild(view.statistic(userId));
+			else if(nav==='followers'||nav==='following'){
+				data.forEach((item,i)=>{
+					this.find('#linesparent').addChild(view.lineFollow(item,i+1,(i===data.length-1)?false:true));
+				})
+				if(data.length===0){
+					this.find('#linesparent').addChild(view.nodata());
+				}
+			}
+			else {
+				data.forEach((item,i)=>{
+					this.find('#linesparent').addChild(view.line(item,i+1,(i===data.length-1)?false:true));
+				})
+				if(data.length===0){
+					this.find('#linesparent').addChild(view.nodata());
+				}
+			}
 			this.stateLabel.innerHTML = 'Profil Pengguna';
 			this.reactTo.hide();
 			this.searchWare.hide();
-			this.logout.show('flex');
+			if(userId===app.userData.uid || !userId)this.logout.show('flex');
 		},
 		newPost(){
 			if(!app.getInfoLogin()){
@@ -370,7 +414,7 @@ const view = {
 			this.clearLinesParent();
 			view.addLoading();
 			//update the user bid data.
-			app.userData.bid = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/bid`,'get'])).val();
+			app.userData.bid = (await app.doglas.do(['database','admin',`${app.userData.uid}/bid`,'get'])).val();
 			view.unloading();
 			this.linesParent.addChild(view.inbox());
 			this.stateLabel.innerHTML = 'Inbox';
@@ -455,7 +499,7 @@ const view = {
 			},
 			OnGoing(){
 				view.addLoading()
-				app.doglas.do(['database','admin',`${app.userData.cleanEmail}/onGoingProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','admin',`${app.userData.uid}/onGoingProjects`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'OnGoing');
@@ -463,7 +507,7 @@ const view = {
 			},
 			Finished(){
 				view.addLoading();
-				app.doglas.do(['database','admin',`${app.userData.cleanEmail}/finishedProjects`,'get','']).then(data=>{
+				app.doglas.do(['database','admin',`${app.userData.uid}/finishedProjects`,'get','']).then(data=>{
 					view.unloading();
 					let datacb = data.val()||[];
 					view.content.openMyproject(datacb,'Finished');
@@ -483,6 +527,9 @@ const view = {
 				align-items: center;
 				position:sticky;
 				top:0;
+				color:deepskyblue;
+				border-bottom:3px solid deepskyblue;
+				border-radius:10px;
 			`,
 			innerHTML:`
 				<div style="
@@ -495,41 +542,13 @@ const view = {
 						display: flex;
 						gap: 8px;
 						cursor: pointer;
-						height: 100%;
-						width: 100%;
-						padding: 10px 20px;
-						justify-content: center;
-					"
-					id=loadcerpen
-					>
-						<img src=./more/media/deer-shape.png class=navimg>
-						Cerpen
-					</div>
-					<div style="
-						display: flex;
-						gap: 8px;
-						cursor: pointer;
-						height: 100%;
-						width: 100%;
-						padding: 10px 20px;
-						justify-content: center;
-					"
-					id=loadartikel
-					>
-						<img src=./more/media/papers.png class=navimg>
-						Artikel
-					</div>
-					<div style="
-						display: flex;
-						gap: 8px;
-						cursor: pointer;
 						width: 100%;
 						justify-content: center;
 						padding: 10px 20px;
 					"
 					id=loadloker
 					>
-						<img src=./more/media/worker.png class=navimg>
+						<img src=./more/media/bluetask.png class=navimg>
 						Project
 					</div>
 					<div style="
@@ -542,8 +561,50 @@ const view = {
 					"
 					id=loadjasa
 					>
-						<img src=./more/media/construction-worker.png class=navimg>
+						<img src=./more/media/blueservices.png class=navimg>
 						Jasa
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadcerpen
+					>
+						<img src=./more/media/bluenews.png class=navimg>
+						Berita
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadartikel
+					>
+						<img src=./more/media/bluewiki.png class=navimg>
+						Artikel
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px 20px;
+						justify-content: center;
+					"
+					id=loadworkers
+					>
+						<img src=./more/media/blueworkers.png class=navimg>
+						Pekerja
 					</div>
 				</div>
 			`,
@@ -556,7 +617,7 @@ const view = {
 			},
 			onadded(){
 				//set the nav.
-				this.find('#'+this.nav).style.borderBottom = '1px solid black';
+				this.find('#'+this.nav).style.color = 'dimgray';
 				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
 				this.find('#'+this.nav).scrollIntoView();
 				this.buttonSetup();
@@ -593,16 +654,19 @@ const view = {
 					let datacb = data.val()||{};
 					view.content.displayList(objToArray(datacb),'loadloker');
 				})
+			},
+			loadworkers(){
+				view.addLoading();
+				app.doglas.do(['database','post','Workers','get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||{};
+					view.content.displayList(objToArray(datacb),'loadworkers');
+				})
 			}
 		})
 	},
 	line(data,i,bt=true){
 		const Dot = (data.title.length>100)?'...':'';
-		if(!data.more){
-			data.more = {
-				view:[]
-			}
-		}
 		return makeElement('div',{
 			className:'lines',
 			innerHTML:`
@@ -612,7 +676,7 @@ const view = {
 					</div>
 					<div class=moreinfo>
 						<div id=fee>
-							${data.type==='Jobs'?'Maks':'Min'} Bid Rp. ${getPrice(data.maxFee||data.minFee)}
+							${data.type==='Jobs'?'Maks':'Min'} Bid Rp ${getPrice(data.maxFee||data.minFee)}
 						</div>
 						<div class=title>
 							${data.title.slice(0,100) + Dot}
@@ -622,13 +686,28 @@ const view = {
 								<img class=profileimg src=${data.profilepicture}>
 							</div>
 							<div class=username>${data.username},</div>
-							<div class=date>${data.time}</div>
+							<div class=date>${SmartTime(data.time)}</div>
 						</div>
 						<div class=vshareinfo>
 							<div>
-								<span>${data.more.view.length} Kali Dibaca.</span>
+								<span style=font-size:11px>${data.view||0} kali dibaca</span>
 							</div>
 						</div>
+					</div>
+					<div style="
+						height:68px;
+						width:30%;
+						border-radius:10px;
+						margin-right:5px;
+						border-right:5px solid whitesmoke;
+						border-bottom:5px solid whitesmoke;
+					">
+						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+							height:100%;
+							width:100%;
+							object-fit:cover;
+							border-radius:10px;
+						">
 					</div>
 				</div>
 			`,
@@ -636,9 +715,14 @@ const view = {
 				if(data.maxFee||data.minFee){
 					this.find('.vshareinfo').remove();
 				}else this.find('#fee').remove();
-				this.find('.item').onclick = ()=>{
+				this.find('.title').onclick = ()=>{
 					app.dataContent = data;
 					view.content[`open${data.type}`]();
+				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner);
 				}
 			},
 		})
@@ -654,29 +738,48 @@ const view = {
 					</div>
 					<div class=moreinfo>
 						<div id=fee>
-							Fee Rp. ${getPrice(data.fee)}
+							Fee Rp ${getPrice(data.fee)}
 						</div>
 						<div class=title>
 							${data.title.slice(0,100) + Dot}
 						</div>
 						<div class=addressinfo>
 							<div>
-								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
+								<img class=profileimg src=${data.owner===app.userData.uid?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
-							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.username},</div>
-							<div class=date>${data.time}</div>
+							<div class=username>${data.owner===app.userData.uid?data.bidder:data.username},</div>
+							<div class=date>${SmartTime(data.time)}</div>
 						</div>
+					</div>
+					<div style="
+						height:68px;
+						width:30%;
+						border-radius:10px;
+						margin-right:5px;
+						border-right: 5px solid whitesmoke;
+						border-bottom: 5px solid whitesmoke;
+					">
+						<img src=${data.preview||'./more/media/nothumbnailnew.png'} style="
+							height:100%;
+							width:100%;
+							object-fit:cover;
+							border-radius:10px;
+						">
 					</div>
 				</div>
 			`,
 			onadded(){
-				this.find('.item').onclick = ()=>{
+				this.find('.title').onclick = ()=>{
 					this.chatData = data;
 					this.openChat();
 				}
+				this.find('.username').onclick = ()=>{
+					app.dataContent = data;
+					view.addLoading();
+					view.content.openProfile([],'home',false,data.owner===app.userData.uid?data.bidderProfileId:data.owner);
+				}
 			},
 			openChat(){
-				console.log(this.chatData);
 				view.main.addChild(view.OnGoingChat(this.chatData,()=>{
 					view.content.openMyproject([],'OnGoing',true);
 				}));
@@ -768,7 +871,7 @@ const view = {
 				})
 				Object.assign(Data,{
 					time:getFullDate(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Articles",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -923,7 +1026,7 @@ const view = {
 				})
 				Object.assign(Data,{
 					time:getFullDate(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Services",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -1074,7 +1177,7 @@ const view = {
 				})
 				Object.assign(Data,{
 					time:getFullDate(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"Jobs",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -1327,7 +1430,7 @@ const view = {
 						<img class=profileimg src=./more/media/gemaprofile.png>
 					</div>
 					<div class=username>${data.username},</div>
-					<div class=date>${data.time}</div>
+					<div class=date>${SmartTime(data.time)}</div>
 				</div>
 				<div id=fee>${data.type==='Jobs'?'Maks Bid':'Min Bid'} Rp. ${getPrice(data.maxFee||data.minFee)}</div>
 				<div style="
@@ -1499,15 +1602,9 @@ const view = {
 			}
 		})
 	},
-	profilePage(){
-		const userData = app.userData;
-		if(!userData.peoples){
-			userData.peoples = {
-				followers:[],
-				following:[],
-				projects:[]
-			}
-		}
+	profilePage(userData){
+		if(!userData)userData = app.userData;
+		//console.log(userData);
 		return makeElement('div',{
 			style:`
 				border-radius:0 0 20px 20px;
@@ -1517,7 +1614,7 @@ const view = {
 				<div style="
 					height:150px;
 					width:100%;
-					background:lightblue;
+					background:deepskyblue;
 					position:relative;
 				">
 					<img id=bannerimg style="
@@ -1530,15 +1627,16 @@ const view = {
 						top: 0;
 						right: 0;
 						padding: 10px;
-						background: white;
-						display: flex;
+						background: deepskyblue;
+						display: ${userData.uid===app.userData.uid?'flex':'none'};
 						align-items: center;
 						justify-content: center;
 						border-radius: 0 0 0 20px;
 						border: 2px solid whitesmoke;
+						border-right:0;border-top:0;
 						cursor:pointer;
 					" id=editbanner>
-						<img src=./more/media/edit.png style="
+						<img src=./more/media/whiteedit.png style="
 							width:24px;
 							height:24px;
 						">
@@ -1564,6 +1662,7 @@ const view = {
 						width:128px;
 						height:128px;
 						position:relative;
+						border:1px solid gainsboro;
 					">
 						<img src=${userData.profilepicture||app.noProfilePng}
 						style="
@@ -1579,27 +1678,32 @@ const view = {
 							bottom: 0;
 							right: 0;
 							padding: 10px;
-							background: white;
+							background: deepskyblue;
 							border: 2px solid whitesmoke;
+							border-left:0;border-top:0;
 							border-radius: 50%;
 							cursor: pointer;
+							display:${userData.uid===app.userData.uid?'':'none'};
 						" id=editPicture>
-							<img src=./more/media/edit.png style="
+							<img src=./more/media/whiteedit.png style="
 								width:24px;
 								height:24px;
 							">
 						</div>
 					</div>
 					<div style="
-						padding:8px;
-						background:white;
-						border:2px solid whitesmoke;
+						padding:8px 15px;
+						background:deepskyblue;
+						color:white;
+						border:2px solid gainsboro;
+						border-top:0;
+						border-left:0;
 						border-radius:20px;
-						display:flex;
+						display: ${userData.uid===app.userData.uid?'flex':'none'};
 						gap:5px;
 						cursor:pointer;
 					" id=editProfile>
-						<img src=./more/media/edit.png
+						<img src=./more/media/whiteedit.png
 						style="
 							width:24px;
 							height:24px;
@@ -1635,20 +1739,17 @@ const view = {
 							margin-top:10px;
 						">
 							<div>
-								<div>${userData.peoples.followers.length} followers</div>
+								<div id=followers>[loading...] followers</div>
 							</div>
 							<div>
-								<div>${userData.peoples.following.length} following</div>
-							</div>
-							<div>
-								<div>${userData.peoples.projects.length} Projects</div>
+								<div id=following>[loading...] following</div>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div style="
 					border-bottom:1px solid whitesmoke;
-					display:flex;
+					display: ${userData.uid===app.userData.uid?'none':'flex'};
 					color: white;
 					font-family: 'montserratbold';
 					overflow:auto;
@@ -1668,103 +1769,72 @@ const view = {
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							" id=hire>
-								<img src=./more/media/hired.png
-									style="
-										width:16px;
-										height:16px;
-									"
-								>Rekrut</div>
-						</div>
-						<div>
-							<div class="button buttonstyled" style="
-								border-radius:20px;display:flex;
-								align-items:center;gap:5px;font-size:10px;
 							" id=chat>
-								<img src=./more/media/chat.png
+								<img src=./more/media/whitechat.png
 									style="
 										width:16px;
 										height:16px;
 									"
 								>CHAT</div>
 						</div>
-						<div>
+						<div id=follow style="
+							display:none;
+						">
 							<div class="button buttonstyled" style="
 								border-radius:20px;display:flex;
 								align-items:center;gap:5px;font-size:10px;
-							" id=follow>
-								<img src=./more/media/follow.png
+							">
+								<img src=./more/media/followwhite.png
 								style="
 									width:16px;
 									height:16px;
 								"
 								>FOLLOW</div>
 						</div>
-					</div>
-				</div>
-				<div style="
-					height: 48px;
-					border-bottom: 1px solid whitesmoke;
-					display: flex;
-					gap: 1px;
-					position: sticky;
-					top: 0;
-					background: white;
-					/* color: white; */
-					/* font-family: 'montserratbold';
-				">
-					<div
-					style="
-						width:100%;
-						height:100%;
-						display:flex;
-						align-items:center;
-					"
-					>
-						<div style="
-								width: 100%;
-								display: flex;
-								justify-content: space-around;
-						" id=berandadivmenu>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								height: 100%;
-								width: 100%;
-								border-bottom: 1px solid black;
-								padding: 10px;
-								justify-content: center;
+						<div id=unfollow style="
+							display:none;
+						">
+							<div class="button buttonstyled" style="
+								border-radius:20px;display:flex;
+								align-items:center;gap:5px;font-size:10px;
 							">
-								<img src=./more/media/papers.png class=navimg>
-								Artikel
-							</div>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								width: 100%;
-								justify-content: center;
-								padding: 10px;
-							">
-								<img src=./more/media/worker.png class=navimg>
-								Project
-							</div>
-							<div style="
-								display: flex;
-								gap: 8px;
-								cursor: pointer;
-								width: 100%;
-								justify-content: center;
-								padding: 10px;
-							">
-								<img src=./more/media/construction-worker.png class=navimg>
-								Jasa
-							</div>
+								<img src=./more/media/unfollow.png
+								style="
+									width:16px;
+									height:16px;
+								"
+								>UNFOLLOW</div>
 						</div>
 					</div>
 				</div>
 			`,
+			showDataFollowAndProject(){
+				//console.log(userData);
+				const following = userData.following?userData.following.length:0;
+				const followers = userData.followers?userData.followers.length:0;
+
+				this.find('#followers').innerText = followers+' followers';
+				this.find('#following').innerText = following+' following';
+			},
+			followOnFollow(){
+				if(userData.followers && app.getInfoLogin()){
+					let following;
+					userData.followers.forEach(user=>{
+						if(user.id===app.userData.uid){
+							following = true;
+							return;
+						}
+					})
+					if(following){
+						this.unfollowButton.show('flex');
+						this.followButton.hide()
+					}else{
+						this.followButton.show('flex');
+					}
+				}else{
+					this.followButton.show('flex');
+				}
+			},
 			onadded(){
 				this.generateMore();
 				//this.generateContent();
@@ -1779,6 +1849,64 @@ const view = {
 				this.find('#editbanner').onclick = ()=>{
 					this.editbanner();
 				}
+				this.find('#chat').onclick = ()=>{
+					this.sendmemsg();
+				}
+				this.followButton = this.find('#follow');
+				this.unfollowButton = this.find('#unfollow');
+				this.followButton.onclick = ()=>{
+					this.followme();
+				}
+				this.unfollowButton.onclick = ()=>{
+					this.unfollow();
+				}
+				this.showDataFollowAndProject();
+				this.followOnFollow();
+				//if loading.
+				view.unloading();
+			},
+			async unfollow(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openProfile([],'home',false,userData.uid);
+					});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				//get target follow list.
+				const followers = (await app.doglas.do(['database','users',`${userData.uid}/followers`,'get'])).val()||[];
+				
+				//time to filter.
+				const newFollowers = [];
+				followers.forEach(item=>{
+					if(item.id!==app.userData.uid){
+						newFollowers.push(item);
+					}
+				})
+				await app.doglas.do(['database','users',`${userData.uid}/followers`,'set',newFollowers]);
+				
+				//get this user following list.
+				const following = (await app.doglas.do(['database','users',`${app.userData.uid}/following`,'get'])).val()||[];
+				
+				//time to filter.
+				const newFollowing = [];
+				following.forEach(item=>{
+					if(item.id!==userData.uid){
+						newFollowing.push(item);
+					}
+				})
+				await app.doglas.do(['database','users',`${app.userData.uid}/following`,'set',newFollowing]);
+
+				//notif handling.
+				//for him.
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.uid}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.uid}/notif`,'set',himnotiflist]);
+
+				//forme.
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Berhenti mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.uid);
 			},
 			generateMore(){
 				for(let i in userData.more){
@@ -1828,6 +1956,104 @@ const view = {
 			},
 			editPicture(){
 				view.main.addChild(view.editPic(this));
+			},
+			async followme(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{
+						view.content.openProfile([],'home',false,userData.uid);	
+					});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				//get target follow list.
+				const followers = (await app.doglas.do(['database','users',`${userData.uid}/followers`,'get'])).val()||[];
+				followers.push({
+					username:app.userData.username,
+					id:app.userData.uid,
+					date:getFullDate(),
+					time:getTime(),
+					profilepicture:app.userData.profilepicture
+				})
+				//push the data.
+				await app.doglas.do(['database','users',`${userData.uid}/followers`,'set',followers]);
+				//get this user following list.
+				const following = (await app.doglas.do(['database','users',`${app.userData.uid}/following`,'get'])).val()||[];
+				following.push({
+					username:userData.username,
+					id:userData.uid,
+					date:getFullDate(),
+					time:getTime(),
+					profilepicture:userData.profilepicture
+				})
+				await app.doglas.do(['database','users',`${app.userData.uid}/following`,'set',following]);
+
+				//notif handling.
+				//for him.
+				const himnotiflist = (await app.doglas.do(['database','users',`${userData.uid}/notif`,'get'])).val()||[];
+				himnotiflist.push({who:app.userData.username,profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti anda.`})
+				await app.doglas.do(['database','users',`${userData.uid}/notif`,'set',himnotiflist]);
+
+				//forme.
+				const menotiflist = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
+				menotiflist.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Mulai mengikuti ${userData.username}`});
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',menotiflist]);				
+				view.content.openProfile([],'home',false,userData.uid);
+				//console.log(userData,app.userData);
+			},
+			async sendmemsg(){
+				if(!app.getInfoLogin()){
+					view.content.getIn(()=>{this.sendmemsg()});
+					return forceRecheck(view.main,'Silahkan Login Lebih Dahulu!');
+				}
+				const chatList = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
+				
+				//case is only checking for user, not with opponent.
+				//have to check the opponent.
+				let ourRoom;
+				const opponentChatList = (await app.doglas.do(['database','users',`${userData.uid}/inbox`,'get'])).val()||[];
+				opponentChatList.forEach((item)=>{
+					if(item.to===app.userData.uid){
+						ourRoom = item;
+						return
+					}
+				})
+				
+				//checking the chat list.
+				//finding the userId. If One, this mean i dont have to create new room
+				let room = null;
+				chatList.forEach((item)=>{
+					//console.log(item.to,userData.uid);
+					if(item.to===userData.uid){
+						room = item;
+						return
+					}
+				})
+				let roomId;
+				if(!room){
+					//no room found. make new one.
+					//send notif to both user.
+					//for sender.
+					if(!ourRoom)roomId = getUniqueID();
+					else roomId = ourRoom.roomId;
+					//get sender chat list.
+					const chatList = (await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'get'])).val()||[];
+					room = {roomId,to:userData.uid,toProfile:userData.profilepicture,date:getFullDate(),toUsername:userData.username};
+					chatList.push(room);
+					await app.doglas.do(['database','users',`${app.userData.uid}/inbox`,'set',chatList]);
+					//set initial data.
+					await app.doglas.do(['database','privateChat',`${roomId}/peoples`,'set',[app.userData.uid,userData.uid]]);
+				}
+
+				if(!ourRoom){
+					//console.log('Opps, theres no room at this db, so i build one');
+					//for reciever.
+					if(!roomId)roomId=room.roomId;
+					const recieverChatList = (await app.doglas.do(['database','users',`${userData.uid}/inbox`,'get'])).val()||[];
+					recieverChatList.push({roomId,to:app.userData.uid,toProfile:app.userData.profilepicture,date:getFullDate(),toUsername:app.userData.username});
+					await app.doglas.do(['database','users',`${userData.uid}/inbox`,'set',recieverChatList]);	
+				}
+				
+				view.main.addChild(view.openPrivateChat(room));
+				//console.log(userData);
 			}
 		})
 	},
@@ -2063,7 +2289,7 @@ const view = {
 					data[input.id] = input.value;
 				})
 				if(data.userEmail){
-					data.cleanEmail = data.userEmail.slice(0,data.userEmail.indexOf('@'));
+					data.uid = data.userEmail.slice(0,data.userEmail.indexOf('@'));
 				}
 				return data;
 			},
@@ -2306,19 +2532,26 @@ const view = {
 					username:`admin-${data.username.value}`,
 					password:data.userpassone.value,
 					email:data.emailuser.value,
-					uniqueId:getUniqueID(),
 					date:getFullDate(),
-					cleanEmail:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@')),
-					profilepicture:app.noProfilePng
+					public:{username:data.username.value},
+					uid:data.emailuser.value.slice(0,data.emailuser.value.indexOf('@'))
 				});
 			},
 			submitData(data){
 				this.hideFormAndButtons();
 				this.find('#loading').show('flex');
-				app.doglas.do(['database','admin',data.cleanEmail,'update',data]).then(()=>{
-					this.showTheAnounce('Pendaftaran Berhasil! Silahkan Lakukan Login.');
-					setTimeout(()=>{this.goIn()},1000);
-				});
+				app.doglas.auth.createUserWithEmailAndPassword(data.email,data.password).then(async (retdata)=>{
+					delete data.password;
+					data.uid = retdata.user.uid;
+					data.public.uid = retdata.user.uid;
+					app.doglas.do(['database','admin',data.uid,'update',data]).then(data=>{
+						forceRecheck(view.main,'Berhasil membuat akun, silahkan login!');
+						this.goIn();
+					})
+				}).catch(err=>{
+					forceRecheck(view.main,err.message);
+					this.goIn();
+				})
 			},
 			onadded(){
 				//close Event.
@@ -2412,7 +2645,7 @@ const view = {
 				})
 				Object.assign(Data,{
 					time:getFullDate(),
-					owner:app.userData.cleanEmail,
+					owner:app.userData.uid,
 					type:"ShortStories",
 					postId:getUniqueID(),
 					username:app.userData.username,
@@ -2455,6 +2688,7 @@ const view = {
 				padding:2%;
 				overflow:auto;
 				cursor:pointer;
+				color:dimgray;
 			`,
 			className:'NotifParent',
 			generateNotifList(NotifList){
@@ -2509,7 +2743,7 @@ const view = {
 			},
 			async loadNotifData(){
 				view.addLoading();
-				const data = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				const data = (await app.doglas.do(['database','admin',`${app.userData.uid}/notif`,'get'])).val()||[];
 				view.unloading();
 				this.generateNotifList(data);
 			},
@@ -2582,14 +2816,14 @@ const view = {
 				})
 				await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'set',ownerNotifs]);
 				//send notif to admin.
-				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.uid}/notif`,'get'])).val()||[];
 				adminNotifs.push({
 					profilepicture:app.noProfilePng,
 					who:'Kamu',
 					when:getFullDate(),
 					what:`Mempublish Postingan ${this.datatoupload.type} ${this.datatoupload.title} dari ${this.datatoupload.owner}`
 				})
-				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				await app.doglas.do(['database','admin',`${app.userData.uid}/notif`,'set',adminNotifs]);
 				const x = await app.doglas.do(['database','post',`${this.datatoupload.type}/${this.datatoupload.postId}`,'set',this.datatoupload]);
 				await app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'remove']);
 				this.handleResponse(x);
@@ -2670,14 +2904,14 @@ const view = {
 				})
 				await app.doglas.do(['database','users',`${this.datatoupload.owner}/notif`,'set',ownerNotifs]);
 				//send notif to admin.
-				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				const adminNotifs = (await app.doglas.do(['database','admin',`${app.userData.uid}/notif`,'get'])).val()||[];
 				adminNotifs.push({
 					profilepicture:app.noProfilePng,
 					who:'Kamu',
 					when:getFullDate(),
 					what:`Menolak Postingan ${this.datatoupload.type} ${this.datatoupload.title} dari ${this.datatoupload.owner}`
 				})
-				await app.doglas.do(['database','admin',`${app.userData.cleanEmail}/notif`,'set',adminNotifs]);
+				await app.doglas.do(['database','admin',`${app.userData.uid}/notif`,'set',adminNotifs]);
 				await app.doglas.do(['database','pending',`${this.datatoupload.type}/${this.datatoupload.postId}`,'remove']);
 				this.handleResponse();
 			},
@@ -2701,6 +2935,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:center;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -2814,7 +3049,7 @@ const view = {
 				}
 			},
 			DoRequest(data){
-				app.doglas.do(['database','users',`${app.userData.cleanEmail}`,'update',data]).then((x)=>{
+				app.doglas.do(['database','admin',`${app.userData.uid}/public`,'update',data]).then((x)=>{
 					this.handleResponse(x,data);
 				})
 			},
@@ -2869,6 +3104,7 @@ const view = {
 				display:flex;
 				align-items:center;
 				justify-content:center;
+				color:dimgray;
 			`
 		})
 	},
@@ -2961,6 +3197,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:center;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3079,7 +3316,7 @@ const view = {
 				this.upnotice.show('block');
 				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
 					const url = await x.ref.getDownloadURL();
-					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{profilepicture:url}]).then(x=>{
+					app.doglas.do(['database','admin',`${app.userData.uid}/public`,'update',{profilepicture:url}]).then(x=>{
 						profilePage.find('#profilepicture').src = url;
 						app.userData.profilepicture = url;
 						this.remove();
@@ -3098,6 +3335,7 @@ const view = {
 				align-items:flex-start;
 				justify-content:center;
 				background:#00000040;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
@@ -3214,7 +3452,7 @@ const view = {
 				this.upnotice.show('block');
 				app.doglas.save([getUniqueID(),this.file,this.file.contentType]).then(async x=>{
 					const url = await x.ref.getDownloadURL();
-					app.doglas.do(['database','users',app.userData.cleanEmail,'update',{bannerpic:url}]).then(x=>{
+					app.doglas.do(['database','admin',`${app.userData.uid}/public`,'update',{bannerpic:url}]).then(x=>{
 						const banner = profilePage.find('#bannerimg');
 						banner.src = url;
 						if(!app.userData.bannerpic){
@@ -3334,7 +3572,7 @@ const view = {
 					bidId:getUniqueID(),
 					description:this.find('#offerDescription').value,
 					bidder:app.userData.username,
-					bidderProfileId:app.userData.cleanEmail,
+					bidderProfileId:app.userData.uid,
 					date:getFullDate(),
 					owner:data.owner,
 					reject:'unset',
@@ -3356,7 +3594,7 @@ const view = {
 				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
 				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
@@ -3365,7 +3603,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			save(){
 				
@@ -3375,9 +3613,9 @@ const view = {
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
 					//get the data first.
-					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'get'])).val()||[];
 					biddatauser.push(data);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'update',biddatauser]);
 					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
@@ -3500,7 +3738,7 @@ const view = {
 					bidId:getUniqueID(),
 					description:this.find('#offerDescription').value,
 					bidder:app.userData.username,
-					bidderProfileId:app.userData.cleanEmail,
+					bidderProfileId:app.userData.uid,
 					date:getFullDate(),
 					owner:data.owner,
 					status:'unset',
@@ -3523,7 +3761,7 @@ const view = {
 				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
 				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what:`Memberi penawaran ke ${data.subject} sebesar Rp. ${getPrice(data.fee)}`});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
@@ -3532,7 +3770,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			save(){
 				
@@ -3542,9 +3780,9 @@ const view = {
 				app.doglas.do(['database',`bid/${data.type}`,data.bidId,'update',data]).then(async x=>{
 					delete data.inbox;
 					//get the data first.
-					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'get'])).val()||[];
+					const biddatauser = (await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'get'])).val()||[];
 					biddatauser.push(data);
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'update',biddatauser]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'update',biddatauser]);
 					const biddataowner = (await app.doglas.do(['database','users',`${data.owner}/bid`,'get'])).val()||[];
 					biddataowner.push(data);
 					await app.doglas.do(['database','users',`${data.owner}/bid`,'update',biddataowner]);
@@ -3569,7 +3807,7 @@ const view = {
 				//get Data bidder first.
 				let biddata = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val()||[];
 				console.log(biddata);
-				biddata.push(app.userData.cleanEmail);
+				biddata.push(app.userData.uid);
 				await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'set',biddata]);
 				const biddingList =  (await app.doglas.do(['database','post',`${data.type}/${data.postid}/biddingList`,'get'])).val()||[];
 				biddingList.push(data.bidId);
@@ -3625,9 +3863,9 @@ const view = {
 						</div>
 						<div class=addressinfo>
 							<div>
-								<img class=profileimg src=${data.owner===app.userData.cleanEmail?data.bidderProfileIdPic:data.profilepicture}>
+								<img class=profileimg src=${data.owner===app.userData.uid?data.bidderProfileIdPic:data.profilepicture}>
 							</div>
-							<div class=username>${data.owner===app.userData.cleanEmail?data.bidder:data.owner},</div>
+							<div class=username>${data.owner===app.userData.uid?data.bidder:data.owner},</div>
 							<div class=date>${data.date}</div>
 						</div>
 					</div>
@@ -3702,7 +3940,7 @@ const view = {
 					<div id=userActionBidder style="
 				    padding: 2% 0;
 				    background: white;
-				    display: ${data.owner===app.userData.cleanEmail?'flex':'none'};
+				    display: ${data.owner===app.userData.uid?'flex':'none'};
 				    gap: 8px;
 				    justify-content: space-around;
 					">
@@ -3859,14 +4097,14 @@ const view = {
 				
 				
 				//set room for owner.
-				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'get'])).val()||[];
+				const ownerOnGoingProjects = (await app.doglas.do(['database','users',`${app.userData.uid}/onGoingProjects`,'get'])).val()||[];
 				console.log(ownerOnGoingProjects);
 				
 				//sing the value of data to project.
 				Object.assign(project,data);
 				console.log('the project is',project);
 				ownerOnGoingProjects.push(project);
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/onGoingProjects`,'set',ownerOnGoingProjects]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/onGoingProjects`,'set',ownerOnGoingProjects]);
 
 				//set room for the winner
 				console.log('winner is',winner);
@@ -3904,7 +4142,7 @@ const view = {
 				//getting peoples id.
 				const bidders = (await app.doglas.do(['database','post',`${data.type}/${data.postid}/bidder`,'get'])).val();
 				//adding owner id also, we need owner bid also updated.
-				bidders.push(app.userData.cleanEmail);
+				bidders.push(app.userData.uid);
 				console.log(bidders);
 
 				bidders.forEach(async bidder=>{
@@ -3922,7 +4160,7 @@ const view = {
 					
 					//get people notif list.
 					const notifs = (await app.doglas.do(['database','users',`${bidder}/notif`,'get'])).val()||[];
-					notifs.push({who:(bidder===app.userData.cleanEmail?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture,when:getFullDate(),
+					notifs.push({who:(bidder===app.userData.uid?'Kamu':app.userData.username),profilepicture:app.userData.profilepicture,when:getFullDate(),
 						what:`Telah menerima penawaran dari ${data.bidderProfileId===bidder?'Kamu':data.bidder} sebesar Rp. ${getPrice(data.fee)}`
 					});
 					//adding notification to user notif list.
@@ -3934,7 +4172,7 @@ const view = {
 				//remove the projects out from the global db.
 				this.setWinner(data.bidderProfileId);
 				actionIndicator.find('#text').innerHTML = `Berhasil Menerima Bid Dari ${data.bidder} sebesar ${data.fee}`;
-				this.out();
+				//this.out();
 			},
 			async reject(){
 				//give the indicator.
@@ -3946,9 +4184,9 @@ const view = {
 				//for user.
 				this.generateNewUserBidData();
 				if(app.userData.bid.length===0){
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'remove']);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'remove']);
 				}else{
-					await app.doglas.do(['database','users',`${app.userData.cleanEmail}/bid`,'set',app.userData.bid]);
+					await app.doglas.do(['database','users',`${app.userData.uid}/bid`,'set',app.userData.bid]);
 				}
 				
 				//for bidder
@@ -3982,7 +4220,7 @@ const view = {
 				await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'set',ownerNotif]);
 			},
 			async handleNotifUser(what){
-				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'get'])).val()||[];
+				let ownerNotif = (await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'get'])).val()||[];
 				ownerNotif.push({who:'Kamu',profilepicture:app.userData.profilepicture,when:getFullDate(),what});
 				if(ownerNotif.length>20){
 					const newOwnerNotif = [];
@@ -3991,7 +4229,7 @@ const view = {
 					}
 					ownerNotif = newOwnerNotif;
 				}
-				await app.doglas.do(['database','users',`${app.userData.cleanEmail}/notif`,'set',ownerNotif]);
+				await app.doglas.do(['database','users',`${app.userData.uid}/notif`,'set',ownerNotif]);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
@@ -4006,9 +4244,6 @@ const view = {
 			},
 			moreMenuInit(){
 				this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
-					view.main.addChild(view.moremenubid(data));
-				}
 			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
@@ -4059,11 +4294,11 @@ const view = {
 				app.doglas.get(`bid/${data.type}/${data.bidId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
-				if(data.bidderProfileId===app.userData.cleanEmail){
+				if(data.bidderProfileId===app.userData.uid){
 					app.doglas.get(`bid/${data.type}/${data.bidId}/reject`).on('value',(x)=>{
 						const rejected = x.val();
 						console.log(rejected);
@@ -4077,7 +4312,7 @@ const view = {
 						const winner = x.val();
 						console.log(winner);
 						if(winner==='unset' || !winner)return;
-						if(winner===app.userData.cleanEmail){
+						if(winner===app.userData.uid){
 							this.handleWinMsg('Anda');
 						}else{
 							this.handleWinMsg(winner);
@@ -4122,7 +4357,7 @@ const view = {
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
 					`,
@@ -4135,7 +4370,7 @@ const view = {
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
+								display:${item.id===app.userData.uid?'none':'block'};
 							">
 								<img src=${item.profilepicture||app.noProfilePng} style="
 									width:32px;
@@ -4145,16 +4380,16 @@ const view = {
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:${item.id===app.userData.uid?'white':'gray'};
+								color:${item.id===app.userData.uid?'black':'white'};
 								padding:10px;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
 							">${item.msg.replaceAll('\n','<br>')}</div>
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'block':'none'};
+								display:${item.id===app.userData.uid?'block':'none'};
 							">
 								<img src=${item.profilepicture||app.noProfilePng} style="
 									width:32px;
@@ -4183,8 +4418,9 @@ const view = {
 				left:0;
 				display:flex;
 				align-items:center;
-				justify-content:center;
-				background:white;
+				justify-content:flex-end;
+				background:rgba(0, 0, 0, 0.4);
+				z-index:1;
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4192,32 +4428,48 @@ const view = {
 					height:100%;
 					background:white;
 					display:flex;
-					flex-direction:column;
-				"
+					flex-direction:column;position:relative;
+				" id=parent
 				>
 					<div style="
 						width: 100%;
-						min-height: 100px;
+						min-height: 77px;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
+						background:deepskyblue;
+						color:white;
+						border-bottom:1px solid gainsboro;
 					">
 						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
+							width:80%;
+							display:flex;
+							align-items:center;
+							gap:10px;
+							padding-left:5%;
 						">
-							<div id=closethis style="cursor:pointer;">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
+							<img src=./more/media/whiteloading.png style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
+							">
+							<div>
+								<div>${data.subject.slice(0,30)+'...'}</div>
+								<div>Rp ${getPrice(data.fee)} - ${data.type} - ${SmartTime(data.time)}</div>
 							</div>
 						</div>
 						<div style="
-							width:80%;
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
 						">
-							<div>${data.subject.slice(0,30)+'...'}</div>
-							<div>Rp. ${getPrice(data.fee)} - ${data.type} - ${data.date}</div>
+							<div id=moremenu style="cursor:pointer;
+								border-radius:50%;
+							">
+								<img src=./more/media/info.png class=navimg style=width:32;height:32;>
+							</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -4226,8 +4478,11 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+							<div id=closethis style="cursor:pointer;
+								padding:5px;
+								border-radius:10px;
+							">
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -4237,10 +4492,65 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
-					  scrollbar-color: gray whitesmoke;
-					  scrollbar-width: thin;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
+					</div>
+
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+						border-top:1px solid gainsboro;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+						border-top:1px solid gainsboro;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+							border:1px solid gainsboro;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
 					</div>
 					<div style="
 						width: 94%;
@@ -4250,8 +4560,27 @@ const view = {
 						align-items: center;
 						justify-content: space-between;
 						padding: 3%;
-						background: whitesmoke;
+						background: white;
+						gap:5px;
+						position:relative;
+						border-top:1px solid gainsboro;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -4261,6 +4590,7 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
@@ -4268,10 +4598,10 @@ const view = {
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
 								min-width:100%;
+								max-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
-							width: 20%;
 							height: 100%;
 							display: flex;
 							align-items: center;
@@ -4281,8 +4611,36 @@ const view = {
 							background: white;
 							border-radius: 0 20px 20px 0;
 						">
-							<div style=cursor:pointer id=sendbutton>
-								<img src=./more/media/send.png
+							<div style="cursor:pointer;
+								padding:10px;
+								border-radius:10px;
+								border:1px solid gainsboro;
+							" id=sendbutton>
+								<img src=./more/media/bluesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+								border:1px solid gainsboro;
+							" id=attachfilebutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -4293,12 +4651,115 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+						border:1px solid gainsboro;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/images.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/documents.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			collectData(){
 				const msg = {
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime(),
+					id:app.userData.uid
 				}
 				return msg;
 			},
@@ -4311,26 +4772,74 @@ const view = {
 			},
 			moreMenuInit(){
 				//this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
+				this.find('#moremenu').onclick = async ()=>{
+					this.parent.addChild(view.openLoading());
+					//getting the newest data.
+					Object.assign(data,(await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}`,'get'])).val()||{});
 					view.main.addChild(view.moremenubid(data));
+					this.parent.saveRemove('#openloading');
 				}
 			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
+
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
+				if(this.file){
+					//hiding the close button on file preview.
+					//console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
+					//console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				const inbox = (await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}/inbox`,'get'])).val()||[];
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}/inbox`,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -4351,15 +4860,16 @@ const view = {
 				app.doglas.get(`OnGoingRooms/${data.OnGoingRoomId}/inbox`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
 				this.msgbox = this.find('#msgbox');
+				this.sendingIndicator = this.find('#sendingIndicator');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
 				this.moreMenuInit();
@@ -4372,7 +4882,7 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
 				this.puttedMsg = msg;
 			},
@@ -4385,67 +4895,156 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
+				this.parent = this.find('#parent');
 				this.init();
 			},
 			getRole(item){
 				let role = '';
-				if(item.from.indexOf('-') && item.from.slice(0,item.from.indexOf('-'))==='admin')role='Admin';
-				else if(item.from===data.username)role='Owner';
-				else if(item.from===data.bidder)role='Worker';
+				if(item.id===data.admin)role='Admin';
+				else if(item.id===data.owner)role='Owner';
+				else if(item.id===data.bidderProfileId)role='Worker';
 				return role;
 			},
 			inboxItem(item){
 				const role = this.getRole(item);
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}: ${role}</div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}"><span class=username>@${item.from}: ${role}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
+								display:${item.id===app.userData.uid?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+								font-weight:bold;
+								border:1px solid gainsboro;
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+										border:1px solid gainsboro;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+											border:1px solid gainsboro;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+									cursor:pointer;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									" id=imgpreviewbutton>
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'block':'none'};
+								width:32px;
+								height:32px;
+								display:${item.id===app.userData.uid?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
+						<div style="
+							margin-${item.id===app.userData.uid?'right':'left'}:48px;
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							//console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -4459,27 +5058,32 @@ const view = {
 				position:absolute;
 				display:flex;
 				align-items:flex-start;
-				justify-content:center;
-				background:#00000040;
+				justify-content:flex-end;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div style="
-					border-radius:0 0 20px 20px;
 					background:white;
-				" class=innerBox>
+					height:100%;
+					overflow:auto;
+					position:relative;
+				" class=innerBox id=parent>
 					<div style="
 						width:94%;
 						display:flex;
 						justify-content:space-between;
-						padding:3%;
+						padding:0 3%;
+						height:77px;
 						align-items:center;
 						background:whitesmoke;
+						position:sticky;
+						top:0;
 					">
 						<div style="
 							font-family:montserratbold;
 							margin-left:5px;
 						">
-							Pilih Tindakan
+							Project Info
 						</div>
 						<div id=closethis style="cursor:pointer;">
 							<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
@@ -4491,81 +5095,545 @@ const view = {
 					<div id=rejectedMsg style="display:none;padding:20px;">
 						<div>Berhasil mereject pembidder, pembidder akan diblock untuk kembali membidder dan percakapan sebelumnya akan di hapus</div>
 					</div>
-					<div style="
-						padding:20px;
+					<div id=adminaction style="
 						display:flex;
-						justify-content:center;
 						gap:10px;
-					" id=buttonsMenu>
-						<div
-						style="
-							width:94%;
-							height:100%;
+						padding:10px;
+						position:sticky;top:0;
+					">
+						<div class=button style="
 							display:flex;
 							align-items:center;
-							gap:8px;
-							justify-content:space-around;
-							flex-direction:column;
-						"
-						>
-							<div style="width:100%">
-								<div class="button buttonstyled" style="
-									border-radius:20px;display:flex;
-									align-items:center;gap:5px;justify-content:center;
-								" id=hire>
-									<img src=./more/media/hired.png
-										style="
-											width:16px;
-											height:16px;
-										"
-									>Terima</div>
-							</div>
-							<div style="width:100%">
-								<div class="button buttonstyled" style="
-									border-radius:20px;display:flex;
-									align-items:center;gap:5px;
-									justify-content:center;
-								" id=reject>
-									<img src=./more/media/rejection.png
-										style="
-											width:16px;
-											height:16px;
-										"
-									>Tolak</div>
+							border-radius:10px;
+							width:100%;gap:5px;justify-content:center;
+						" id=finishproject>
+							<img src=./more/media/whitefinish.png style="
+								width:24;height:24;
+							">
+							Selesaikan
+						</div>
+						<div class=button style="
+							display:flex;
+							align-items:center;
+							border-radius:10px;
+							width:100%;gap:5px;justify-content:center;
+						" id=closeproject>
+							<img src=./more/media/whiteclose.png style="
+								width:24;height:24;
+							">
+							Batalkan
+						</div>
+					</div>
+					<div style="
+						    padding: 20px;
+								display: flex;
+								flex-direction: column;
+								gap: 5px
+					">
+						<div><b>Admin</b></div>
+						<div>
+							<input value=${data.admin} readonly>
+						</div>
+						<div><b>Owner</b></div>
+						<div>
+							<input value=${data.username} readonly>
+						</div>
+						<div><b>Bidder</b></div>
+						<div>
+							<input value=${data.bidder} readonly>
+						</div>
+						<div><b>Fee</b></div>
+						<div>
+							<input value="Rp ${getPrice(data.fee)}" readonly>
+						</div>
+						<div><b>Status</b></div>
+						<div>
+							<input value="${data.finished?'Selesai':'Sedang Berlangsung'}" readonly>
+						</div>
+						<div><b>Status Pembayaran</b></div>
+						<div style="
+							display:flex;
+							gap:10px;
+							align-items:center;
+						">
+							<select id=selectionFeeStatus>
+								<option value="0" ${data.paid?'':'selected'}>Belum Dibayar</option>
+								<option value="1" ${data.paid?'selected':''}>Sudah Dibayar</option>
+							</select>
+							<div style="
+								background:deepskyblue;
+								border-radius:10px;
+								padding:8px;
+								cursor:pointer;
+								height:auto;
+							" id=saveFeeStatus class=button>
+								<img src=./more/media/whitesave.png style="
+									width:24;height:24;
+								">
 							</div>
 						</div>
 					</div>
 				</div>
 			`,
+			async closeproject(){
+				console.log('Close Project');
+				this.handleReturnSaldo();
+				this.updateSaldo('0');
+				//adding loading indicator.
+				this.parent.addChild(view.openLoading());
+				console.log(data);
+				//the algorithm of finish project.
+				/*
+					1. send notif to all user.
+					2. delete the data from each user.
+					3. delete from global path.
+					4. adding data to user finished project data.
+					5. set the statistic.
+				*/
+
+				//delete unnecessary data before saving.
+				delete data.inbox;
+				delete data.status;
+				delete data.paid;
+				delete data.postid;
+				delete data.maxFee;
+				//delete data.OnGoingRoomId;
+				//set new necessary data.
+				data.finishTime = getTime();
+				data.adminprofilepic = (await app.doglas.do(['database','admin',`${data.admin}/public/profilepicture`,'get'])).val()||app.noProfilePng;
+				
+				//handling notif.
+				this.handleNotifBidder('cancel');
+				this.handleNotifOwner('cancel');
+				this.handleNotifAdmin('cancel');
+				//
+
+				//now handling data finished to all people.
+				this.handleFinishedDataToBidder();
+				this.handleFinishedDataToOwner();
+				this.handleFinishedDataToAdmin();
+				//
+
+				//add statistic data.
+				this.handleStatisticBidder('cancel');
+				this.handleStatisticOwner('cancel');
+				this.handleStatisticAdmin('cancel');
+				//
+
+				//delete list for each people.
+				this.removeProjectFromBidder();
+				this.removeProjectFromOwner();
+				this.removeProjectFromAdmin();
+
+				//delete project from global scope.
+				this.handleRemoveGlobalProject();
+
+				console.log('Project cancelled!');
+				this.parent.saveRemove('#openloading');
+			},
+			async finishproject(){
+				
+				//simple check, to make sure that project is paid.
+				if(!data.paid)return forceRecheck(view.main,'Opps, selesaikan pembayaran terlebih dahulu.');
+
+				//adding loading indicator.
+				this.parent.addChild(view.openLoading());
+				console.log(data);
+				//the algorithm of finish project.
+				/*
+					1. send notif to all user.
+					2. delete the data from each user.
+					3. delete from global path.
+					4. adding data to user finished project data.
+					5. set the statistic.
+				*/
+
+				//delete unnecessary data before saving.
+				delete data.inbox;
+				delete data.status;
+				delete data.paid;
+				delete data.postid;
+				delete data.maxFee;
+				//delete data.OnGoingRoomId;
+				//set new necessary data.
+				data.finishTime = getTime();
+				data.adminprofilepic = (await app.doglas.do(['database','admin',`${data.admin}/public/profilepicture`,'get'])).val()||app.noProfilePng;
+				
+				//handling notif.
+				this.handleNotifBidder();
+				this.handleNotifOwner();
+				this.handleNotifAdmin();
+				//
+
+				//now handling data finished to all people.
+				this.handleFinishedDataToBidder();
+				this.handleFinishedDataToOwner();
+				this.handleFinishedDataToAdmin();
+				//
+
+				//add statistic data.
+				this.handleStatisticBidder();
+				this.handleStatisticOwner();
+				this.handleStatisticAdmin();
+				//
+
+				//delete list for each people.
+				this.removeProjectFromBidder();
+				this.removeProjectFromOwner();
+				this.removeProjectFromAdmin();
+
+				//delete project from global scope.
+				this.handleRemoveGlobalProject();
+
+				console.log('Project Finished!');
+				this.parent.saveRemove('#openloading');
+			},
+			async handleRemoveGlobalProject(){
+				console.log('Trying to remove project from global scope',data);
+				await app.doglas.do(['database','OnGoingRooms',data.OnGoingRoomId,'remove']);
+				console.log('Data removed from global scope');
+			},
+			async removeProjectFromBidder(){
+				console.log('Trying to remove this project from bidder');
+
+				const list = (await app.doglas.do(['database','users',`${data.bidderProfileId}/onGoingProjects`,'get'])).val();
+				const newList = [];
+				list.forEach(item=>{
+					if(item.OnGoingRoomId!==data.OnGoingRoomId)newList.push(item);
+				})
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onGoingProjects`,'set',newList]);
+				console.log('bidder On Going list is done.');
+			},
+			async removeProjectFromOwner(){
+				console.log('Trying to remove this project from owner');
+
+				const list = (await app.doglas.do(['database','users',`${data.owner}/onGoingProjects`,'get'])).val();
+				const newList = [];
+				list.forEach(item=>{
+					if(item.OnGoingRoomId!==data.OnGoingRoomId)newList.push(item);
+				})
+				await app.doglas.do(['database','users',`${data.owner}/onGoingProjects`,'set',newList]);
+				console.log('owner On Going list is done.');
+			},
+			async removeProjectFromAdmin(){
+				console.log('Trying to remove this project from admin');
+
+				const list = (await app.doglas.do(['database','admin',`${data.admin}/OnGoingProjects`,'get'])).val();
+				const newList = [];
+				list.forEach(item=>{
+					if(item.OnGoingRoomId!==data.OnGoingRoomId)newList.push(item);
+				})
+				await app.doglas.do(['database','admin',`${data.admin}/OnGoingProjects`,'set',newList]);
+				console.log('admin On Going list is done.');
+			},
+			async handleStatisticBidder(param='finish'){
+				console.log('Trying to update bidder stats');
+				const bidderStatistics = (await app.doglas.do(['database','users',`${data.bidderProfileId}/public/statistics`,'get'])).val();
+				
+				if(!bidderStatistics.ongoingproject)bidderStatistics.ongoingproject = 0;
+				else bidderStatistics.ongoingproject -= 1;
+				
+				const libs = {
+					'cancel':'projectcancelled',
+					'finish':'projectfinished'
+				}
+				if(!bidderStatistics[libs[param]])bidderStatistics[libs[param]] = 1;
+				else bidderStatistics[libs[param]] += 1;
+
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/public/statistics`,'set',bidderStatistics]);
+
+				console.log('Bidder Statistik is done.');
+			},
+			async handleStatisticOwner(param='finsh'){
+				console.log('Trying to update owner stats');
+				const ownerStatistics = (await app.doglas.do(['database','users',`${data.owner}/public/statistics`,'get'])).val();
+				
+				if(!ownerStatistics.ongoingproject)ownerStatistics.ongoingproject = 0;
+				else ownerStatistics.ongoingproject -= 1;
+				
+				const libs = {
+					'cancel':'projectcancelled',
+					'finish':'projectfinished'
+				}
+				if(!ownerStatistics[libs[param]])ownerStatistics[libs[param]] = 1;
+				else ownerStatistics[libs[param]] += 1;
+
+				await app.doglas.do(['database','users',`${data.owner}/public/statistics`,'set',ownerStatistics]);
+
+				console.log('owner Statistik is done.');
+			},
+			async handleStatisticAdmin(param='finish'){
+				console.log('Trying to update owner stats');
+				const ownerStatistics = (await app.doglas.do(['database','admin',`${data.admin}/public/statistics`,'get'])).val()||{};
+				
+				if(!ownerStatistics.ongoingproject)ownerStatistics.ongoingproject = 0;
+				else ownerStatistics.ongoingproject -= 1;
+
+				const libs = {
+					'cancel':'projectcancelled',
+					'finish':'projectfinished'
+				}
+				if(!ownerStatistics[libs[param]])ownerStatistics[libs[param]] = 1;
+				else ownerStatistics[libs[param]] += 1;
+
+				await app.doglas.do(['database','admin',`${data.admin}/public/statistics`,'set',ownerStatistics]);
+
+				console.log('admin Statistik is done.');
+			},
+			async handleFinishedDataToBidder(){
+				console.log('Trying to handle finished data of bidder', data);
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onFinishedProjects/${data.OnGoingRoomId}`,'set',data]);
+				console.log('Bidder finished data seted');
+			},
+			async handleFinishedDataToOwner(){
+				console.log('Trying to handle finished data of owner', data);
+				await app.doglas.do(['database','users',`${data.owner}/onFinishedProjects/${data.OnGoingRoomId}`,'set',data]);
+				console.log('Owner finished data seted');
+			},
+			async handleFinishedDataToAdmin(){
+				console.log('Trying to handle finished data of admin', data);
+				await app.doglas.do(['database','admin',`${data.admin}/OnFinishedProjects/${data.OnGoingRoomId}`,'set',data]);
+				console.log('Admin finished data seted');
+			},
+			async handleNotifBidder(param='finish'){
+				console.log('Trying to handle notif for bidder', data);
+				const bidderNotif = (await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'get'])).val()||[];
+				const libs = {
+					'cancel':`We so sorry Worker! Project anda ${data.subject} bersama ${data.ownerUsername} telah dicancel`,
+					'finished':`Good Job Worker! Project anda ${data.subject} bersama ${data.ownerUsername} telah selesai`,
+				}
+				bidderNotif.push({
+					profilepicture:data.adminprofilepic,
+					when:getFullDate(),
+					what:libs[param],
+					who:'Admin'
+				})
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'set',bidderNotif]);
+				console.log('Bidder Notif is done.');
+			},
+			async handleNotifOwner(param='finish'){
+				console.log('Trying to handle notif for owner', data);
+				const ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
+				const libs = {
+					'cancel':`We so sorry Owner! Project anda ${data.subject} bersama ${data.bidder} telah dicancel`,
+					'finish':`Good Job Owner! Project anda ${data.subject} bersama ${data.bidder} telah selesai`,
+				}
+				ownerNotif.push({
+					profilepicture:data.adminprofilepic,
+					when:getFullDate(),
+					what:libs[param],
+					who:'Admin'
+				})
+				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif])
+				console.log('Owner Notif is done.');
+			},
+			async handleNotifAdmin(param='finish'){
+				console.log('Trying to handle notif for admin', data);
+				const adminNotif = (await app.doglas.do(['database','admin',`${data.admin}/notif`,'get'])).val()||[];
+				const libs = {
+					'cancel':`Its ok Admin! Project anda ${data.subject} bersama ${data.ownerUsername} dan ${data.bidder} telah dicancel`,
+					'finish':`Good Job Admin! Project anda ${data.subject} bersama ${data.ownerUsername} dan ${data.bidder} telah selesai`
+				}
+				adminNotif.push({
+					profilepicture:data.adminprofilepic,
+					when:getFullDate(),
+					what:libs[param],
+					who:'Sistem'
+				})
+				await app.doglas.do(['database','admin',`${data.admin}/notif`,'set',adminNotif]);
+				console.log('Admin Notif is done.');
+			},
+			async handleReturnSaldo(){
+				console.log('Project cancelled, checking for returning saldo back');
+				if(data.paid){
+					//calculating saldo to back.
+					const saldo = Number(data.fee)-(Number(data.fee)*0.1);
+					let ownerSaldo = (await app.doglas.do(['database','users',`${data.owner}/money`,'get'])).val()||0;
+					ownerSaldo += saldo;
+					await app.doglas.do(['database','users',`${data.owner}/money`,'set',ownerSaldo]);
+				}else console.log('Project isnt paid, leave!');
+			},
+			async updateSaldo(param){
+				console.log('data saldo to update',data);
+
+				let todo;
+
+				if(param==='0' && !data.paid){
+					todo = 'leave';
+				}else if(param==='1' && !data.paid){
+					todo = 'add';
+					data.paid = true;
+				}else if(param==='0' && data.paid){
+					todo = 'minus';
+					data.paid = false;
+				}
+
+				//calculate the actual fee for the worker, we get 10% of it.
+				const finalFee = Number(data.fee)-(Number(data.fee*0.1));
+
+				console.log(todo);
+
+				//getting userSaldo.
+				let userSaldo = (await app.doglas.do(['database','users',`${data.bidderProfileId}/money`,'get'])).val()||0;
+				const action = {
+					add(){
+						userSaldo += finalFee;
+					},
+					minus(){
+						userSaldo -= finalFee;
+					},
+					leave(){
+
+					}
+				}
+				action[todo]();
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/money`,'set',userSaldo]);
+			},
+			async saveFeeStatus(){
+				const saveFeeStatus = this.find('#selectionFeeStatus');
+				//give the indicator first.
+				this.parent.addChild(view.openLoading());
+				await app.doglas.do(['database','OnGoingRooms',`${data.OnGoingRoomId}/paid`,'set',saveFeeStatus.value==='0'?false:true]);
+				this.updateSaldo(saveFeeStatus.value);
+				this.parent.saveRemove('#openloading');
+			},
 			buttonsEvent(){
 				this.findall('.button').forEach(button=>{
 					button.onclick = ()=>{this[button.id]()};
 				})
 			},
+			async deleteOnGoingData(){
+				await app.doglas.do(['database','OnGoingRooms',data.OnGoingRoomId,'remove']);
+				console.log('data deleted!');
+			},
+			async deleteDataFromEachUser(){
+				//for owner.
+				const ownerOnGoingList = (await app.doglas.do(['database','users',`${data.owner}/onGoingProjects`,'get'])).val()||[];
+				const newOwnerGoingList = [];
+				ownerOnGoingList.forEach(item=>{
+					if(item.OnGoingRoomId!=data.OnGoingRoomId)newOwnerGoingList.push(item);
+				})
+				await app.doglas.do(['database','users',`${data.owner}/onGoingProjects`,'set',newOwnerGoingList]);
+				//for bidder.
+				const bidderOnGoingList = (await app.doglas.do(['database','users',`${data.owner}/onGoingProjects`,'get'])).val()||[];
+				const newNidderOnGoingList = [];
+				bidderOnGoingList.forEach(item=>{
+					if(item.OnGoingRoomId!=data.OnGoingRoomId)newNidderOnGoingList.push(item);
+				})
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/onGoingProjects`,'set',newNidderOnGoingList]);
+				//for admin.
+				const adminOnGoingList = (await app.doglas.do(['database','admin',`${data.admin}/onGoingProjects`,'get'])).val()||[];
+				const newAdminOnGoingList = [];
+				adminOnGoingList.forEach(item=>{
+					if(item.OnGoingRoomId!=data.OnGoingRoomId)newAdminOnGoingList.push(item);
+				})
+				await app.doglas.do(['database','users',`${data.admin}/onGoingProjects`,'set',newAdminOnGoingList]);
+				console.log('data deleted for each user!');
+			},
+			async setNotif(status){
+				//for owner.
+				const ownerNotif = (await app.doglas.do(['database','users',`${data.owner}/notif`,'get'])).val()||[];
+				ownerNotif.push({
+					profilepicture:data.adminprofilepic||app.noProfilePng,
+					who:'Admin',
+					id:data.admin,
+					when:getFullDate(),
+					time:getTime(),
+					what:`Telah ${status}, ${data.type} ${data.subject} anda bersama ${data.bidder} sebesar Rp ${getPrice(data.fee)}`
+				});
+				await app.doglas.do(['database','users',`${data.owner}/notif`,'set',ownerNotif]);
+				//for bidder.
+				const bidderNotif = (await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'get'])).val()||[];
+				bidderNotif.push({
+					profilepicture:data.adminprofilepic||app.noProfilePng,
+					who:'Admin',
+					id:data.admin,
+					when:getFullDate(),
+					time:getTime(),
+					what:`Telah ${status}, project ${data.type} ${data.subject} anda bersama ${data.owner} sebesar Rp ${getPrice(data.fee)}`
+				});
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'set',bidderNotif]);
+				//for admin.
+				const AdminNotif = (await app.doglas.do(['database','users',`${data.bidderProfileId}/notif`,'get'])).val()||[];
+				AdminNotif.push({
+					profilepicture:data.adminprofilepic||app.noProfilePng,
+					who:'Kamu',
+					id:data.admin,
+					when:getFullDate(),
+					time:getTime(),
+					what:`Telah ${status}, project ${data.type} ${data.subject} antara ${data.bidder} bersama ${data.owner} sebesar Rp ${getPrice(data.fee)}`
+				});
+				await app.doglas.do(['database','admin',`${data.admin}/notif`,'set',AdminNotif]);
+				console.log('notif setted');
+			},
+			async newDataToThem(finish=false){
+				if(finish){
+					//set on finish, for owner.
+					const ownerOnFinish = (await app.doglas.do(['database','users',`${data.owner}/projectfinish`,'get'])).val()||[];
+					ownerOnFinish.push(data);
+					await app.doglas.do(['database','users',`${data.owner}/projectfinish`,'set',ownerOnFinish]);
+
+					//set on finish, for bidder.
+					const bidderOnFinish = (await app.doglas.do(['database','users',`${data.bidderProfileId}/projectfinish`,'get'])).val()||[];
+					bidderOnFinish.push(data);
+					await app.doglas.do(['database','users',`${data.bidderProfileId}/projectfinish`,'set',bidderOnFinish]);
+
+					//set on finish, for admin.
+					const adminFinish = (await app.doglas.do(['database','admin',`${data.admin}/projectfinish`,'get'])).val()||[];
+					adminFinish.push(data);
+					await app.doglas.do(['database','admin',`${data.admin}/projectfinish`,'set',adminFinish]);
+				}
+				//statistic.
+				//for owner
+				let ownerStatisticOnGoingProject = (await app.doglas.do(['database','users',`${data.owner}/statistics/ongoingproject`,'get'])).val()||0;
+				ownerStatisticOnGoingProject += 1;
+				await app.doglas.do(['database','users',`${data.owner}/statistics/ongoingproject`,'set',ownerStatisticOnGoingProject]);
+
+				let ownerStatisticOnStatus = (await app.doglas.do(['database','users',`${data.owner}/statistics/${!finish?'projectcancelled':'projectfinished'}`,'get'])).val()||0;
+				ownerStatisticOnStatus += 1;
+				await app.doglas.do(['database','users',`${data.owner}/statistics/${!finish?'projectcancelled':'projectfinished'}`,'set',ownerStatisticOnStatus]);
+				
+				//for bidder
+				let bidderStatisticOnGoingProject = (await app.doglas.do(['database','users',`${data.bidderProfileId}/statistics/ongoingproject`,'get'])).val()||0;
+				bidderStatisticOnGoingProject += 1;
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/statistics/ongoingproject`,'set',bidderStatisticOnGoingProject]);
+
+				let bidderStatisticOnStatus = (await app.doglas.do(['database','users',`${data.bidderProfileId}/statistics/${!finish?'projectcancelled':'projectfinished'}`,'get'])).val()||0;
+				bidderStatisticOnStatus += 1;
+				await app.doglas.do(['database','users',`${data.bidderProfileId}/statistics/${!finish?'projectcancelled':'projectfinished'}`,'set',bidderStatisticOnStatus]);
+				console.log('new data given!');
+			},
+			addLoading(){
+				this.addChild(view.openLoading());
+			},
+			removeLoading(){
+				this.saveRemove('#openloading');
+			},
 			onadded(){
 				this.find('#closethis').onclick = ()=>{this.remove()}
+				this.parent = this.find('#parent');
 				this.buttonsMenu = this.find('#buttonsMenu');
 				this.buttonsEvent();
 			},
 			hire(){
-				console.log('To Hire ',data);
+				//console.log('To Hire ',data);
 				this.buttonsMenu.changeTo(this.find('#hiredMsg'),'flex');
 			},
 			async reject(){
-				console.log('To Reject ',data);
+				//console.log('To Reject ',data);
 				const deleteR = await app.doglas.do(['database','bid',`${data.type}/${data.bidId}`,'remove']);
-				console.log(deleteR);
+				//console.log(deleteR);
 				//for user.
 				this.generateNewUserBidData();
-				console.log(app.userData.bid);
+				//console.log(app.userData.bid);
 				const saveBidUser = await app.doglas.do(['database','users',`${data.bidderProfileId}/bid`,'update',app.userData.bid]);
-				console.log(saveBidUser);
+				//console.log(saveBidUser);
 			},
 			generateNewUserBidData(){
 				const bidData = [];
 				if(app.userData.bid.length>0){
 					app.userData.bid.forEach(bidId=>{
-						console.log(bidId);
+						//console.log(bidId);
 						if(bidId.bidId!=data.bidId)bidData.push(bidId);
 					})	
 				}
@@ -4638,8 +5706,9 @@ const view = {
 				left:0;
 				display:flex;
 				align-items:center;
-				justify-content:center;
-				background:white;
+				justify-content:flex-end;
+				background:#00000066;
+				z-index:1;
 			`,
 			innerHTML:`
 				<div class=innerBox
@@ -4652,26 +5721,28 @@ const view = {
 				>
 					<div style="
 						width: 100%;
-						min-height: 100px;
+						min-height: 77px;
 						display: flex;
 						align-items: center;
 						justify-content: space-around;
+						background:deepskyblue;
+						color:white;
+						border-bottom:1px solid gainsboro;
 					">
 						<div style="
-							height: 100%;
-							width: 64px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-						">
-							<div id=closethis style="cursor:pointer;">
-								<img src=./more/media/close.png class=navimg style=width:16px;height:16px;>
-							</div>
-						</div>
-						<div style="
 							width:80%;
+							display:flex;
+							align-items:center;
+							gap:10px;
+							padding-left:5%;
 						">
-							<div style=font-family:montserratbold>The Simpsons Group</div>
+							<img src=./more/media/whiteglobe.png style="
+								width:32px;
+								height:32px;
+								object-fit:cover;
+								border-radius:50%;
+							">
+							<div>Global Chat Room</div>
 						</div>
 						<div style="
 							height: 100%;
@@ -4680,8 +5751,8 @@ const view = {
 							align-items: center;
 							justify-content: center;
 						">
-							<div id=moremenu style="cursor:pointer;">
-								<img src=./more/media/menu.png class=navimg style=width:32px;height:32px;>
+							<div id=closethis style="cursor:pointer;border-radius:10px;padding:10px;">
+								<img src=./more/media/whiteclose.png class=navimg style=width:32;height:32;>
 							</div>
 						</div>
 					</div>
@@ -4691,10 +5762,64 @@ const view = {
 						background:whitesmoke;
 						overflow:auto;
 						padding:5%;
-					  scrollbar-color: gray whitesmoke;
-					  scrollbar-width: thin;
+						  scrollbar-color: gray whitesmoke;
+						  scrollbar-width: thin;
 					" id=boxinbox>
 						
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:5px;
+						border-top:1px solid gainsboro;
+					" id=embedfile>
+						<div id=filename></div>
+						<div>
+							<div id=closeembedfile style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
+					</div>
+					<div style="
+						width: 94%;
+						border-top: 1px solid whitesmoke;
+						display: none;
+						align-items: center;
+						justify-content: space-between;
+						padding: 3%;
+						background: white;
+						gap:10px;
+						border-top:1px solid gainsboro;
+					" id=embedphoto>
+						<div id=preview style="
+							width:100%;
+							height:150px;
+							background:whitesmoke;
+							border-radius:20px;
+							border:1px solid gainsboro;
+						">
+							<img src=./more/media/gemaprofile.png style="
+								width:100%;
+								height:100%;
+								object-fit:contain;
+							">
+						</div>
+						<div>
+							<div id=closeembedphoto style=cursor:pointer;>
+								<img src=./more/media/close.png style="
+									width:16px;
+									height:16px;
+								">
+							</div>
+						</div>
 					</div>
 					<div style="
 						width: 94%;
@@ -4704,8 +5829,27 @@ const view = {
 						align-items: center;
 						justify-content: space-between;
 						padding: 3%;
-						background: whitesmoke;
+						background: white;
+						gap:5px;
+						position:relative;
+						border-top:1px solid gainsboro;
 					">
+						<div style="
+							background:white;
+							width:100%;
+							height:100%;
+							position:absolute;
+							top:0;left:0;
+							display:none;
+							align-items:center;
+							justify-content:center;
+						" id=sendingIndicator>
+							<img src=./more/media/Loading_icon.gif style="
+								width:64px;
+								height:64px;
+								object-fit:cover;
+							"> <span id=text>Mengirim Pesan!</span>
+						</div>
 						<div style="
 							width: 80%;
 							/* height: 100%; */
@@ -4715,17 +5859,18 @@ const view = {
 							background: white;
 							border-radius: 20px 0 0 20px;
 							padding:10px;
+							overflow:hidden;
 						">
 							<textarea style="
 								background: white;
 								border: none;
 								border-radius: 20px 0 0 20px;
 								min-height:40px;
+								max-width:100%;
 								min-width:100%;
 							" id=msgbox placeholder="Masukan Teks Disini..."></textarea>
 						</div>
 						<div style="
-							width: 20%;
 							height: 100%;
 							display: flex;
 							align-items: center;
@@ -4735,8 +5880,36 @@ const view = {
 							background: white;
 							border-radius: 0 20px 20px 0;
 						">
-							<div style=cursor:pointer id=sendbutton>
-								<img src=./more/media/send.png
+							<div style="cursor:pointer;
+								padding:10px;
+								border:1px solid gainsboro;
+								border-radius:10px;
+							" id=sendbutton>
+								<img src=./more/media/bluesend.png
+								style="
+									width:32px;
+									height:32px;
+								"
+								>
+							</div>
+						</div>
+						<div style="
+							height: 100%;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							/* background: whitesmoke; */
+							/* border: 1px solid whitesmoke; */
+							background: white;
+							border-radius: 0 20px 20px 0;
+						">
+							<div style="cursor:pointer;
+								padding:10px;
+								background:whitesmoke;
+								border-radius:10px;
+								border:1px solid gainsboro;
+							" id=attachfilebutton>
+								<img src=./more/media/attachfile.png
 								style="
 									width:32px;
 									height:32px;
@@ -4747,29 +5920,164 @@ const view = {
 					</div>
 				</div>
 			`,
+			embedMedia(button){
+				const parent = this;
+				this.find('#boxinbox').addChild(makeElement('div',{
+					style:`
+						position: absolute;
+						background: white;
+						bottom: 0px;
+						right: 0px;
+						margin-bottom: 100px;
+						margin-right: 10px;
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						justify-content: center;
+						padding: 15px 10px;
+						gap: 10px;
+						border-radius: 30px;
+						border:1px solid gainsboro;
+					`,
+					innerHTML:`
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=sendphoto>
+							<img src=./more/media/blueimage.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=senddocument>
+							<img src=./more/media/bluedocument.png style="
+								width:32;
+								height:32;
+							">
+						</div>
+						<div style="
+							padding:5px;
+							cursor:pointer;
+						" id=closethis>
+							<img src=./more/media/close.png style="
+								width:16;
+								height:16;
+							">
+						</div>
+					`,
+					onadded(){
+						this.findall('div').forEach(div=>{
+							if(div.id==='closethis')parent.closethispreview = div;
+							div.onclick = ()=>{this[div.id]()};
+						})
+						button.hide();
+					},
+					closethis(){
+						parent.filebutton.show('flex');
+						this.remove();
+					},
+					senddocument(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							parent.find('#filename').innerText = `File: ${parent.file.name.slice(0,50)}...`;
+							parent.find('#embedfile').show('flex');
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,
+											text/plain, application/pdf
+							`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					},
+					sendphoto(){
+						const onload = ()=>{
+							parent.file = this.input.files[0];
+							const fs = new FileReader();
+							fs.onload = ()=>{
+								//show the div.
+								parent.find('#embedphoto #preview img').src = fs.result;
+								parent.find('#embedphoto').show('flex');
+							}
+							fs.readAsDataURL(parent.file);
+							this.closethis();
+						}
+						this.input = makeElement('input',{
+							type:'file',
+							accept:`image/png,image/jpeg,image/gif,image/jpg`,
+							onchange(){
+								onload();
+							}
+						})
+						this.input.click();
+					}
+				}))
+			},
 			collectData(){
 				const msg = {
+					id:app.userData.uid,
 					from:app.userData.username,
 					date:getFullDate(),
+					time:getTime(),
 					msg:this.msgbox.value,
-					profilepicture:app.userData.profilepicture
+					profilepicture:app.userData.profilepicture,
+					time:getTime()
 				}
 				return msg;
-			},
-			moreMenuInit(){
-				//this.initUserActionToBidder();
-				this.find('#moremenu').onclick = ()=>{
-					view.main.addChild(view.moremenubid(data));
-				}
 			},
 			initSendButton(){
 				this.find('#sendbutton').onclick = ()=>{
 					this.sendMsg();
 				}
+				this.filebutton.onclick = ()=>{
+					this.embedMedia(this.filebutton);
+				}
+				//closefileembed
+				this.find('#closeembedphoto').onclick = ()=>{
+					this.embedphoto.hide();
+					this.filebutton.show('flex');
+				}
+				this.find('#closeembedfile').onclick = ()=>{
+					this.embedfile.hide();
+					this.filebutton.show('flex');
+				}
 			},
 			async sendMsg(){
 				const msgData = this.collectData();
-				if(msgData.msg.length===0)return;
+				if(msgData.msg.length===0 && !this.file)return;
+				
+				//give the indicator.
+				this.sendingIndicator.show('flex');
+
+				if(this.file){
+					//hiding the close button on file preview.
+					//console.log(this.closethispreview);
+					if(this.closethispreview){
+						this.closethispreview.hide();
+					}
+					//setting the indicator.
+					this.sendingIndicator.find('#text').innerText = 'Mengupload File!';
+					//console.log('uploading file', this.file);
+					const file = await app.doglas.save([this.file.name,this.file,this.file.contentType]);
+					const url = await file.ref.getDownloadURL();
+					if(url){
+						this.sendingIndicator.find('#text').innerText = 'Mengirim Pesan!';
+					}
+					msgData.file = {
+						url,type:this.file.type,
+						name:this.file.name,size:this.file.size
+					}
+					if(msgData.file.type.split('/')[0]==='image'){
+						this.embedphoto.hide();
+					}else this.embedfile.hide();
+				}
 				
 				//send the msg to the server.
 				let inbox = (await app.doglas.do(['database','globalGroupChat',``,'get'])).val()||[];
@@ -4780,8 +6088,13 @@ const view = {
 				inbox.push(msgData);
 				const result = await app.doglas.do(['database','globalGroupChat',``,'set',inbox]);
 				this.putMsg(msgData);
+				this.filebutton.show('flex');
+				this.file = null;
 				//set msgbox value to zero.
 				this.msgbox.value = '';
+
+				//hide the sending indicator.
+				this.sendingIndicator.hide();
 			},
 			downKeys:[],
 			initEnterSend(){
@@ -4799,18 +6112,18 @@ const view = {
 				app.doglas.get(`globalGroupChat`).on('value',(x)=>{
 					const data = x.val();
 					if(!data)return;
-					if(data[data.length-1].from!==app.userData.username){
+					if(data[data.length-1].id!==app.userData.uid){
 						this.putMsg(data[data.length-1]);
 					}
 				})
 			},
 			init(){
 				this.boxinbox = this.find('#boxinbox');
-				this.showInboxInit();
 				this.msgbox = this.find('#msgbox');
+				this.sendingIndicator = this.find('#sendingIndicator');
+				this.showInboxInit();
 				this.initSendButton();
 				this.initEnterSend();
-				this.moreMenuInit();
 				setTimeout(()=>{this.listen()},2000);
 			},
 			async showInboxInit(){
@@ -4820,7 +6133,7 @@ const view = {
 				})
 			},
 			putMsg(msg){
-				if(this.puttedMsg && this.puttedMsg.msg === msg.msg)return;
+				if(this.puttedMsg && this.puttedMsg.time === msg.time)return;
 				this.boxinbox.addChild(this.inboxItem(msg));
 				this.puttedMsg = msg;
 			},
@@ -4828,9 +6141,9 @@ const view = {
 				app.doglas.get(`globalGroupChat`).off('value');
 			},
 			onCloseClickded(){
-				if(customCloseThis){
-					customCloseThis();
-				}else view.content.openInbox();
+				//if(customCloseThis){
+					//customCloseThis();
+				//}else view.content.openInbox();
 				//delete the event
 				this.removeListen();
 				this.remove();
@@ -4838,59 +6151,149 @@ const view = {
 			onadded(){
 				//close event.
 				this.find('#closethis').onclick = ()=>{this.onCloseClickded()};
+				this.embedphoto = this.find('#embedphoto');
+				this.embedfile = this.find('#embedfile');
+				this.filebutton = this.find('#attachfilebutton');
 				this.init();
 			},
 			inboxItem(item){
+				const parent = this;
 				return makeElement('div',{
 					style:`
 						display:flex;
 						flex-direction:column;
-						align-items:${item.from===app.userData.username?'flex-end':'flex-start'};
+						align-items:${item.id===app.userData.uid?'flex-end':'flex-start'};
 						width:100%;
 						gap:5px;
+						margin-bottom:15px;
 					`,
 					innerHTML:`
-						<div>${item.from}</div>
+						<div style="font-weight:bold;${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}"><span class=username>@${item.from}</span></div>
 						<div style="
 							display:flex;
 						">
 							<div style="
 								padding:8px;
+								width:32px;
+								height:32px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'none':'block'};
+								display:${item.id===app.userData.uid?'none':'block'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
-									border-radius:50%;
+									width:100%;
+									height:100%;
+									border-radius:50%;x
 									object-fit:cover;
+									border:2px solid gainsboro;
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 							<div style="
-								background:${item.from===app.userData.username?'white':'gray'};
-								color:${item.from===app.userData.username?'black':'white'};
+								background:white;
+								color:black;
 								padding:10px;
-								border-radius:${item.from===app.userData.username?'20px 0 20px 20px':'0 20px 20px 20px'};
-							">${item.msg.replaceAll('\n','<br>')}</div>
+								font-weight:bold;
+								border:1px solid gainsboro;
+								border-radius:${item.id===app.userData.uid?'20px 0 20px 20px':'0 20px 20px 20px'};
+							">
+								<div id=fileembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'none':'flex':'none'};
+									gap:10px;
+									align-items:center;
+									justify-content:space-between;
+									margin-bottom:10px;
+									border-bottom:2px solid ${item.id===app.userData.uid?'whitesmoke':'white'};
+									padding-bottom:10px;
+								">
+									<div style="
+										padding: 10px;
+										background: whitesmoke;
+										border-radius: 10px;
+										color:black;
+										border:1px solid gainsboro;
+									" id=filex>
+									-
+									</div>
+									<div>
+										${item.file?item.file.name?item.file.name.slice(0,10):'':''}...
+									</div>
+									<div>
+										<div style="
+											padding:5px;
+											border-radius:10px;
+											cursor:pointer;
+											background:whitesmoke;
+											border:1px solid gainsboro;
+										" id=downloadbutton>
+											<img src=./more/media/downloadmedia.png style="
+												width:24;
+												height:24;
+											">
+										</div>
+									</div>
+								</div>
+								<div id=photoembed style="
+									display:${item.file?item.file.type.split('/')[0]==='image'?'flex':'none':'none'};
+									width:100%;
+									height:150px;
+									margin-bottom:10px;
+									border-radius:20px;
+									background:whitesmoke;
+									overflow:hidden;
+									cursor:pointer;
+								">
+									<img src="${item.file?item.file.url:''}" style="
+										width:100%;
+										height:100%;
+										object-fit:contain;
+									" id=imgpreviewbutton>
+								</div>
+								${item.msg.length>0?item.msg.replaceAll('\n','<br>'):''}
+							</div>
+
 							<div style="
 								padding:8px;
 								border-radius:50%;
 								background:whitesmoke;
-								display:${item.from===app.userData.username?'block':'none'};
+								width:32px;
+								height:32px;
+								display:${item.id===app.userData.uid?'block':'none'};
 							">
 								<img src=${item.profilepicture} style="
-									width:32px;
-									height:32px;
+									width:100%;
+									height:100%;
 									border-radius:50%;
 									object-fit:cover;
+									border:2px solid gainsboro;
+									${!this.puttedMsg?'':this.puttedMsg.id===item.id?'display:none;':''}
 								">
 							</div>
 						</div>
-						<div style=font-size:12px>${item.date}</div>
+						<div style="
+							margin-${item.id===app.userData.uid?'right':'left'}:48px;
+						"><span style=font-size:10px;>${SmartTime(item.time)}</span></div>
 					`,
 					onadded(){
 						this.scrollIntoView();
+						this.find('#downloadbutton').onclick = ()=>{this.setupDownload()};
+						this.find('#imgpreviewbutton').onclick = ()=>{this.bigPreview()};
+						this.find('.username').onclick = ()=>{
+							view.addLoading();
+							view.content.openProfile([],'home',false,item.id);
+							parent.remove();
+						}
+						if(item.file){
+							const spliteditem = item.file.name.split('.');
+							this.find('#filex').innerText = spliteditem[spliteditem.length-1];
+							//console.log(spliteditem);
+						}
+					},
+					setupDownload(){
+						if(item.file && item.file.url)open(item.file.url,'_blank');
+					},
+					bigPreview(){
+						view.main.addChild(view.bigImgPreview(item.file.url));
 					}
 				})
 			}
@@ -4934,7 +6337,357 @@ const view = {
 		this.content.addChild(view.openLoading());
 	},
 	unloading(){
-		this.content.find('#openLoading').remove();
+		this.content.saveRemove('#openLoading');
+	},
+	myProjectDiv(nav='OnGoing',boot=false){
+		return makeElement('div',{
+			nav,
+			style:`
+				width: 100%;
+				display: flex;
+				overflow: auto;
+				background: white;
+				border-bottom: 2px solid deepskyblue;
+				align-items: center;
+				position:sticky;
+				top:0;
+				border-radius:10px;
+				color:deepskyblue;
+			`,
+			innerHTML:`
+				<div style="
+					  width: 100%;
+						display: flex;
+						justify-content: flex-start;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=OnGoing
+					>
+						<img src=./more/media/blueongoing.png class=navimg>
+						OnGoing
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=Finished
+					>
+						<img src=./more/media/bluefinish.png class=navimg>
+						Finished
+					</div>
+				</div>
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				//console.log(this.nav);
+				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
+				this.find('#'+this.nav).style.color = 'dimgray';
+				this.find('#'+this.nav).scrollIntoView();
+				this.buttonSetup();
+				if(boot){
+					//console.log('boot is true');
+					this.OnGoing();
+				}
+			},
+			OnGoing(){
+				view.addLoading()
+				app.doglas.do(['database','admin',`${app.userData.uid}/OnGoingProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openMyproject(datacb,'OnGoing');
+				})
+			},
+			Finished(){
+				view.addLoading();
+				app.doglas.do(['database','admin',`${app.userData.uid}/OnFinishedProjects`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = data.val()||[];
+					view.content.openMyproject(datacb,'Finished');
+				})
+			}
+		})
+	},
+	profileDiv(nav='home',boot=false,userId){
+		return makeElement('div',{
+			nav,
+			style:`
+				width: 100%;
+				display: flex;
+				overflow: auto;
+				background: white;
+				align-items: center;
+				position:sticky;
+				top:0;
+				z-index:1;
+				color:deepskyblue;
+				border-bottom:3px solid deepskyblue;
+				border-radius:0 0 10px 10px;
+				margin-bottom:10px;
+			`,
+			innerHTML:`
+				<div style="
+					  width: 100%;
+						display: flex;
+						justify-content: flex-start;
+						/* margin: 2%; */
+						background: white;
+				" id=berandadivmenu>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=home
+					>
+						<img src=./more/media/bluehome.png class=navimg>
+						Beranda
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=article
+					>
+						<img src=./more/media/bluewiki.png class=navimg>
+						Artikel
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=jobs
+					>
+						<img src=./more/media/bluetask.png class=navimg>
+						Loker
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=services
+					>
+						<img src=./more/media/blueservices.png class=navimg>
+						Jasa
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=news
+					>
+						<img src=./more/media/bluenews.png class=navimg>
+						news
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=statistic
+					>
+						<img src=./more/media/bluestats.png class=navimg>
+						Statistik
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=followers
+					>
+						<img src=./more/media/bluefollow.png class=navimg>
+						Followers
+					</div>
+					<div style="
+						display: flex;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						gap:8px;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=following
+					>
+						<img src=./more/media/bluefollow.png class=navimg>
+						Following
+					</div>
+					<div style="
+						display: flex;
+						gap: 8px;
+						cursor: pointer;
+						height: 100%;
+						width: 100%;
+						padding: 10px;
+						justify-content: center;
+					"
+					id=bidderSay
+					>
+						<img src=./more/media/bluestar.png class=navimg>
+						Testimoni
+					</div>
+				</div>
+			`,
+			buttonSetup(){
+				this.findall('#berandadivmenu div').forEach(button=>{
+					button.onclick = ()=>{
+						this[button.id]();
+					}
+				})
+			},
+			onadded(){
+				//set the nav.
+				//console.log(this.nav);
+				//fix userIdNullBug
+				if(!userId)userId=app.userData.uid;
+				this.find('#'+this.nav).style.color = 'dimgray';
+				this.find('#'+this.nav).style.fontFamily = 'montserratbold';
+				this.find('#'+this.nav).scrollIntoView();
+				this.buttonSetup();
+			},
+			home(){
+				view.addLoading();
+				view.content.openProfile([],'home',false,userId);
+			},
+			article(){
+				view.addLoading();
+				app.doglas.do(['database','post','Articles','get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'article',false,userId);
+				})
+			},
+			jobs(){
+				view.addLoading();
+				app.doglas.do(['database','post','Jobs','get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'jobs',false,userId);
+				})
+			},
+			services(){
+				view.addLoading();
+				app.doglas.do(['database','post','Services','get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'services',false,userId);
+				})
+			},
+			statistic(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.uid}/statistic`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'statistic',false,userId);
+				})
+			},
+			bidderSay(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${app.userData.uid}/bidderSay`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'bidderSay',false,userId);
+				})
+			},
+			followers(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${userId||app.userData.uid}/followers`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'followers',false,userId);
+				})
+			},
+			following(){
+				view.addLoading();
+				app.doglas.do(['database','users',`${userId||app.userData.uid}/following`,'get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					view.content.openProfile(datacb,'following',false,userId);
+				})
+			},
+			news(){
+				view.addLoading();
+				app.doglas.do(['database','post','ShortStories','get','']).then(data=>{
+					view.unloading();
+					let datacb = objToArray(data.val()||{});
+					//filtering
+					const fixdata = [];
+					datacb.forEach(item=>{
+						if(item.owner===userId)fixdata.push(item);
+					})
+					view.content.openProfile(fixdata,'news',false,userId);
+				})
+			}
+		})
 	}
 }
 
